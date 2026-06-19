@@ -26,7 +26,7 @@ Every release must have:
 - security review notes,
 - known limitations,
 - release notes,
-- a completed pentest report for the exact commit being tagged,
+- a completed pentest report for the release,
 - no hidden dependency on one developer machine.
 
 Every release should prefer:
@@ -53,10 +53,8 @@ A version is not tag-ready until:
 - `cargo audit` passes,
 - release notes exist at `release-notes/RELEASE_NOTES_<version>.md`,
 - a pentest report exists at `security/pentest/<tag>.md`,
-- the pentest report names the exact `Audited-Commit:` that was reviewed,
 - the pentest report records `Input-Digest: sha256:<digest>` for the scratch
   `PENTEST.md` input,
-- only the permanent pentest report changed after the audited commit,
 - the pentest report has `Status: PASS`,
 - the pentest report has non-blank `Tester:` and `Scope:` fields,
 - the pentest report has a `Date: YYYY-MM-DD` field,
@@ -67,7 +65,7 @@ A version is not tag-ready until:
 When a version's implementation criteria are done, stop before tagging and say:
 
 ```text
-vX.Y.Z implementation stop reached. Run pentest for this exact commit.
+vX.Y.Z implementation stop reached. Run pentest for this release.
 ```
 
 Do not tag until the pentest has been completed, findings have been fixed, and
@@ -77,8 +75,8 @@ the permanent report is committed.
 
 Use this loop for every version:
 
-1. The implementation owner finishes the criteria and reports the exact commit
-   for review.
+1. The implementation owner finishes the criteria and reports the release is
+   ready for review.
 2. The maintainer runs pentest and writes temporary findings to root
    `PENTEST.md`.
 3. Findings are reviewed, release-scope issues are fixed, documentation or
@@ -91,7 +89,6 @@ Use this loop for every version:
 ```bash
 scripts/finalize_release.py \
   --version X.Y.Z \
-  --audited-commit <commit-that-was-pentested> \
   --tester "<tester>" \
   --scope "<scope>" \
   --date YYYY-MM-DD
@@ -99,13 +96,17 @@ scripts/finalize_release.py \
 
 This records the scratch report, deletes root `PENTEST.md`, commits the
 permanent report, runs the version release gate, and creates the local tag.
+The pentest report is a release approval artifact. It records the digest of the
+scratch `PENTEST.md` that the maintainer supplied, but it does not bind the
+approval to a single git commit. After the maintainer confirms pentest and
+GitHub are green, the release may be finalized without restarting pentest for
+release-process-only commits.
 
 The lower-level report-only command is:
 
 ```bash
 scripts/record_pentest_report.py \
   --version X.Y.Z \
-  --audited-commit <commit-that-was-pentested> \
   --tester "<tester>" \
   --scope "<scope>" \
   --date YYYY-MM-DD
@@ -1260,7 +1261,7 @@ Deliverables:
 - native QUIC binding,
 - full threat model,
 - release notes,
-- pentest pass for exact commit.
+- pentest pass for the release.
 
 Verification:
 

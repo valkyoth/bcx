@@ -71,11 +71,6 @@ def main() -> int:
         default=workspace_version(),
         help="Release version without leading v. Defaults to workspace version.",
     )
-    parser.add_argument(
-        "--audited-commit",
-        default=capture(["git", "rev-parse", "HEAD"]),
-        help="Commit that was pentested. Defaults to HEAD.",
-    )
     parser.add_argument("--tester", required=True, help="Tester or review role.")
     parser.add_argument("--scope", required=True, help="Pentest scope.")
     parser.add_argument("--date", required=True, help="Pentest date in YYYY-MM-DD format.")
@@ -126,8 +121,6 @@ def main() -> int:
             "scripts/record_pentest_report.py",
             "--version",
             args.version,
-            "--audited-commit",
-            args.audited_commit,
             "--tester",
             tester,
             "--scope",

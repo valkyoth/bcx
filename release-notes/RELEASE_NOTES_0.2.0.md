@@ -12,8 +12,9 @@ publication.
 - Split pre-tag release readiness from post-tag publish readiness.
 - Require publish-time pentest metadata checks without rejecting an existing
   release tag.
-- Require pentest reports to point at the exact commit that was audited.
 - Record a SHA-256 digest of root `PENTEST.md` in the permanent pentest report.
+- Treat pentest reports as release approval artifacts instead of binding them
+  to one audited git commit.
 - Add a release finalizer that records the pentest report, runs the release
   gate, commits the report, and creates the local tag.
 - Add a dedicated `v0.2.0` release gate.

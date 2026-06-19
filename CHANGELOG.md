@@ -5,7 +5,9 @@ All notable BCX changes will be documented here.
 ## 0.2.0 - Unreleased
 
 - Split pre-tag release readiness from post-tag publish readiness.
-- Add audited-commit and scratch-report digest checks for pentest reports.
+- Add scratch-report digest checks for pentest reports.
+- Treat pentest reports as release approval artifacts rather than git commit
+  attestations.
 - Add an automated release finalizer for the pentest-report/tag flow.
 - Add the `v0.2.0` release gate and publication metadata.
 - Harden digest and nonce comparisons against byte-by-byte early exit.
