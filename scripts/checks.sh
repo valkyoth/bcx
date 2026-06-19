@@ -51,14 +51,5 @@ cargo package -p bcx-policy --allow-dirty --list >/dev/null
 cargo package -p bcx-wire --allow-dirty --list >/dev/null
 cargo package -p bcx --allow-dirty --list >/dev/null
 
-if cargo deny --version >/dev/null 2>&1; then
-    cargo deny check
-else
-    printf 'skipping cargo deny; cargo-deny is not installed\n'
-fi
-
-if cargo audit --version >/dev/null 2>&1; then
-    cargo audit
-else
-    printf 'skipping cargo audit; cargo-audit is not installed\n'
-fi
+cargo deny check
+cargo audit

@@ -157,7 +157,10 @@ impl OperationSequence {
 }
 
 /// Nonce bytes carried by signed invocations and WHY queries.
-#[derive(Clone, Eq)]
+///
+/// `Nonce` intentionally does not implement `Clone` or `Copy`; duplicating
+/// nonce bytes increases the number of plaintext copies that must be cleared.
+#[derive(Eq)]
 pub struct Nonce([u8; Self::LEN]);
 
 impl Nonce {
@@ -193,6 +196,12 @@ impl PartialEq for Nonce {
 }
 
 impl core::hash::Hash for Nonce {
+    /// Hashes nonce bytes for non-adversarial collection use.
+    ///
+    /// This hash operation is not constant-time. Replay caches for
+    /// high-assurance deployments should use a keyed structure that accounts
+    /// for timing and bucket-collision behavior instead of treating `Hash` as
+    /// a security boundary.
     fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
         core::hash::Hash::hash(&self.0, state);
     }

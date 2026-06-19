@@ -52,10 +52,18 @@ first crates.io publication.
 - Admit `zeroize 1.9.0` for no-std nonce clearing.
 - Admit `subtle 2.6.1` for constant-time digest and nonce equality.
 - Remove ordering from digest and nonce-backed identifier types.
+- Require hybrid Ed25519 plus ML-DSA-65 verification through explicit component
+  verifier methods so both halves must verify before success.
 - Document and expose the hybrid Ed25519 plus ML-DSA-65 signature split.
 - Bound detached payload verification by `WireLimits`.
 - Bind `CauseCapsule` parent limits to `WireLimits`.
 - Sanitize pentest report metadata arguments.
+- Make `cargo deny check` and `cargo audit` mandatory in the local check gate.
+- Redact signature bytes from `SignatureEnvelope` debug output.
+- Make `ProtocolVersion` fields private behind accessors.
+- Avoid platform-dependent payload-length truncation in wire-header validation.
+- Remove `Clone` from `Nonce` and document that `Hash` is not a replay-cache
+  security boundary.
 
 ## Deferred
 

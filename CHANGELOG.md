@@ -29,11 +29,19 @@ All notable BCX changes will be documented here.
 - Warn on multiple dependency versions in `cargo-deny`.
 - Use `subtle` for constant-time digest and nonce equality.
 - Remove ordering from digest and nonce-backed identifier types.
+- Require explicit component verification for hybrid Ed25519 plus ML-DSA-65
+  signatures.
 - Document and expose the hybrid Ed25519 plus ML-DSA-65 signature split.
 - Bound detached payload verification by `WireLimits`.
 - Bind `CauseCapsule` parent limits to `WireLimits`.
 - Sanitize pentest report metadata arguments.
 - Confirm `cargo-deny 0.19.9` requires `all` for unmaintained and unsound advisory coverage.
+- Require `cargo deny check` and `cargo audit` instead of skipping missing
+  security tools.
+- Redact signature bytes from `SignatureEnvelope` debug output.
+- Make `ProtocolVersion` fields private.
+- Avoid platform-dependent payload-length truncation in wire-header validation.
+- Remove `Clone` from `Nonce` and document replay-cache hashing limitations.
 
 ## 0.1.0 - 2026-06-19
 

@@ -1,6 +1,7 @@
 use crate::VerificationError;
 use bcx_core::Digest;
 use bcx_wire::WireLimits;
+use core::fmt;
 
 /// Signature algorithms named by BCX metadata.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -110,7 +111,7 @@ impl SignatureAlgorithm {
 }
 
 /// Signature metadata over a canonical BCX payload.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct SignatureEnvelope<'a> {
     key_id: Digest,
     algorithm: SignatureAlgorithm,
@@ -172,6 +173,20 @@ impl<'a> SignatureEnvelope<'a> {
     }
 }
 
+impl<'a> fmt::Debug for SignatureEnvelope<'a> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SignatureEnvelope")
+            .field("key_id", &self.key_id)
+            .field("algorithm", &self.algorithm)
+            .field(
+                "signature",
+                &format_args!("[{} bytes]", self.signature.len()),
+            )
+            .finish()
+    }
+}
+
 /// Payload paired with a signature envelope.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SignedEnvelope<'a, T> {
@@ -205,7 +220,16 @@ impl<'a, T> SignedEnvelope<'a, T> {
         if canonical_payload.len() > limits.maximum_message_len() {
             return Err(VerificationError::PayloadTooLarge);
         }
-        verifier.verify(&self.signature, canonical_payload)
+        match self.signature.algorithm {
+            SignatureAlgorithm::HybridEd25519MlDsa65 => verifier
+                .verify_hybrid(&self.signature, canonical_payload)
+                .map(|_| ()),
+            SignatureAlgorithm::Ed25519
+            | SignatureAlgorithm::MlDsa65
+            | SignatureAlgorithm::SlhDsaSha2_128s => {
+                verifier.verify(&self.signature, canonical_payload)
+            }
+        }
     }
 
     /// Returns the payload value.
@@ -221,8 +245,44 @@ impl<'a, T> SignedEnvelope<'a, T> {
     }
 }
 
+/// Proof that both components of a hybrid signature verified.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct HybridVerified(());
+
+/// Verification backend boundary for hybrid signature components.
+pub trait HybridVerifier {
+    /// Verifies the Ed25519 component of a hybrid signature.
+    fn verify_ed25519(
+        &self,
+        ed25519_signature: &[u8],
+        canonical_payload: &[u8],
+    ) -> Result<(), VerificationError>;
+
+    /// Verifies the ML-DSA-65 component of a hybrid signature.
+    fn verify_ml_dsa_65(
+        &self,
+        ml_dsa_65_signature: &[u8],
+        canonical_payload: &[u8],
+    ) -> Result<(), VerificationError>;
+
+    /// Verifies both components of a hybrid signature.
+    fn verify_hybrid(
+        &self,
+        envelope: &SignatureEnvelope<'_>,
+        canonical_payload: &[u8],
+    ) -> Result<HybridVerified, VerificationError> {
+        let (ed25519, ml_dsa_65) = envelope
+            .algorithm()
+            .split_hybrid(envelope.signature())
+            .ok_or(VerificationError::InvalidSignature)?;
+        self.verify_ed25519(ed25519, canonical_payload)?;
+        self.verify_ml_dsa_65(ml_dsa_65, canonical_payload)?;
+        Ok(HybridVerified(()))
+    }
+}
+
 /// Signature verification backend boundary.
-pub trait Verifier {
+pub trait Verifier: HybridVerifier {
     /// Verifies one signature envelope over canonical payload bytes.
     fn verify(
         &self,

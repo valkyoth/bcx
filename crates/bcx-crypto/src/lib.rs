@@ -5,7 +5,8 @@ mod envelope;
 mod error;
 
 pub use envelope::{
-    AlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope, SignedEnvelope, Verifier,
+    AlgorithmPolicy, HybridVerified, HybridVerifier, SignatureAlgorithm, SignatureEnvelope,
+    SignedEnvelope, Verifier,
 };
 pub use error::VerificationError;
 
@@ -60,6 +61,24 @@ mod tests {
     fn policy_rejects_unadmitted_algorithm_before_verifier() -> Result<(), VerificationError> {
         struct RejectingVerifier;
 
+        impl HybridVerifier for RejectingVerifier {
+            fn verify_ed25519(
+                &self,
+                _ed25519_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Err(VerificationError::InvalidSignature)
+            }
+
+            fn verify_ml_dsa_65(
+                &self,
+                _ml_dsa_65_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Err(VerificationError::InvalidSignature)
+            }
+        }
+
         impl Verifier for RejectingVerifier {
             fn verify(
                 &self,
@@ -98,6 +117,24 @@ mod tests {
     fn detached_payload_is_bounded_by_wire_limits() -> Result<(), VerificationError> {
         struct AcceptingVerifier;
 
+        impl HybridVerifier for AcceptingVerifier {
+            fn verify_ed25519(
+                &self,
+                _ed25519_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Ok(())
+            }
+
+            fn verify_ml_dsa_65(
+                &self,
+                _ml_dsa_65_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Ok(())
+            }
+        }
+
         impl Verifier for AcceptingVerifier {
             fn verify(
                 &self,
@@ -126,6 +163,88 @@ mod tests {
         assert_eq!(
             envelope.verify_detached_bytes(&AcceptingVerifier, &policy, &payload, limits),
             Err(VerificationError::PayloadTooLarge)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn signature_envelope_debug_redacts_signature_bytes() -> Result<(), VerificationError> {
+        extern crate std;
+        use std::{format, string::String};
+
+        let signature = [7; SignatureAlgorithm::ED25519_SIGNATURE_LEN];
+        let envelope = SignatureEnvelope::new(
+            Digest::new([1; Digest::LEN]),
+            SignatureAlgorithm::Ed25519,
+            &signature,
+            WireLimits::DEVELOPMENT,
+        )?;
+
+        assert_eq!(
+            format!("{envelope:?}"),
+            String::from(
+                "SignatureEnvelope { key_id: Digest(..), algorithm: Ed25519, signature: [64 bytes] }"
+            )
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn hybrid_verification_requires_both_components() -> Result<(), VerificationError> {
+        struct PartialHybridVerifier;
+
+        impl HybridVerifier for PartialHybridVerifier {
+            fn verify_ed25519(
+                &self,
+                ed25519_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                if ed25519_signature.len() == SignatureAlgorithm::ED25519_SIGNATURE_LEN {
+                    Ok(())
+                } else {
+                    Err(VerificationError::InvalidSignature)
+                }
+            }
+
+            fn verify_ml_dsa_65(
+                &self,
+                _ml_dsa_65_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Err(VerificationError::InvalidSignature)
+            }
+        }
+
+        impl Verifier for PartialHybridVerifier {
+            fn verify(
+                &self,
+                _envelope: &SignatureEnvelope<'_>,
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Ok(())
+            }
+        }
+
+        let signature = [9; SignatureAlgorithm::HYBRID_ED25519_ML_DSA_65_SIGNATURE_LEN];
+        let envelope = SignedEnvelope::new(
+            (),
+            SignatureEnvelope::new(
+                Digest::new([1; Digest::LEN]),
+                SignatureAlgorithm::HybridEd25519MlDsa65,
+                &signature,
+                WireLimits::DEVELOPMENT,
+            )?,
+        );
+        let policy = AlgorithmPolicy::new(&[SignatureAlgorithm::HybridEd25519MlDsa65]);
+
+        assert_eq!(
+            envelope.verify_detached_bytes(
+                &PartialHybridVerifier,
+                &policy,
+                b"payload",
+                WireLimits::DEVELOPMENT,
+            ),
+            Err(VerificationError::InvalidSignature)
         );
         Ok(())
     }

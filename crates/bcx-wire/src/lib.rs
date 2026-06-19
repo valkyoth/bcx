@@ -2,14 +2,13 @@
 #![doc = "Wire versioning and bounded-message primitives for BCX."]
 
 use bcx_core::ValidationError;
+use core::convert::TryFrom;
 
 /// BCX protocol version negotiated by a transport binding.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ProtocolVersion {
-    /// Major version.
-    pub major: u16,
-    /// Minor version.
-    pub minor: u16,
+    major: u16,
+    minor: u16,
 }
 
 impl ProtocolVersion {
@@ -20,6 +19,18 @@ impl ProtocolVersion {
     #[must_use]
     pub const fn new(major: u16, minor: u16) -> Self {
         Self { major, minor }
+    }
+
+    /// Returns the major protocol version.
+    #[must_use]
+    pub const fn major(self) -> u16 {
+        self.major
+    }
+
+    /// Returns the minor protocol version.
+    #[must_use]
+    pub const fn minor(self) -> u16 {
+        self.minor
     }
 }
 
@@ -117,7 +128,7 @@ pub struct WireHeader {
 
 impl WireHeader {
     /// Creates a validated wire header.
-    pub const fn new(
+    pub fn new(
         version: ProtocolVersion,
         payload_len: u32,
         limits: WireLimits,
@@ -133,17 +144,19 @@ impl WireHeader {
     }
 
     /// Validates protocol version and payload length.
-    pub const fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
-        if self.version.major != ProtocolVersion::CURRENT.major {
+    pub fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
+        if self.version.major() != ProtocolVersion::CURRENT.major() {
             return Err(ValidationError::NotPermitted);
         }
-        if self.version.minor != ProtocolVersion::CURRENT.minor {
+        if self.version.minor() != ProtocolVersion::CURRENT.minor() {
             return Err(ValidationError::NotPermitted);
         }
         if self.payload_len == 0 {
             return Err(ValidationError::Empty);
         }
-        if (self.payload_len as usize) > limits.maximum_message_len() {
+        let payload_len =
+            usize::try_from(self.payload_len).map_err(|_| ValidationError::TooLarge)?;
+        if payload_len > limits.maximum_message_len() {
             return Err(ValidationError::TooLarge);
         }
         Ok(())
