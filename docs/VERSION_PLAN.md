@@ -87,6 +87,9 @@ Use this loop for every version:
    and scope.
 7. `scripts/validate-release-readiness.sh <tag>` passes.
 8. Tagging and pushing tags happen only when explicitly requested.
+9. Publishing uses `scripts/release_crate.py --version X.Y.Z --require-tag`;
+   publish-time checks must accept that the tag already exists and must verify
+   the tag and pentest report point at the commit being published.
 
 Never commit root `PENTEST.md`; it is scratch input and is ignored by git.
 
@@ -127,13 +130,15 @@ Deliverables:
 - release-readiness validator,
 - pentest report metadata checks,
 - version-specific release gate pattern,
+- publish-readiness checks that are separate from pre-tag readiness checks,
 - release-note filename checks,
-- existing-tag rejection,
+- pre-tag existing-tag rejection,
 - root `PENTEST.md` rejection.
 
 Verification:
 
 - `scripts/checks.sh`
+- `scripts/release_0_2_gate.sh` after pentest report exists
 - negative tests by temporarily omitting required release files locally
 
 Exit criteria:

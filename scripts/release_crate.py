@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -113,6 +114,45 @@ def check_release_notes(version: str) -> None:
         raise RuntimeError(f"missing release notes: {path.relative_to(ROOT)}")
 
 
+def require_no_scratch_pentest() -> None:
+    path = ROOT / "PENTEST.md"
+    if path.exists():
+        raise RuntimeError("PENTEST.md is scratch input and must not be committed")
+
+
+def check_pentest_report(version: str) -> None:
+    tag = f"v{version}"
+    path = ROOT / "security" / "pentest" / f"{tag}.md"
+    if not path.is_file() or path.stat().st_size == 0:
+        raise RuntimeError(f"missing pentest report: {path.relative_to(ROOT)}")
+
+    text = path.read_text(encoding="utf-8")
+    required_patterns = (
+        r"^Status: PASS$",
+        r"^Tester: .+",
+        r"^Scope: .+",
+        r"^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        r"^Commit: [0-9a-fA-F]{40}$",
+    )
+    for pattern in required_patterns:
+        if re.search(pattern, text, flags=re.MULTILINE) is None:
+            raise RuntimeError(
+                f"pentest report {path.relative_to(ROOT)} missing {pattern}"
+            )
+
+    expected_commit = capture(["git", "rev-parse", "HEAD"])
+    commit_line = next(
+        (line for line in text.splitlines() if line.startswith("Commit: ")),
+        "",
+    )
+    reported_commit = commit_line.removeprefix("Commit: ").strip()
+    if reported_commit != expected_commit:
+        raise RuntimeError(
+            f"pentest report commit {reported_commit} does not match HEAD "
+            f"{expected_commit}"
+        )
+
+
 def check_release_tag(version: str, *, require_tag: bool) -> None:
     tag = f"v{version}"
     tag_ref = f"refs/tags/{tag}"
@@ -145,11 +185,14 @@ def check_release_tag(version: str, *, require_tag: bool) -> None:
     print(f"Release tag {tag} points at HEAD.")
 
 
-def run_release_readiness(version: str, *, dry_run: bool, require_tag: bool) -> None:
+def check_publish_readiness(version: str, *, require_tag: bool) -> None:
     if not require_tag:
-        print("Skipping release-readiness script until --require-tag is used.")
+        print("Skipping publish-readiness checks until --require-tag is used.")
         return
-    run(["scripts/validate-release-readiness.sh", f"v{version}"], dry_run=dry_run)
+
+    require_no_scratch_pentest()
+    check_pentest_report(version)
+    print(f"Publish readiness passed for BCX {version}.")
 
 
 def wait_for_index(package: str, version: str, *, dry_run: bool) -> None:
@@ -179,7 +222,6 @@ def run_preflight(args: argparse.Namespace) -> None:
         return
 
     run(["scripts/checks.sh"], dry_run=args.dry_run)
-    run(["scripts/validate-release-readiness.sh", f"v{args.version}"], dry_run=args.dry_run)
 
 
 def selected_steps(start_at: str) -> tuple[str, ...]:
@@ -258,7 +300,7 @@ def main() -> int:
     verify_versions(args.version)
     check_release_notes(args.version)
     check_release_tag(args.version, require_tag=args.require_tag)
-    run_release_readiness(args.version, dry_run=args.dry_run, require_tag=args.require_tag)
+    check_publish_readiness(args.version, require_tag=args.require_tag)
 
     steps = selected_steps(args.start_at)
 

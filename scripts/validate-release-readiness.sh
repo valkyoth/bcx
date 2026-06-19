@@ -51,3 +51,11 @@ for pattern in "${required_patterns[@]}"; do
         exit 1
     fi
 done
+
+reported_commit="$(sed -n 's/^Commit: //p' "$pentest_file" | head -n 1)"
+head_commit="$(git rev-parse HEAD)"
+if [ "$reported_commit" != "$head_commit" ]; then
+    printf 'pentest report %s commit %s does not match HEAD %s\n' \
+        "$pentest_file" "$reported_commit" "$head_commit" >&2
+    exit 1
+fi
