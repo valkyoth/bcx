@@ -38,7 +38,8 @@ fi
 
 required_patterns=(
     '^Status: PASS$'
-    '^Commit: [0-9a-fA-F]{40}$'
+    '^Audited-Commit: [0-9a-fA-F]{40}$'
+    '^Input-Digest: sha256:[0-9a-fA-F]{64}$'
     '^Tester: .+'
     '^Scope: .+'
     '^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$'
@@ -52,10 +53,19 @@ for pattern in "${required_patterns[@]}"; do
     fi
 done
 
-reported_commit="$(sed -n 's/^Commit: //p' "$pentest_file" | head -n 1)"
-head_commit="$(git rev-parse HEAD)"
-if [ "$reported_commit" != "$head_commit" ]; then
-    printf 'pentest report %s commit %s does not match HEAD %s\n' \
-        "$pentest_file" "$reported_commit" "$head_commit" >&2
+audited_commit="$(sed -n 's/^Audited-Commit: //p' "$pentest_file" | head -n 1)"
+if ! git merge-base --is-ancestor "$audited_commit" HEAD; then
+    printf 'pentest report %s audited commit %s is not an ancestor of HEAD\n' \
+        "$pentest_file" "$audited_commit" >&2
+    exit 1
+fi
+
+changed_after_audit="$(git diff --name-only "${audited_commit}..HEAD")"
+unexpected_changes="$(printf '%s\n' "$changed_after_audit" \
+    | grep -Fvx "$pentest_file" \
+    | sed '/^$/d' || true)"
+if [ -n "$unexpected_changes" ]; then
+    printf 'only %s may change after audited commit %s; found:\n%s\n' \
+        "$pentest_file" "$audited_commit" "$unexpected_changes" >&2
     exit 1
 fi

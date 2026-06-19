@@ -132,7 +132,8 @@ def check_pentest_report(version: str) -> None:
         r"^Tester: .+",
         r"^Scope: .+",
         r"^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$",
-        r"^Commit: [0-9a-fA-F]{40}$",
+        r"^Audited-Commit: [0-9a-fA-F]{40}$",
+        r"^Input-Digest: sha256:[0-9a-fA-F]{64}$",
     )
     for pattern in required_patterns:
         if re.search(pattern, text, flags=re.MULTILINE) is None:
@@ -140,16 +141,28 @@ def check_pentest_report(version: str) -> None:
                 f"pentest report {path.relative_to(ROOT)} missing {pattern}"
             )
 
-    expected_commit = capture(["git", "rev-parse", "HEAD"])
-    commit_line = next(
-        (line for line in text.splitlines() if line.startswith("Commit: ")),
+    audited_line = next(
+        (line for line in text.splitlines() if line.startswith("Audited-Commit: ")),
         "",
     )
-    reported_commit = commit_line.removeprefix("Commit: ").strip()
-    if reported_commit != expected_commit:
+    audited_commit = audited_line.removeprefix("Audited-Commit: ").strip()
+    subprocess.run(
+        ["git", "merge-base", "--is-ancestor", audited_commit, "HEAD"],
+        cwd=ROOT,
+        check=True,
+    )
+
+    changed_after_audit = capture(["git", "diff", "--name-only", f"{audited_commit}..HEAD"])
+    allowed_path = str(path.relative_to(ROOT))
+    unexpected_changes = [
+        changed
+        for changed in changed_after_audit.splitlines()
+        if changed and changed != allowed_path
+    ]
+    if unexpected_changes:
         raise RuntimeError(
-            f"pentest report commit {reported_commit} does not match HEAD "
-            f"{expected_commit}"
+            f"only {allowed_path} may change after audited commit "
+            f"{audited_commit}; found {unexpected_changes}"
         )
 
 

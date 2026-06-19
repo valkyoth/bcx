@@ -53,7 +53,10 @@ A version is not tag-ready until:
 - `cargo audit` passes,
 - release notes exist at `release-notes/RELEASE_NOTES_<version>.md`,
 - a pentest report exists at `security/pentest/<tag>.md`,
-- the pentest report names the exact `Commit:` being tagged,
+- the pentest report names the exact `Audited-Commit:` that was reviewed,
+- the pentest report records `Input-Digest: sha256:<digest>` for the scratch
+  `PENTEST.md` input,
+- only the permanent pentest report changed after the audited commit,
 - the pentest report has `Status: PASS`,
 - the pentest report has non-blank `Tester:` and `Scope:` fields,
 - the pentest report has a `Date: YYYY-MM-DD` field,
@@ -82,14 +85,25 @@ Use this loop for every version:
    release notes are updated, and `PENTEST.md` is deleted.
 4. Local gates run again.
 5. The maintainer reruns pentest if needed.
-6. When GitHub CI and CodeQL default setup are green, the maintainer writes
-   `security/pentest/<tag>.md` with exact commit, `Status: PASS`, tester, date,
-   and scope.
-7. `scripts/validate-release-readiness.sh <tag>` passes.
-8. Tagging and pushing tags happen only when explicitly requested.
-9. Publishing uses `scripts/release_crate.py --version X.Y.Z --require-tag`;
-   publish-time checks must accept that the tag already exists and must verify
-   the tag and pentest report point at the commit being published.
+6. When GitHub CI and CodeQL default setup are green, record the scratch report:
+
+```bash
+scripts/record_pentest_report.py \
+  --version X.Y.Z \
+  --audited-commit <commit-that-was-pentested> \
+  --tester "<tester>" \
+  --scope "<scope>" \
+  --date YYYY-MM-DD
+```
+
+7. Review `security/pentest/<tag>.md`, delete root `PENTEST.md`, and commit the
+   permanent report. The final tag commit is allowed to be this report commit.
+8. `scripts/validate-release-readiness.sh <tag>` passes.
+9. Tagging and pushing tags happen only when explicitly requested.
+10. Publishing uses `scripts/release_crate.py --version X.Y.Z --require-tag`;
+    publish-time checks must accept that the tag already exists and must verify
+    the tag points at the report commit while the pentest report points at the
+    audited implementation commit.
 
 Never commit root `PENTEST.md`; it is scratch input and is ignored by git.
 
@@ -131,6 +145,7 @@ Deliverables:
 - pentest report metadata checks,
 - version-specific release gate pattern,
 - publish-readiness checks that are separate from pre-tag readiness checks,
+- scratch pentest digest capture in permanent reports,
 - release-note filename checks,
 - pre-tag existing-tag rejection,
 - root `PENTEST.md` rejection.

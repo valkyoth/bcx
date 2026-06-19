@@ -12,7 +12,8 @@ publication.
 - Split pre-tag release readiness from post-tag publish readiness.
 - Require publish-time pentest metadata checks without rejecting an existing
   release tag.
-- Require pentest reports to point at the exact commit being released.
+- Require pentest reports to point at the exact commit that was audited.
+- Record a SHA-256 digest of root `PENTEST.md` in the permanent pentest report.
 - Add a dedicated `v0.2.0` release gate.
 - Harden `Digest` and `Nonce` equality against byte-by-byte early exit.
 - Reject all-zero nonces and clear nonce memory on drop with `zeroize`.
