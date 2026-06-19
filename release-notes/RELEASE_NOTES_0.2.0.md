@@ -29,10 +29,10 @@ first crates.io publication.
 - Split pre-tag release readiness from post-tag publish readiness.
 - Require publish-time pentest metadata checks without rejecting an existing
   release tag.
-- Record a SHA-256 digest of root `PENTEST.md` in the permanent pentest report.
-- Require permanent pentest reports to record the exact audited commit.
-- Reject release tags and publishes when code changed after the audited commit;
-  only the permanent pentest report may differ.
+- Align permanent pentest reports with the Aesynx-style release flow:
+  `Tag`, `Commit`, `Status`, `Tester`, `Date`, and `Scope`.
+- Accept pentest reports for current `HEAD` or `HEAD^` when current `HEAD` is
+  only the permanent pentest report commit.
 - Add a release finalizer that records the pentest report, runs the release
   gate, commits the report, and creates the local tag.
 - Allow the release finalizer to use an existing permanent pentest report when

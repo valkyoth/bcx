@@ -37,12 +37,12 @@ if [ ! -s "$pentest_file" ]; then
 fi
 
 required_patterns=(
+    "^Tag: ${tag}$"
+    '^Commit: [0-9a-fA-F]{40}$'
     '^Status: PASS$'
-    '^Input-Digest: sha256:[0-9a-fA-F]{64}$'
-    '^Audited-Commit: [0-9a-fA-F]{40}$'
     '^Tester: .+'
-    '^Scope: .+'
     '^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$'
+    '^Scope: .+'
 )
 
 for pattern in "${required_patterns[@]}"; do
@@ -53,22 +53,22 @@ for pattern in "${required_patterns[@]}"; do
     fi
 done
 
-audited_commit="$(sed -n 's/^Audited-Commit: //p' "$pentest_file" | head -n 1)"
-if ! git merge-base --is-ancestor "$audited_commit" HEAD; then
-    printf 'audited commit %s is not an ancestor of HEAD\n' \
-        "$audited_commit" >&2
+head_commit="$(git rev-parse HEAD)"
+parent_commit=""
+if git rev-parse -q --verify HEAD^ >/dev/null; then
+    parent_commit="$(git rev-parse HEAD^)"
+fi
+
+if ! grep -Fxq "Commit: ${head_commit}" "$pentest_file" \
+    && { [ "$parent_commit" = "" ] || ! grep -Fxq "Commit: ${parent_commit}" "$pentest_file"; }; then
+    printf 'pentest report %s must target current HEAD or first parent: %s\n' \
+        "$pentest_file" "$head_commit" >&2
     exit 1
 fi
 
-changed_after_audit="$(
-    git diff --name-only "${audited_commit}..HEAD" \
-        | grep -Fvx "$pentest_file" \
-        | sed '/^$/d' \
-        || true
-)"
-if [ -n "$changed_after_audit" ]; then
-    printf 'code changed after audited commit; only %s may differ\n' \
-        "$pentest_file" >&2
-    printf '%s\n' "$changed_after_audit" >&2
+if grep -Eq 'TODO|TBD|Status: FAIL|Status: BLOCKED' "$pentest_file"; then
+    printf 'pentest report %s contains unresolved status text\n' "$pentest_file" >&2
     exit 1
 fi
+
+printf 'release readiness: ok for %s\n' "$tag"

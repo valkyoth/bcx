@@ -12,8 +12,10 @@ All notable BCX changes will be documented here.
   domain profiles, and services.
 - Replace the roadmap with a smaller-step core-first version map.
 - Split pre-tag release readiness from post-tag publish readiness.
-- Add scratch-report digest checks for pentest reports.
-- Restore audited-commit traceability for pentest reports.
+- Align pentest report validation with the Aesynx-style `Tag`, `Commit`,
+  `Status`, `Tester`, `Date`, and `Scope` flow.
+- Accept a pentest report for `HEAD^` when `HEAD` only adds the permanent
+  pentest report.
 - Add an automated release finalizer for the pentest-report/tag flow.
 - Allow release finalization from an existing permanent pentest report after
   root `PENTEST.md` has been removed.

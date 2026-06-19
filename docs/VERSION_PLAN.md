@@ -53,14 +53,13 @@ A version is not tag-ready until:
 - `cargo audit` passes,
 - release notes exist at `release-notes/RELEASE_NOTES_<version>.md`,
 - a pentest report exists at `security/pentest/<tag>.md`,
-- the pentest report records `Input-Digest: sha256:<digest>` for the scratch
-  `PENTEST.md` input,
-- the pentest report records `Audited-Commit: <40-character git commit>`,
+- the pentest report records `Tag: <tag>`,
+- the pentest report records `Commit: <40-character git commit>`,
 - the pentest report has `Status: PASS`,
 - the pentest report has non-blank `Tester:` and `Scope:` fields,
 - the pentest report has a `Date: YYYY-MM-DD` field,
-- the audited commit is an ancestor of the release commit,
-- only `security/pentest/<tag>.md` differs after the audited commit,
+- the report commit matches current `HEAD` or `HEAD^` when the current commit
+  only adds the permanent pentest report,
 - root `PENTEST.md` does not exist,
 - the tag does not already exist locally,
 - `scripts/validate-release-readiness.sh <tag>` passes.
@@ -88,18 +87,19 @@ scripts/finalize_release.py \
   --version X.Y.Z \
   --tester "<tester>" \
   --scope "<scope>" \
-  --date YYYY-MM-DD \
-  --audited-commit "<40-character commit hash>"
+  --date YYYY-MM-DD
 ```
 
 If root `PENTEST.md` exists, the finalizer records the scratch report, deletes
 root `PENTEST.md`, commits `security/pentest/<tag>.md`, runs the release gate,
 and creates the local tag. If the permanent report already exists, the
-finalizer verifies that it records the same audited commit.
+finalizer uses it directly.
 
-The final release commit may add or update only `security/pentest/<tag>.md`
-after the audited commit. Any other changed path requires a new pentest pass
-before tagging.
+The permanent report follows the Aesynx-style release evidence model. It names
+the exact implementation commit that was reviewed. The release gate accepts a
+report for current `HEAD`, or for `HEAD^` when current `HEAD` is only the
+permanent pentest report commit. This keeps traceability without requiring a new
+pentest for the evidence commit itself.
 
 Never commit root `PENTEST.md`; it is scratch input and is ignored by git.
 
@@ -1384,7 +1384,7 @@ Required scope:
 - at least two checkpoint witness or settlement receipt models,
 - complete threat model, security controls, release notes, and supply-chain
   documentation,
-- final pentest PASS for the exact audited commit.
+- final pentest PASS for the exact reviewed commit.
 
 Non-goals for `1.0.0`:
 

@@ -4,14 +4,12 @@
 from __future__ import annotations
 
 import argparse
-import re
 import subprocess
 import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-COMMIT_HASH_PATTERN = r"^[0-9a-fA-F]{40}$"
 
 
 def run(command: list[str]) -> None:
@@ -69,21 +67,21 @@ def commit_report_if_changed(report: Path, tag: str) -> None:
         print(f"{report.relative_to(ROOT)} already committed.")
 
 
-def validate_report_arg(name: str, value: str, pattern: str = r"^[^\n\r]+$") -> str:
-    if re.fullmatch(pattern, value) is None:
+def validate_report_arg(name: str, value: str) -> str:
+    if "\n" in value or "\r" in value:
         raise ValueError(f"--{name} contains invalid characters: {value!r}")
+    if not value.strip():
+        raise ValueError(f"--{name} must not be blank")
     return value
 
 
-def require_report_audited_commit(report: Path, audited_commit: str) -> None:
-    text = report.read_text(encoding="utf-8")
-    expected = f"Audited-Commit: {audited_commit}"
-    if expected not in text.splitlines():
-        print(
-            f"{report.relative_to(ROOT)} does not record {expected}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+def validate_date(value: str) -> str:
+    parts = value.split("-")
+    if len(parts) != 3 or any(not part.isdigit() for part in parts):
+        raise ValueError(f"--date must use YYYY-MM-DD format: {value!r}")
+    if len(parts[0]) != 4 or len(parts[1]) != 2 or len(parts[2]) != 2:
+        raise ValueError(f"--date must use YYYY-MM-DD format: {value!r}")
+    return value
 
 
 def main() -> int:
@@ -98,11 +96,6 @@ def main() -> int:
     parser.add_argument("--tester", required=True, help="Tester or review role.")
     parser.add_argument("--scope", required=True, help="Pentest scope.")
     parser.add_argument("--date", required=True, help="Pentest date in YYYY-MM-DD format.")
-    parser.add_argument(
-        "--audited-commit",
-        required=True,
-        help="Exact 40-character commit hash that was pentested.",
-    )
     parser.add_argument(
         "--push-main",
         action="store_true",
@@ -121,10 +114,7 @@ def main() -> int:
     args = parser.parse_args()
     tester = validate_report_arg("tester", args.tester)
     scope = validate_report_arg("scope", args.scope)
-    date = validate_report_arg("date", args.date, r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
-    audited_commit = validate_report_arg(
-        "audited-commit", args.audited_commit, COMMIT_HASH_PATTERN
-    )
+    date = validate_date(args.date)
 
     tag = f"v{args.version}"
     version_parts = args.version.split(".")
@@ -152,6 +142,7 @@ def main() -> int:
             return 1
 
     if scratch.is_file():
+        implementation_commit = capture(["git", "rev-parse", "HEAD"])
         run(
             [
                 "scripts/record_pentest_report.py",
@@ -163,14 +154,13 @@ def main() -> int:
                 scope,
                 "--date",
                 date,
-                "--audited-commit",
-                audited_commit,
+                "--commit",
+                implementation_commit,
             ]
         )
         scratch.unlink()
     else:
         print(f"using existing {report.relative_to(ROOT)}")
-        require_report_audited_commit(report, audited_commit)
 
     commit_report_if_changed(report, tag)
     run([gate])

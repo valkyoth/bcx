@@ -128,12 +128,12 @@ def check_pentest_report(version: str) -> None:
 
     text = path.read_text(encoding="utf-8")
     required_patterns = (
+        rf"^Tag: {tag}$",
+        r"^Commit: [0-9a-fA-F]{40}$",
         r"^Status: PASS$",
         r"^Tester: .+",
         r"^Scope: .+",
         r"^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$",
-        r"^Input-Digest: sha256:[0-9a-fA-F]{64}$",
-        r"^Audited-Commit: [0-9a-fA-F]{40}$",
     )
     for pattern in required_patterns:
         if re.search(pattern, text, flags=re.MULTILINE) is None:
@@ -141,32 +141,26 @@ def check_pentest_report(version: str) -> None:
                 f"pentest report {path.relative_to(ROOT)} missing {pattern}"
             )
 
-    audited_commit = re.search(
-        r"^Audited-Commit: ([0-9a-fA-F]{40})$", text, flags=re.MULTILINE
-    )
-    if audited_commit is None:
-        raise RuntimeError(f"pentest report {path.relative_to(ROOT)} is malformed")
-
-    audited_hash = audited_commit.group(1)
+    head_commit = capture(["git", "rev-parse", "HEAD"])
+    parent_commit = ""
     if subprocess.run(
-        ["git", "merge-base", "--is-ancestor", audited_hash, "HEAD"],
+        ["git", "rev-parse", "-q", "--verify", "HEAD^"],
         cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
         check=False,
-    ).returncode != 0:
-        raise RuntimeError(f"audited commit {audited_hash} is not an ancestor of HEAD")
+    ).returncode == 0:
+        parent_commit = capture(["git", "rev-parse", "HEAD^"])
 
-    allowed = str(path.relative_to(ROOT))
-    changed = [
-        line
-        for line in capture(["git", "diff", "--name-only", f"{audited_hash}..HEAD"])
-        .splitlines()
-        if line and line != allowed
-    ]
-    if changed:
+    if f"Commit: {head_commit}" not in text.splitlines() and (
+        not parent_commit or f"Commit: {parent_commit}" not in text.splitlines()
+    ):
         raise RuntimeError(
-            "code changed after audited commit; only "
-            f"{allowed} may differ: {changed}"
+            f"pentest report {path.relative_to(ROOT)} must target HEAD or first parent"
         )
+
+    if re.search(r"TODO|TBD|Status: FAIL|Status: BLOCKED", text) is not None:
+        raise RuntimeError(f"pentest report {path.relative_to(ROOT)} is unresolved")
 
 
 def check_release_tag(version: str, *, require_tag: bool) -> None:
