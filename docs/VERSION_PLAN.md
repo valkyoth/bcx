@@ -59,6 +59,9 @@ Rules:
 - do not bump a leaf crate just because another unrelated crate changed,
 - bump the root `bcx` facade when its exports, embedded docs, or local
   dependency pins change,
+- when a local crate version changes, update and version-bump every dependent
+  crate that needs the new local dependency pin, repeating transitively through
+  the workspace dependency graph,
 - update `docs/CRATE_VERSION_MATRIX.md` whenever any package version changes,
 - keep local path dependency `version = "..."`
   requirements synchronized with the referenced local package version,

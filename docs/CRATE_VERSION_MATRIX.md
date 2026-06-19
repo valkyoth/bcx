@@ -28,6 +28,10 @@ Cargo metadata.
   package version and should not be republished.
 - Path dependency `version = "..."`
   requirements must match the referenced local package version.
+- If a crate package version changes, every published workspace crate with a
+  local path dependency on it must update that dependency pin and bump its own
+  package version. Repeat this through the local dependency graph until no
+  dependent crate needs a changed pin.
 - The root `bcx` facade may move more often than leaf crates because it exposes
   dependency pins and user-facing re-exports.
 - Protocol spec versions are independent. A crate can publish several patch

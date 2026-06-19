@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 import sys
+from collections import deque
 from pathlib import Path
 
 try:
@@ -157,6 +158,24 @@ def package_content_changed(path: str, changed: set[str]) -> bool:
     return any(item in exact or item.startswith(prefixes) for item in changed)
 
 
+def dependency_bump_requirements(
+    changed_versions: set[str], dependents_by_dep: dict[str, set[str]]
+) -> dict[str, set[str]]:
+    required_by: dict[str, set[str]] = {}
+    queue = deque(sorted(changed_versions))
+
+    while queue:
+        dependency = queue.popleft()
+        for dependent in sorted(dependents_by_dep.get(dependency, set())):
+            reasons = required_by.setdefault(dependent, set())
+            before = len(reasons)
+            reasons.add(dependency)
+            if len(reasons) != before and dependent not in changed_versions:
+                queue.append(dependent)
+
+    return required_by
+
+
 def validate() -> None:
     packages = workspace_packages()
     matrix = parse_matrix()
@@ -169,6 +188,7 @@ def validate() -> None:
     manifest_to_package = {
         package["manifest"]: (name, package["version"]) for name, package in packages.items()
     }
+    dependents_by_dep: dict[str, set[str]] = {}
 
     for name, package in sorted(packages.items()):
         row = matrix[name]
@@ -184,6 +204,7 @@ def validate() -> None:
             if dep_manifest not in manifest_to_package:
                 continue
             actual_name, actual_version = manifest_to_package[dep_manifest]
+            dependents_by_dep.setdefault(actual_name, set()).add(name)
             if required_version != actual_version:
                 raise RuntimeError(
                     f"{name} dependency {dep_name} requires {required_version}, "
@@ -196,15 +217,31 @@ def validate() -> None:
         return
 
     changed = changed_paths_since(tag)
+    old_versions = {}
+    changed_versions = set()
     for name, package in sorted(packages.items()):
+        old_version = package_version_at(tag, package["manifest"])
+        old_versions[name] = old_version
+        if old_version != package["version"]:
+            changed_versions.add(name)
+
         if not package_content_changed(package["path"], changed):
             continue
-        old_version = package_version_at(tag, package["manifest"])
         if old_version == package["version"]:
             raise RuntimeError(
                 f"{name} package content changed since {tag} but version is still "
                 f"{package['version']}"
             )
+
+    required_bumps = dependency_bump_requirements(changed_versions, dependents_by_dep)
+    for name, dependencies in sorted(required_bumps.items()):
+        if old_versions.get(name) != packages[name]["version"]:
+            continue
+        dependency_list = ", ".join(f"`{dependency}`" for dependency in sorted(dependencies))
+        raise RuntimeError(
+            f"{name} must bump because local dependency version changed since {tag}: "
+            f"{dependency_list}"
+        )
 
     print("crate version matrix: ok")
 
