@@ -4,10 +4,16 @@ All notable BCX changes will be documented here.
 
 ## 0.2.0 - Unreleased
 
+- Reframe BCX as Bifrost Causal Exchange: a semantic overlay protocol with one
+  invariant core and optional native profiles.
+- Preserve the new idea draft as `docs/original-idea.md`.
+- Add `docs/protocol-family.md`.
+- Add repository family placeholders for profiles, integrations, proofs,
+  domain profiles, and services.
+- Replace the roadmap with a smaller-step core-first version map.
 - Split pre-tag release readiness from post-tag publish readiness.
 - Add scratch-report digest checks for pentest reports.
-- Treat pentest reports as release approval artifacts rather than git commit
-  attestations.
+- Restore audited-commit traceability for pentest reports.
 - Add an automated release finalizer for the pentest-report/tag flow.
 - Allow release finalization from an existing permanent pentest report after
   root `PENTEST.md` has been removed.

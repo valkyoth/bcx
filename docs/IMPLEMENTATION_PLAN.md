@@ -1,36 +1,39 @@
 # BCX Implementation Plan
 
-Status: planning document
+Status: active planning document
 
 Project and crate name: `bcx`
 
-Expanded name: Bifrost Casual Exchange
+Expanded protocol name: Bifrost Causal Exchange
 
-1.0 target: a production-ready Rust protocol crate for verifiable causal
-network accountability, with Fluxheim as the first serious implementation.
+1.0 target: a production-ready no-std Rust protocol foundation for signed
+causal meaning, proof composition, native bindings, checkpoints, and bounded
+explanations across multiple underlying systems.
 
 ## Core Position
 
-BCX is a proof-carrying causal protocol for consequential operations. It is not
-an HTTP replacement and not an observability trace format. HTTP, queues, native
-QUIC streams, files, and air-gapped bundles may carry BCX objects, but the
-security decision is based on canonical signed BCX objects.
+BCX is a semantic overlay protocol. It does not replace HTTP, QUIC, Ethereum,
+Cardano, Bitcoin, XRP, Kafka, object stores, institutional ledgers, or future
+networks. BCX defines what an operation means, why it was authorized, what it
+caused, who attested to it, what evidence exists, and what remains unknown.
 
-The fundamental sequence is:
+Underlying systems carry, execute, observe, store, or settle BCX objects. They
+do not change the invariant BCX statement model.
 
 ```text
-Invocation -> AdmissionDecision -> ExecutedEffect -> VerifiableReceipt
+Application, institution, agent, or service
+    -> BCX semantic layer
+    -> BCX profile or integration
+    -> HTTP, QUIC, Ethereum, Cardano, Bitcoin, XRP, storage, or offline bundle
 ```
 
-BCX must answer:
+The central rule is:
 
-- why an operation happened,
-- who or what caused it,
-- what authority permitted it,
-- what policy was applied,
-- what effect was observed,
-- what downstream operations followed,
-- what cannot be proven.
+```text
+BCX defines causal meaning and proof structure.
+Profiles bind that meaning to native systems.
+Integrations make those bindings usable in real stacks.
+```
 
 ## Non-Negotiable Engineering Rules
 
@@ -42,175 +45,188 @@ BCX must answer:
 - Edition 2024 and workspace resolver `3`.
 - Core crates are `no_std` by default.
 - The root crate stays no-std by default.
+- The core never depends on HTTP, blockchain, async runtime, database, CLI, or
+  provider-specific crates.
+- Profiles depend on the core; the core never depends on profiles.
+- Integrations depend on profiles; profiles do not depend on one concrete
+  framework.
 - Third-party crates are admitted only after review, documentation, and tests.
-- Transport, crypto provider, storage, CLI, and HTTP/3 bindings must be
-  separate crates so the main crate does not lose no-std.
 - Normal `.rs` files must stay under 500 lines.
-- Security and testability are part of every release, not cleanup work.
+- Security and testability are part of every release.
 - Unsafe Rust is forbidden until a documented boundary crate is approved.
 
-## Workspace Shape
+## Published Foundation Crates
 
-- `bcx`: published facade crate.
-- `bcx-core`: IDs, digests, nonces, sequence numbers, validation errors.
-- `bcx-model`: cause capsules, actions, admissions, effects, truth statuses,
-  and assurance levels.
-- `bcx-crypto`: crypto-agile envelopes, algorithm identifiers, verifier traits,
-  and future provider boundaries.
-- `bcx-policy`: profiles, proof levels, disclosure levels, and policy result
-  skeletons.
-- `bcx-wire`: versioning, size limits, message headers, and future canonical
-  encoding boundaries.
+The crates already published for `0.1.0` still fit the new model and should be
+evolved rather than renamed casually.
 
-Future crates:
+| Crate | Foundation role |
+| --- | --- |
+| `bcx` | Published facade crate and stable user entry point. |
+| `bcx-core` | Identifiers, digests, nonces, sequence numbers, and common validation errors. |
+| `bcx-model` | Statement vocabulary, causal edges, claim statuses, effects, admissions, and contradictions. |
+| `bcx-crypto` | Crypto-agile attestation envelope metadata and verifier traits. |
+| `bcx-policy` | Profiles, proof levels, disclosure levels, replay policy, and settlement policy vocabulary. |
+| `bcx-wire` | Protocol versions, wire limits, bounded message entry rules, and future canonical framing boundaries. |
 
-- `bcx-codec`: deterministic CBOR or admitted canonical binary encoding.
-- `bcx-capability`: proof-of-possession capabilities and attenuation rules.
-- `bcx-receipt`: admission, effect, witness, and transparency receipts.
-- `bcx-why`: bounded explanation queries and proof bundle verification.
-- `bcx-store`: append-only event storage traits and default stores.
-- `bcx-http`: HTTP/1.1, HTTP/2, and HTTP/3 compatibility binding.
-- `bcx-quic`: native `bcx/1` protocol over QUIC.
-- `bcx-cli`: `why`, `verify`, `bundle`, and inspection commands.
+## Future Workspace Families
 
-## Phase 1: Protocol Kernel
+Future crates should be introduced only when the preceding release has a clean
+stop, tests, release notes, and pentest handoff.
 
-Build minimal no-std canonical types:
+### Core Crates
 
-- event IDs,
-- digest commitments,
-- nonces,
-- issuer sequence numbers,
-- cause kinds,
-- relationship kinds,
-- operation actions,
-- truth statuses,
-- assurance levels,
-- admission and effect result enums.
+- `bcx-codec`: canonical deterministic encoding, initially CBOR if admitted.
+- `bcx-state`: optional deterministic state transition engine for rollups,
+  consortium ledgers, synchronized causal state, or replayable simulations.
+- `bcx-explain`: WHY queries, causal traversal, contradictions, unknowns,
+  selective disclosure, and proof-bundle verification.
+- `bcx-registry`: type, profile, algorithm, proof-suite, and extension
+  registries.
+- `bcx-conformance`: interoperability vectors and cross-platform fixtures.
+- `bcx-testkit`: deterministic test builders and adversarial fixtures.
 
-The first correctness question is: can BCX represent causal claims without
-confusing observation, declaration, verification, enforcement, and receipt?
+### Profiles
 
-## Phase 2: Canonical Encoding
+Profiles define normative mappings. They should be small and dependency-light.
 
-Introduce canonical encoding after the model stabilizes.
+- `bcx-http`: HTTP binding for attached and encapsulated BCX exchanges.
+- `bcx-quic`: native `bcx/1` exchange over QUIC.
+- `bcx-ethereum`: Ethereum binding, observation, action gating, and settlement
+  profile.
+- `bcx-cardano`: Cardano EUTXO binding and settlement profile.
+- `bcx-offline`: air-gapped and file-bundle profile.
+- `bcx-scitt`: transparency-service profile.
+- `bcx-opentelemetry`: observability correlation profile.
+- future `bcx-bitcoin`, `bcx-xrp`, or other settlement/binding profiles when
+  a concrete security contract is written.
 
-Requirements:
+### Integrations
 
-- deterministic bytes,
-- bounded lengths,
-- schema versioning,
-- unknown-field policy,
-- no native Rust memory layout dependency,
-- no JSON security boundary,
-- malformed input rejection before expensive verification.
+Integrations connect profiles to real libraries, frameworks, services, or
+products.
 
-## Phase 3: Crypto And Capability Boundary
+- `bcx-http-hyper`
+- `bcx-http-axum`
+- `bcx-http-h3`
+- `bcx-quic-quinn`
+- `bcx-ethereum-alloy`
+- `bcx-ethereum-contracts`
+- `bcx-cardano-pallas`
+- `bcx-skrifheim`
+- `bcx-fluxheim`
 
-Build crypto-agile signatures and proof-of-possession capabilities.
+### Proof Crates
 
-Requirements:
+- `bcx-proof-cose`
+- `bcx-proof-threshold`
+- `bcx-proof-sp1`
+- `bcx-proof-risc0`
 
-- algorithm identifiers,
-- key identifiers,
-- admitted algorithm policy,
-- bounded signature set size,
-- audience binding,
-- expiry,
-- issuer sequence,
-- nonce,
-- replay cache hooks,
-- capability attenuation.
+### Domain Profiles
 
-BCX must not invent cryptographic primitives. It owns the envelope semantics
-and provider traits; provider crates own actual algorithm implementations.
+Domain profiles define business or operational semantics. They must not be
+confused with transport or settlement bindings.
 
-## Phase 4: Admission And Effect Receipts
+- `bcx-profile-banking`
+- `bcx-profile-ai-agent`
+- `bcx-profile-supply-chain`
+- `bcx-profile-healthcare`
 
-Add signed receipts:
+### Services
 
-- admission allow, deny, narrow, require approval, quarantine,
-- policy digest,
-- configuration digest,
-- identity and capability status,
-- observed network effect,
-- application effect hooks,
-- child invocation references,
-- obligations.
+Services are optional applications around the protocol.
 
-A gateway may receipt network effects. Application, database, storage, or worker
-integrations are required before BCX can claim deeper effects.
+- `bcx-cli`
+- `bcx-node`
+- `bcx-witness`
+- `bcx-prover`
+- `bcx-query`
 
-## Phase 5: Local Fluxheim Integration
+## Core Object Model
 
-Fluxheim should first use BCX locally:
+BCX separates logical statements, attestations, and native bindings.
 
-- ingress event,
-- authentication result,
-- route decision,
-- rate-limit/security decision,
-- upstream selection,
-- upstream dispatch,
-- response receipt,
-- cache decision,
-- response completion.
+```text
+Statement
+    What is being claimed?
 
-This phase requires no browser support and no federation.
+Attestation
+    Who signed, witnessed, or proved that claim?
 
-## Phase 6: Federated WHY
+Native binding
+    Which HTTP request, Ethereum transaction, Cardano UTXO, offline bundle, or
+    other native event does the statement bind to?
+```
 
-Add authenticated bounded explanation queries.
+Statement identifiers are derived from canonical statement bytes, not from a
+specific signature. Multiple parties can attest to the same statement without
+changing the statement identity.
 
-Requirements:
+BCX/1 starts with a small statement body set:
 
-- audit capabilities,
-- query purpose,
-- maximum depth,
-- maximum nodes,
-- maximum response bytes,
-- cycle detection,
-- redacted edges,
-- missing-event disclosure,
-- contradictory claim handling,
-- cross-domain trust policy.
+- `Intent`
+- `Admission`
+- `Effect`
+- `Delegation`
+- `Revocation`
+- `Checkpoint`
+- `Contradiction`
 
-WHY must never be an unauthenticated recursive graph crawl.
+## Truth And Assurance
 
-## Phase 7: Native BCX Over QUIC
+BCX must never collapse a signed claim into proven reality. A signature proves
+authorship and integrity of a statement. It does not prove an internal motive or
+the truth of an offchain business claim.
 
-Add `bcx/1` as a native QUIC application protocol after the semantics are
-stable.
+Claim statuses should include:
 
-The native protocol may define frames such as:
+- declared,
+- observed,
+- cryptographically verified,
+- policy enforced,
+- counterparty acknowledged,
+- independently witnessed,
+- settlement finalized,
+- contradicted,
+- unknown.
 
-- `HELLO`,
-- `TRUST_CONTEXT`,
-- `INVOKE`,
-- `ADMISSION`,
-- `DATA`,
-- `EFFECT`,
-- `WHY`,
-- `EXPLANATION`,
-- `REVOKE`,
-- `CANCEL`,
-- `CLOSE`.
+Adapters may attest only to effects they can actually observe. For example, an
+HTTP gateway can attest that it received a response; it cannot claim a database
+commit without database or application evidence.
 
-HTTP/3 remains a compatibility binding, not the source of proof.
+## Profile Security Contract
 
-## Phase 8: High-Assurance Profile
+Every BCX profile must document:
 
-Define the Sovereign profile:
+- exactly what native fields are committed,
+- how replay is prevented,
+- what finality means,
+- what intermediaries may alter,
+- what information becomes public,
+- what the adapter can truthfully observe,
+- how downgrades are prevented,
+- how unknown extensions are handled,
+- what happens when native evidence disappears.
 
-- mutual peer authentication,
-- no unsigned consequential invocations,
-- no bearer-only authorization,
-- no state-changing 0-RTT,
-- no silent downgrade,
-- bounded graph traversal,
-- key rotation and revocation,
-- append-only receipt storage,
-- optional remote attestation,
-- optional traffic padding.
+No profile may silently downgrade to unsigned or unaudited operation.
+
+## First Implementation Strategy
+
+Do not start with Ethereum rollup, Cardano validator, Bitcoin anchoring, or a
+large Fluxheim integration. Build the invariant core slowly first.
+
+The first serious sequence is:
+
+1. make the protocol-family architecture explicit in `0.2.0`,
+2. harden statement, attestation, binding, and checkpoint vocabulary,
+3. add deterministic canonical encoding and test vectors,
+4. add bounded verification and replay hooks,
+5. add local/offline WHY proof bundles,
+6. add HTTP as the first carrier profile,
+7. add Fluxheim as the first live integration,
+8. add one settlement profile,
+9. add a second settlement profile to prove BCX is not chain-specific.
 
 ## 1.0 Definition
 
@@ -218,8 +234,12 @@ BCX 1.0 is ready when:
 
 - the root `bcx` crate is stable enough for external users,
 - the canonical object model is documented and tested,
-- a Fluxheim integration can produce and verify local WHY explanations,
-- two Fluxheim peers can exchange signed causal events,
-- tampering, replay, false-parent, and downgrade tests fail closed,
+- statement IDs are stable across profiles,
+- the standard proof suite and canonical codec are implemented,
+- local/offline WHY bundles verify correctly,
+- HTTP and Fluxheim can carry and verify signed causal objects,
+- at least two settlement or witness profiles can record the same checkpoint,
+- tampering, replay, false-parent, overclaiming, and downgrade tests fail
+  closed,
 - release notes, threat model, security controls, and supply-chain docs are
   complete for the exact release.

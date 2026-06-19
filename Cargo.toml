@@ -44,7 +44,7 @@ license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 readme.workspace = true
-description = "Bifrost Casual Exchange protocol primitives for verifiable causal network accountability."
+description = "Bifrost Causal Exchange protocol primitives for signed causal meaning and proof composition."
 keywords = ["protocol", "security", "audit", "causal", "no-std"]
 categories = ["authentication", "cryptography", "network-programming", "no-std"]
 

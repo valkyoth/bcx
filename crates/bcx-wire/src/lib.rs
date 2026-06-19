@@ -108,7 +108,7 @@ impl WireLimits {
     }
 }
 
-/// Fixed header metadata common to native and HTTP-carried BCX messages.
+/// Fixed header metadata common to profile-carried BCX messages.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct WireHeader {
     version: ProtocolVersion,
