@@ -16,6 +16,7 @@ alloc = []
 
 [dependencies]
 bcx-core = { version = "0.2.0", path = "../bcx-core", default-features = false }
+bcx-wire = { version = "0.2.0", path = "../bcx-wire", default-features = false }
 
 [lints]
 workspace = true

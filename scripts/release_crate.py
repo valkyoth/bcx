@@ -7,9 +7,9 @@ crates.io has time to index them before publishing dependents.
 Publish order:
 1. bcx-core
 2. bcx-policy
-3. bcx-crypto
-4. bcx-model
-5. bcx-wire
+3. bcx-wire
+4. bcx-crypto
+5. bcx-model
 6. bcx
 """
 
@@ -34,9 +34,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DEPENDENCY_STEPS = (
     "bcx-core",
     "bcx-policy",
+    "bcx-wire",
     "bcx-crypto",
     "bcx-model",
-    "bcx-wire",
 )
 
 FINAL_STEPS = ("bcx",)

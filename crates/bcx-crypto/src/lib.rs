@@ -13,37 +13,36 @@ pub use error::VerificationError;
 mod tests {
     use super::*;
     use bcx_core::Digest;
+    use bcx_wire::WireLimits;
 
     #[test]
     fn empty_signature_is_rejected() {
-        let envelope = SignatureEnvelope {
-            key_id: Digest::new([1; Digest::LEN]),
-            algorithm: SignatureAlgorithm::Ed25519,
-            signature: &[],
-        };
-
         assert_eq!(
-            envelope.validate(256),
+            SignatureEnvelope::new(
+                Digest::new([1; Digest::LEN]),
+                SignatureAlgorithm::Ed25519,
+                &[],
+                WireLimits::DEVELOPMENT,
+            ),
             Err(VerificationError::EmptySignature)
         );
     }
 
     #[test]
     fn wrong_signature_length_is_rejected() {
-        let envelope = SignatureEnvelope {
-            key_id: Digest::new([1; Digest::LEN]),
-            algorithm: SignatureAlgorithm::Ed25519,
-            signature: &[7; 63],
-        };
-
         assert_eq!(
-            envelope.validate(256),
+            SignatureEnvelope::new(
+                Digest::new([1; Digest::LEN]),
+                SignatureAlgorithm::Ed25519,
+                &[7; 63],
+                WireLimits::DEVELOPMENT,
+            ),
             Err(VerificationError::InvalidSignature)
         );
     }
 
     #[test]
-    fn policy_rejects_unadmitted_algorithm_before_verifier() {
+    fn policy_rejects_unadmitted_algorithm_before_verifier() -> Result<(), VerificationError> {
         struct RejectingVerifier;
 
         impl Verifier for RejectingVerifier {
@@ -57,19 +56,26 @@ mod tests {
         }
 
         let signature = [1; 64];
-        let envelope = SignedEnvelope {
-            payload: (),
-            signature: SignatureEnvelope {
-                key_id: Digest::new([1; Digest::LEN]),
-                algorithm: SignatureAlgorithm::Ed25519,
-                signature: &signature,
-            },
-        };
+        let envelope = SignedEnvelope::new(
+            (),
+            SignatureEnvelope::new(
+                Digest::new([1; Digest::LEN]),
+                SignatureAlgorithm::Ed25519,
+                &signature,
+                WireLimits::DEVELOPMENT,
+            )?,
+        );
         let policy = AlgorithmPolicy::new(&[SignatureAlgorithm::MlDsa65]);
 
         assert_eq!(
-            envelope.verify_bytes(&RejectingVerifier, &policy, b"payload", 8_000),
+            envelope.verify_detached_bytes(
+                &RejectingVerifier,
+                &policy,
+                b"payload",
+                WireLimits::DEVELOPMENT,
+            ),
             Err(VerificationError::AlgorithmNotAdmitted)
         );
+        Ok(())
     }
 }

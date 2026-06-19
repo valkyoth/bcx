@@ -111,13 +111,27 @@ impl WireLimits {
 /// Fixed header metadata common to native and HTTP-carried BCX messages.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct WireHeader {
-    /// Protocol version.
-    pub version: ProtocolVersion,
-    /// Canonical payload length in bytes.
-    pub payload_len: usize,
+    version: ProtocolVersion,
+    payload_len: u32,
 }
 
 impl WireHeader {
+    /// Creates a validated wire header.
+    pub const fn new(
+        version: ProtocolVersion,
+        payload_len: u32,
+        limits: WireLimits,
+    ) -> Result<Self, ValidationError> {
+        let header = Self {
+            version,
+            payload_len,
+        };
+        match header.validate(limits) {
+            Ok(()) => Ok(header),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Validates protocol version and payload length.
     pub const fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
         if self.version.major != ProtocolVersion::CURRENT.major {
@@ -129,10 +143,22 @@ impl WireHeader {
         if self.payload_len == 0 {
             return Err(ValidationError::Empty);
         }
-        if self.payload_len > limits.maximum_message_len() {
+        if (self.payload_len as usize) > limits.maximum_message_len() {
             return Err(ValidationError::TooLarge);
         }
         Ok(())
+    }
+
+    /// Returns the protocol version.
+    #[must_use]
+    pub const fn version(self) -> ProtocolVersion {
+        self.version
+    }
+
+    /// Returns the canonical payload length in bytes.
+    #[must_use]
+    pub const fn payload_len(self) -> u32 {
+        self.payload_len
     }
 }
 
@@ -142,26 +168,16 @@ mod tests {
 
     #[test]
     fn header_rejects_empty_payload() {
-        let header = WireHeader {
-            version: ProtocolVersion::CURRENT,
-            payload_len: 0,
-        };
-
         assert_eq!(
-            header.validate(WireLimits::DEVELOPMENT),
+            WireHeader::new(ProtocolVersion::CURRENT, 0, WireLimits::DEVELOPMENT),
             Err(ValidationError::Empty)
         );
     }
 
     #[test]
     fn header_rejects_future_minor_version() {
-        let header = WireHeader {
-            version: ProtocolVersion::new(1, 1),
-            payload_len: 1,
-        };
-
         assert_eq!(
-            header.validate(WireLimits::DEVELOPMENT),
+            WireHeader::new(ProtocolVersion::new(1, 1), 1, WireLimits::DEVELOPMENT),
             Err(ValidationError::NotPermitted)
         );
     }

@@ -16,3 +16,9 @@ Before admitting a dependency:
 - add targeted tests for the dependency boundary.
 
 Unknown registries and unknown git sources are denied by `deny.toml`.
+
+## Admitted Dependencies
+
+| Crate | Version | Used by | Reason |
+| --- | --- | --- | --- |
+| `zeroize` | `1.9.0` | `bcx-core` | Clears nonce memory on drop without adding local unsafe code. |

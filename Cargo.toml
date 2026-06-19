@@ -31,6 +31,9 @@ expect_used = "deny"
 todo = "deny"
 undocumented_unsafe_blocks = "deny"
 
+[workspace.dependencies]
+zeroize = { version = "1.9.0", default-features = false }
+
 [package]
 name = "bcx"
 version.workspace = true

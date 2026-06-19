@@ -97,7 +97,7 @@ pub enum EffectResult {
 
 /// Compact event capsule for causal parentage.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct CauseCapsule<'a> {
+pub struct CauseCapsuleParts<'a> {
     /// Local event identifier.
     pub event_id: EventId,
     /// Parent event identifiers.
@@ -114,13 +114,90 @@ pub struct CauseCapsule<'a> {
     pub policy_epoch: Option<PolicyEpoch>,
 }
 
-impl CauseCapsule<'_> {
+/// Validated compact event capsule for causal parentage.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CauseCapsule<'a> {
+    event_id: EventId,
+    parents: &'a [EventId],
+    relationship: RelationshipKind,
+    cause_kind: CauseKind,
+    action: OperationAction,
+    authority: Option<CapabilityRef>,
+    policy_epoch: Option<PolicyEpoch>,
+}
+
+impl<'a> CauseCapsule<'a> {
+    /// Creates a validated compact cause capsule.
+    pub const fn new(
+        parts: CauseCapsuleParts<'a>,
+        maximum_parents: usize,
+    ) -> Result<Self, ValidationError> {
+        let capsule = Self {
+            event_id: parts.event_id,
+            parents: parts.parents,
+            relationship: parts.relationship,
+            cause_kind: parts.cause_kind,
+            action: parts.action,
+            authority: parts.authority,
+            policy_epoch: parts.policy_epoch,
+        };
+        match capsule.validate(maximum_parents) {
+            Ok(()) => Ok(capsule),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Validates bounded capsule shape.
     pub const fn validate(&self, maximum_parents: usize) -> Result<(), ValidationError> {
+        if self.parents.is_empty() {
+            return Err(ValidationError::Empty);
+        }
         if self.parents.len() > maximum_parents {
             Err(ValidationError::TooLarge)
         } else {
             Ok(())
         }
+    }
+
+    /// Returns the local event identifier.
+    #[must_use]
+    pub const fn event_id(&self) -> EventId {
+        self.event_id
+    }
+
+    /// Returns parent event identifiers.
+    #[must_use]
+    pub const fn parents(&self) -> &'a [EventId] {
+        self.parents
+    }
+
+    /// Returns the relationship used for each parent.
+    #[must_use]
+    pub const fn relationship(&self) -> RelationshipKind {
+        self.relationship
+    }
+
+    /// Returns the observable cause class.
+    #[must_use]
+    pub const fn cause_kind(&self) -> CauseKind {
+        self.cause_kind
+    }
+
+    /// Returns the requested action.
+    #[must_use]
+    pub const fn action(&self) -> OperationAction {
+        self.action
+    }
+
+    /// Returns the optional authority reference.
+    #[must_use]
+    pub const fn authority(&self) -> Option<CapabilityRef> {
+        self.authority
+    }
+
+    /// Returns the optional policy epoch reference.
+    #[must_use]
+    pub const fn policy_epoch(&self) -> Option<PolicyEpoch> {
+        self.policy_epoch
     }
 }

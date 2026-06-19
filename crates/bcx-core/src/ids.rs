@@ -1,7 +1,8 @@
 use crate::ValidationError;
+use zeroize::Zeroize;
 
 /// Fixed-width digest used for protocol commitments.
-#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Eq, Ord, PartialOrd)]
 pub struct Digest([u8; Self::LEN]);
 
 impl Digest {
@@ -34,17 +35,28 @@ impl Digest {
 
     /// Compares two digests without data-dependent early exit.
     ///
-    /// Use this method in security-sensitive paths. The derived `PartialEq`
-    /// implementation remains available for ordinary structural comparisons.
+    /// This is also used by `PartialEq` to avoid byte-by-byte early exit.
     #[must_use]
-    pub const fn ct_eq(&self, other: &Self) -> bool {
-        let mut accumulated = 0;
+    pub fn ct_eq(&self, other: &Self) -> bool {
+        let mut accumulated = 0u8;
         let mut index = 0;
         while index < Self::LEN {
             accumulated |= self.0[index] ^ other.0[index];
             index += 1;
         }
-        accumulated == 0
+        core::hint::black_box(accumulated) == 0
+    }
+}
+
+impl PartialEq for Digest {
+    fn eq(&self, other: &Self) -> bool {
+        self.ct_eq(other)
+    }
+}
+
+impl core::hash::Hash for Digest {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        core::hash::Hash::hash(&self.0, state);
     }
 }
 
@@ -136,26 +148,82 @@ impl OperationSequence {
     pub const fn get(self) -> u64 {
         self.0
     }
+
+    /// Returns the next sequence value.
+    pub const fn next(self) -> Result<Self, ValidationError> {
+        match self.0.checked_add(1) {
+            Some(value) => Ok(Self(value)),
+            None => Err(ValidationError::TooLarge),
+        }
+    }
+
+    /// Returns true when this sequence immediately follows `previous`.
+    #[must_use]
+    pub const fn immediately_follows(self, previous: Self) -> bool {
+        match previous.0.checked_add(1) {
+            Some(expected) => self.0 == expected,
+            None => false,
+        }
+    }
 }
 
 /// Nonce bytes carried by signed invocations and WHY queries.
-#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Eq, Ord, PartialOrd)]
 pub struct Nonce([u8; Self::LEN]);
 
 impl Nonce {
     /// Nonce byte length for the first BCX profile.
     pub const LEN: usize = 16;
 
-    /// Creates a nonce from raw bytes.
-    #[must_use]
-    pub const fn new(bytes: [u8; Self::LEN]) -> Self {
-        Self(bytes)
+    /// Creates a nonce from non-zero raw bytes.
+    pub fn new(bytes: [u8; Self::LEN]) -> Result<Self, ValidationError> {
+        let mut accumulated = 0u8;
+        let mut index = 0;
+        while index < Self::LEN {
+            accumulated |= bytes[index];
+            index += 1;
+        }
+        if core::hint::black_box(accumulated) == 0 {
+            Err(ValidationError::ZeroValue)
+        } else {
+            Ok(Self(bytes))
+        }
     }
 
     /// Returns the nonce as bytes.
     #[must_use]
     pub const fn as_bytes(&self) -> &[u8; Self::LEN] {
         &self.0
+    }
+
+    /// Compares two nonces without data-dependent early exit.
+    #[must_use]
+    pub fn ct_eq(&self, other: &Self) -> bool {
+        let mut accumulated = 0u8;
+        let mut index = 0;
+        while index < Self::LEN {
+            accumulated |= self.0[index] ^ other.0[index];
+            index += 1;
+        }
+        core::hint::black_box(accumulated) == 0
+    }
+}
+
+impl PartialEq for Nonce {
+    fn eq(&self, other: &Self) -> bool {
+        self.ct_eq(other)
+    }
+}
+
+impl core::hash::Hash for Nonce {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        core::hash::Hash::hash(&self.0, state);
+    }
+}
+
+impl Drop for Nonce {
+    fn drop(&mut self) {
+        self.0.zeroize();
     }
 }
 
