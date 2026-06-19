@@ -18,6 +18,7 @@ no-std protocol primitives.
   - `bcx-wire`
 - EUPL-1.2 licensing.
 - Local check script.
+- Version-specific release gate with latest-tool validation before tagging.
 - Security, implementation, version, threat-model, toolchain, modularity, and
   supply-chain documentation.
 

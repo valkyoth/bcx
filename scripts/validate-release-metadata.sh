@@ -12,6 +12,7 @@ required=(
     "docs/modularity-policy.md"
     "docs/toolchain-policy.md"
     "release-notes/RELEASE_NOTES_0.1.0.md"
+    "scripts/release_0_1_gate.sh"
     "scripts/validate-release-readiness.sh"
     "scripts/validate-latest-tools.sh"
     "scripts/release_crate.py"

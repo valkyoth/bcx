@@ -47,6 +47,8 @@ applies to tiny `v0.N.P` patch tags as well as milestone tags.
 A version is not tag-ready until:
 
 - `scripts/checks.sh` passes,
+- the version-specific release gate passes,
+- the release gate has checked latest pinned security and GitHub tooling,
 - `cargo deny check` passes,
 - `cargo audit` passes,
 - release notes exist at `release-notes/RELEASE_NOTES_<version>.md`,
@@ -107,6 +109,7 @@ Deliverables:
 Verification:
 
 - `scripts/checks.sh`
+- `scripts/release_0_1_gate.sh` after pentest report exists
 - `scripts/validate-release-readiness.sh v0.1.0` after pentest report exists
 
 Exit criteria:
@@ -123,6 +126,7 @@ Deliverables:
 
 - release-readiness validator,
 - pentest report metadata checks,
+- version-specific release gate pattern,
 - release-note filename checks,
 - existing-tag rejection,
 - root `PENTEST.md` rejection.
