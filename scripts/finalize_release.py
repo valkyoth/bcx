@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Finalize a BCX release after root PENTEST.md is ready."""
+"""Finalize a BCX release after pentest evidence and GitHub are green."""
 
 from __future__ import annotations
 
@@ -29,19 +29,11 @@ def workspace_version() -> str:
     raise RuntimeError("could not determine workspace version")
 
 
-def require_clean_release_tree(report: Path) -> None:
+def require_clean_release_tree() -> None:
     status = capture(["git", "status", "--porcelain"])
-    report_path = str(report.relative_to(ROOT))
-    tracked_or_unignored = [
-        line
-        for line in status.splitlines()
-        if not line.endswith(" PENTEST.md")
-        and not line.endswith(f" {report_path}")
-        and "PENTEST.md" not in line
-    ]
-    if tracked_or_unignored:
+    if status:
         print("Refusing to finalize from a dirty tracked worktree:", file=sys.stderr)
-        print("\n".join(tracked_or_unignored), file=sys.stderr)
+        print(status, file=sys.stderr)
         sys.exit(1)
 
 
@@ -58,48 +50,19 @@ def require_no_tag(tag: str) -> None:
         sys.exit(1)
 
 
-def commit_report_if_changed(report: Path, tag: str) -> None:
-    run(["git", "add", str(report.relative_to(ROOT))])
-    staged = capture(["git", "diff", "--cached", "--name-only"])
-    if str(report.relative_to(ROOT)) in staged.splitlines():
-        run(["git", "commit", "-m", f"Add {tag} pentest report"])
-    else:
-        print(f"{report.relative_to(ROOT)} already committed.")
-
-
-def validate_report_arg(name: str, value: str) -> str:
-    if "\n" in value or "\r" in value:
-        raise ValueError(f"--{name} contains invalid characters: {value!r}")
-    if not value.strip():
-        raise ValueError(f"--{name} must not be blank")
-    return value
-
-
-def validate_date(value: str) -> str:
-    parts = value.split("-")
-    if len(parts) != 3 or any(not part.isdigit() for part in parts):
-        raise ValueError(f"--date must use YYYY-MM-DD format: {value!r}")
-    if len(parts[0]) != 4 or len(parts[1]) != 2 or len(parts[2]) != 2:
-        raise ValueError(f"--date must use YYYY-MM-DD format: {value!r}")
-    return value
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Record pentest report, run release gate, commit, tag, and optionally push."
+        description="Run release gate, create the release tag, and optionally push."
     )
     parser.add_argument(
         "--version",
         default=workspace_version(),
         help="Release version without leading v. Defaults to workspace version.",
     )
-    parser.add_argument("--tester", required=True, help="Tester or review role.")
-    parser.add_argument("--scope", required=True, help="Pentest scope.")
-    parser.add_argument("--date", required=True, help="Pentest date in YYYY-MM-DD format.")
     parser.add_argument(
         "--push-main",
         action="store_true",
-        help="Push main after committing the permanent pentest report.",
+        help="Push main before pushing the release tag.",
     )
     parser.add_argument(
         "--push-tag",
@@ -112,10 +75,6 @@ def main() -> int:
         help="Skip the release version confirmation prompt.",
     )
     args = parser.parse_args()
-    tester = validate_report_arg("tester", args.tester)
-    scope = validate_report_arg("scope", args.scope)
-    date = validate_date(args.date)
-
     tag = f"v{args.version}"
     version_parts = args.version.split(".")
     if len(version_parts) != 3:
@@ -125,14 +84,17 @@ def main() -> int:
     scratch = ROOT / "PENTEST.md"
     report = ROOT / "security" / "pentest" / f"{tag}.md"
 
-    if not scratch.is_file() and not report.is_file():
+    if scratch.exists():
         print(
-            f"missing root PENTEST.md scratch report and {report.relative_to(ROOT)}",
+            "root PENTEST.md must be digested and removed before finalizing",
             file=sys.stderr,
         )
         return 1
+    if not report.is_file():
+        print(f"missing pentest report: {report.relative_to(ROOT)}", file=sys.stderr)
+        return 1
 
-    require_clean_release_tree(report)
+    require_clean_release_tree()
     require_no_tag(tag)
 
     if not args.yes:
@@ -141,28 +103,6 @@ def main() -> int:
             print("version confirmation did not match; aborting", file=sys.stderr)
             return 1
 
-    if scratch.is_file():
-        implementation_commit = capture(["git", "rev-parse", "HEAD"])
-        run(
-            [
-                "scripts/record_pentest_report.py",
-                "--version",
-                args.version,
-                "--tester",
-                tester,
-                "--scope",
-                scope,
-                "--date",
-                date,
-                "--commit",
-                implementation_commit,
-            ]
-        )
-        scratch.unlink()
-    else:
-        print(f"using existing {report.relative_to(ROOT)}")
-
-    commit_report_if_changed(report, tag)
     run([gate])
     run(["git", "tag", "-a", tag, "-m", f"BCX {args.version}"])
 

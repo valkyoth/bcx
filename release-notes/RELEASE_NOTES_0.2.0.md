@@ -33,10 +33,9 @@ first crates.io publication.
   `Tag`, `Commit`, `Status`, `Tester`, `Date`, and `Scope`.
 - Accept pentest reports for current `HEAD` or `HEAD^` when current `HEAD` is
   only the permanent pentest report commit.
-- Add a release finalizer that records the pentest report, runs the release
-  gate, commits the report, and creates the local tag.
-- Allow the release finalizer to use an existing permanent pentest report when
-  root `PENTEST.md` has already been removed.
+- Separate pentest digestion from tagging: `record_pentest_report.py` captures
+  root `PENTEST.md`, while `finalize_release.py` only runs the release gate and
+  creates the tag after GitHub is green.
 - Add a dedicated `v0.2.0` release gate.
 - Harden `Digest` and `Nonce` equality against byte-by-byte early exit.
 - Reject all-zero nonces and clear nonce memory on drop with `zeroize`.

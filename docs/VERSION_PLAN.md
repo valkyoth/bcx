@@ -76,24 +76,33 @@ vX.Y.Z implementation stop reached. Run pentest for this release.
    ready for review.
 2. The maintainer runs pentest and writes temporary findings to root
    `PENTEST.md`.
-3. Release-scope issues are fixed, release notes are updated, and local gates
-   run again.
-4. The maintainer reruns pentest if needed.
-5. When GitHub CI and CodeQL default setup are green, the preferred automated
-   finalizer is:
+3. The implementation owner reviews root `PENTEST.md`, fixes release-scope
+   findings, updates release notes or tracking docs, and records the scratch
+   report into `security/pentest/<tag>.md`:
 
 ```bash
-scripts/finalize_release.py \
+scripts/record_pentest_report.py \
   --version X.Y.Z \
   --tester "<tester>" \
   --scope "<scope>" \
   --date YYYY-MM-DD
 ```
 
-If root `PENTEST.md` exists, the finalizer records the scratch report, deletes
-root `PENTEST.md`, commits `security/pentest/<tag>.md`, runs the release gate,
-and creates the local tag. If the permanent report already exists, the
-finalizer uses it directly.
+4. Root `PENTEST.md` is deleted after the permanent digest report has been
+   reviewed.
+5. The maintainer decides whether another pentest pass is needed. If yes,
+   repeat from step 2. If no, commit the implementation and permanent pentest
+   report, then wait for GitHub CI and CodeQL default setup.
+6. When the maintainer reports that GitHub is green, the tag-only finalizer is:
+
+```bash
+scripts/finalize_release.py \
+  --version X.Y.Z
+```
+
+The finalizer refuses to run while root `PENTEST.md` exists, refuses dirty
+tracked worktrees, runs the version release gate, creates the annotated tag,
+and optionally pushes `main` or the tag when explicitly requested.
 
 The permanent report follows the Aesynx-style release evidence model. It names
 the exact implementation commit that was reviewed. The release gate accepts a

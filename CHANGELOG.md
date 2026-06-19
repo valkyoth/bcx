@@ -16,9 +16,8 @@ All notable BCX changes will be documented here.
   `Status`, `Tester`, `Date`, and `Scope` flow.
 - Accept a pentest report for `HEAD^` when `HEAD` only adds the permanent
   pentest report.
-- Add an automated release finalizer for the pentest-report/tag flow.
-- Allow release finalization from an existing permanent pentest report after
-  root `PENTEST.md` has been removed.
+- Separate pentest report digestion from tag finalization.
+- Make `finalize_release.py` tag-only after GitHub is green.
 - Add the `v0.2.0` release gate and publication metadata.
 - Harden digest and nonce comparisons against byte-by-byte early exit.
 - Reject all-zero nonces and clear nonce memory on drop with `zeroize`.
