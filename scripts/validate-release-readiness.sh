@@ -39,6 +39,7 @@ fi
 required_patterns=(
     '^Status: PASS$'
     '^Input-Digest: sha256:[0-9a-fA-F]{64}$'
+    '^Audited-Commit: [0-9a-fA-F]{40}$'
     '^Tester: .+'
     '^Scope: .+'
     '^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$'
@@ -51,3 +52,23 @@ for pattern in "${required_patterns[@]}"; do
         exit 1
     fi
 done
+
+audited_commit="$(sed -n 's/^Audited-Commit: //p' "$pentest_file" | head -n 1)"
+if ! git merge-base --is-ancestor "$audited_commit" HEAD; then
+    printf 'audited commit %s is not an ancestor of HEAD\n' \
+        "$audited_commit" >&2
+    exit 1
+fi
+
+changed_after_audit="$(
+    git diff --name-only "${audited_commit}..HEAD" \
+        | grep -Fvx "$pentest_file" \
+        | sed '/^$/d' \
+        || true
+)"
+if [ -n "$changed_after_audit" ]; then
+    printf 'code changed after audited commit; only %s may differ\n' \
+        "$pentest_file" >&2
+    printf '%s\n' "$changed_after_audit" >&2
+    exit 1
+fi

@@ -55,9 +55,12 @@ A version is not tag-ready until:
 - a pentest report exists at `security/pentest/<tag>.md`,
 - the pentest report records `Input-Digest: sha256:<digest>` for the scratch
   `PENTEST.md` input,
+- the pentest report records `Audited-Commit: <40-character git commit>`,
 - the pentest report has `Status: PASS`,
 - the pentest report has non-blank `Tester:` and `Scope:` fields,
 - the pentest report has a `Date: YYYY-MM-DD` field,
+- the audited commit is an ancestor of the release commit,
+- only `security/pentest/<tag>.md` differs after the audited commit,
 - root `PENTEST.md` does not exist,
 - the tag does not already exist locally,
 - `scripts/validate-release-readiness.sh <tag>` passes.
@@ -93,19 +96,21 @@ scripts/finalize_release.py \
   --version X.Y.Z \
   --tester "<tester>" \
   --scope "<scope>" \
-  --date YYYY-MM-DD
+  --date YYYY-MM-DD \
+  --audited-commit "<40-character commit hash>"
 ```
 
 If root `PENTEST.md` exists, this records the scratch report, deletes root
 `PENTEST.md`, commits the permanent report, runs the version release gate, and
 creates the local tag. If root `PENTEST.md` has already been removed and
 `security/pentest/<tag>.md` exists, the finalizer uses the permanent report and
-does not require the scratch file.
-The pentest report is a release approval artifact. It records the digest of the
-scratch `PENTEST.md` that the maintainer supplied, but it does not bind the
-approval to a single git commit. After the maintainer confirms pentest and
-GitHub are green, the release may be finalized without restarting pentest for
-release-process-only commits.
+does not require the scratch file. The permanent report must still record the
+same audited commit that is passed to the finalizer.
+
+The pentest report binds approval to one audited implementation commit. The
+final release commit may add or update only `security/pentest/<tag>.md` after
+that audited commit; any other changed path requires a new pentest pass before
+tagging.
 
 The lower-level report-only command is:
 
@@ -114,7 +119,8 @@ scripts/record_pentest_report.py \
   --version X.Y.Z \
   --tester "<tester>" \
   --scope "<scope>" \
-  --date YYYY-MM-DD
+  --date YYYY-MM-DD \
+  --audited-commit "<40-character commit hash>"
 ```
 
 7. Review `security/pentest/<tag>.md`. The final tag commit is allowed to be

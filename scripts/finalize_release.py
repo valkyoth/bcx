@@ -11,6 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+COMMIT_HASH_PATTERN = r"^[0-9a-fA-F]{40}$"
 
 
 def run(command: list[str]) -> None:
@@ -74,6 +75,17 @@ def validate_report_arg(name: str, value: str, pattern: str = r"^[^\n\r]+$") -> 
     return value
 
 
+def require_report_audited_commit(report: Path, audited_commit: str) -> None:
+    text = report.read_text(encoding="utf-8")
+    expected = f"Audited-Commit: {audited_commit}"
+    if expected not in text.splitlines():
+        print(
+            f"{report.relative_to(ROOT)} does not record {expected}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Record pentest report, run release gate, commit, tag, and optionally push."
@@ -86,6 +98,11 @@ def main() -> int:
     parser.add_argument("--tester", required=True, help="Tester or review role.")
     parser.add_argument("--scope", required=True, help="Pentest scope.")
     parser.add_argument("--date", required=True, help="Pentest date in YYYY-MM-DD format.")
+    parser.add_argument(
+        "--audited-commit",
+        required=True,
+        help="Exact 40-character commit hash that was pentested.",
+    )
     parser.add_argument(
         "--push-main",
         action="store_true",
@@ -105,6 +122,9 @@ def main() -> int:
     tester = validate_report_arg("tester", args.tester)
     scope = validate_report_arg("scope", args.scope)
     date = validate_report_arg("date", args.date, r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+    audited_commit = validate_report_arg(
+        "audited-commit", args.audited_commit, COMMIT_HASH_PATTERN
+    )
 
     tag = f"v{args.version}"
     version_parts = args.version.split(".")
@@ -143,11 +163,14 @@ def main() -> int:
                 scope,
                 "--date",
                 date,
+                "--audited-commit",
+                audited_commit,
             ]
         )
         scratch.unlink()
     else:
         print(f"using existing {report.relative_to(ROOT)}")
+        require_report_audited_commit(report, audited_commit)
 
     commit_report_if_changed(report, tag)
     run([gate])
