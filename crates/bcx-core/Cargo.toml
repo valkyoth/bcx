@@ -1,0 +1,20 @@
+[package]
+name = "bcx-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+description = "Core no_std BCX identifiers, limits, and validation errors."
+keywords = ["bcx", "no-std", "protocol"]
+categories = ["no-std", "network-programming"]
+
+[features]
+default = []
+alloc = []
+
+[dependencies]
+
+[lints]
+workspace = true

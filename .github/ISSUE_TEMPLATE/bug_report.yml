@@ -1,0 +1,54 @@
+name: Bug Report
+description: Report a bug, missing behavior, or unexpected protocol issue in BCX.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thanks for helping improve BCX.
+        If this is an exploitable security vulnerability, do not open a public issue. Please follow SECURITY.md instead.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, missing behavior, or confusing documentation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What did you expect to happen?
+      description: Describe the behavior or verification result you expected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce it?
+      description: Provide clear steps, inputs, or commands to trigger the issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Version and Build Environment
+      description: Please provide technical details about your exact environment.
+      placeholder: |
+        - BCX version or commit hash:
+        - Rust toolchain version:
+        - Host operating system:
+        - Enabled features:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Console Output
+      description: Paste relevant output. Strip all secrets, tokens, private data, and internal identifiers.
+      render: text

@@ -1,0 +1,20 @@
+[package]
+name = "bcx-policy"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+description = "BCX security profiles and disclosure policy primitives."
+keywords = ["bcx", "policy", "security", "no-std"]
+categories = ["no-std", "network-programming"]
+
+[features]
+default = []
+alloc = []
+
+[dependencies]
+
+[lints]
+workspace = true

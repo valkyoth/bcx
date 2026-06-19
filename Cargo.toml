@@ -1,0 +1,66 @@
+[workspace]
+members = [
+    ".",
+    "crates/bcx-core",
+    "crates/bcx-crypto",
+    "crates/bcx-model",
+    "crates/bcx-policy",
+    "crates/bcx-wire",
+]
+default-members = ["."]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "EUPL-1.2"
+homepage = "https://github.com/valkyoth/bcx"
+repository = "https://github.com/valkyoth/bcx"
+readme = "README.md"
+
+[workspace.lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+panic = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+todo = "deny"
+undocumented_unsafe_blocks = "deny"
+
+[package]
+name = "bcx"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+description = "Bifrost Casual Exchange protocol primitives for verifiable causal network accountability."
+keywords = ["protocol", "security", "audit", "causal", "no-std"]
+categories = ["authentication", "cryptography", "network-programming", "no-std"]
+
+[features]
+default = []
+alloc = [
+    "bcx-core/alloc",
+    "bcx-crypto/alloc",
+    "bcx-model/alloc",
+    "bcx-policy/alloc",
+    "bcx-wire/alloc",
+]
+std = ["alloc"]
+
+[dependencies]
+bcx-core = { version = "0.1.0", path = "crates/bcx-core", default-features = false }
+bcx-crypto = { version = "0.1.0", path = "crates/bcx-crypto", default-features = false }
+bcx-model = { version = "0.1.0", path = "crates/bcx-model", default-features = false }
+bcx-policy = { version = "0.1.0", path = "crates/bcx-policy", default-features = false }
+bcx-wire = { version = "0.1.0", path = "crates/bcx-wire", default-features = false }
+
+[lints]
+workspace = true
