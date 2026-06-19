@@ -32,6 +32,7 @@ todo = "deny"
 undocumented_unsafe_blocks = "deny"
 
 [workspace.dependencies]
+subtle = { version = "2.6.1", default-features = false }
 zeroize = { version = "1.9.0", default-features = false }
 
 [package]

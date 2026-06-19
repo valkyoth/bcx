@@ -12,18 +12,49 @@ pub enum SignatureAlgorithm {
     /// SLH-DSA-SHA2-128s for conservative stateless signatures.
     SlhDsaSha2_128s,
     /// Hybrid Ed25519 plus ML-DSA-65 signature envelope.
+    ///
+    /// Canonical layout is `[ed25519: 64 bytes][ml-dsa-65: 3293 bytes]`.
+    /// Verifiers must verify both components before returning `Ok`.
     HybridEd25519MlDsa65,
 }
 
 impl SignatureAlgorithm {
+    /// Ed25519 signature byte length.
+    pub const ED25519_SIGNATURE_LEN: usize = 64;
+    /// ML-DSA-65 signature byte length.
+    pub const ML_DSA_65_SIGNATURE_LEN: usize = 3_293;
+    /// SLH-DSA-SHA2-128s signature byte length.
+    pub const SLH_DSA_SHA2_128S_SIGNATURE_LEN: usize = 7_856;
+    /// Hybrid Ed25519 plus ML-DSA-65 signature byte length.
+    pub const HYBRID_ED25519_ML_DSA_65_SIGNATURE_LEN: usize =
+        Self::ED25519_SIGNATURE_LEN + Self::ML_DSA_65_SIGNATURE_LEN;
+
     /// Returns the exact signature length admitted for this algorithm.
     #[must_use]
     pub const fn expected_signature_len(self) -> usize {
         match self {
-            Self::Ed25519 => 64,
-            Self::MlDsa65 => 3_293,
-            Self::SlhDsaSha2_128s => 7_856,
-            Self::HybridEd25519MlDsa65 => 3_357,
+            Self::Ed25519 => Self::ED25519_SIGNATURE_LEN,
+            Self::MlDsa65 => Self::ML_DSA_65_SIGNATURE_LEN,
+            Self::SlhDsaSha2_128s => Self::SLH_DSA_SHA2_128S_SIGNATURE_LEN,
+            Self::HybridEd25519MlDsa65 => Self::HYBRID_ED25519_ML_DSA_65_SIGNATURE_LEN,
+        }
+    }
+
+    /// Splits a hybrid signature into Ed25519 and ML-DSA-65 components.
+    ///
+    /// Layout: `[ed25519: 64 bytes][ml-dsa-65: 3293 bytes]`. Verifiers for
+    /// `HybridEd25519MlDsa65` must verify both returned components.
+    #[must_use]
+    pub fn split_hybrid(self, signature: &[u8]) -> Option<(&[u8], &[u8])> {
+        match self {
+            Self::HybridEd25519MlDsa65
+                if signature.len() == Self::HYBRID_ED25519_ML_DSA_65_SIGNATURE_LEN =>
+            {
+                Some(signature.split_at(Self::ED25519_SIGNATURE_LEN))
+            }
+            Self::Ed25519 | Self::MlDsa65 | Self::SlhDsaSha2_128s | Self::HybridEd25519MlDsa65 => {
+                None
+            }
         }
     }
 }
@@ -88,7 +119,7 @@ pub struct SignatureEnvelope<'a> {
 
 impl<'a> SignatureEnvelope<'a> {
     /// Creates a validated signature envelope.
-    pub const fn new(
+    pub fn new(
         key_id: Digest,
         algorithm: SignatureAlgorithm,
         signature: &'a [u8],
@@ -106,7 +137,7 @@ impl<'a> SignatureEnvelope<'a> {
     }
 
     /// Validates envelope shape before algorithm dispatch.
-    pub const fn validate(&self, limits: WireLimits) -> Result<(), VerificationError> {
+    pub fn validate(&self, limits: WireLimits) -> Result<(), VerificationError> {
         if self.key_id.is_zero() {
             return Err(VerificationError::EmptyKeyId);
         }
@@ -171,6 +202,9 @@ impl<'a, T> SignedEnvelope<'a, T> {
             return Err(VerificationError::AlgorithmNotAdmitted);
         }
         self.signature.validate(limits)?;
+        if canonical_payload.len() > limits.maximum_message_len() {
+            return Err(VerificationError::PayloadTooLarge);
+        }
         verifier.verify(&self.signature, canonical_payload)
     }
 

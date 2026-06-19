@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -55,6 +56,12 @@ def require_no_tag(tag: str) -> None:
         sys.exit(1)
 
 
+def validate_report_arg(name: str, value: str, pattern: str = r"^[^\n\r]+$") -> str:
+    if re.fullmatch(pattern, value) is None:
+        raise ValueError(f"--{name} contains invalid characters: {value!r}")
+    return value
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Record pentest report, run release gate, commit, tag, and optionally push."
@@ -88,6 +95,9 @@ def main() -> int:
         help="Skip the release version confirmation prompt.",
     )
     args = parser.parse_args()
+    tester = validate_report_arg("tester", args.tester)
+    scope = validate_report_arg("scope", args.scope)
+    date = validate_report_arg("date", args.date, r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 
     tag = f"v{args.version}"
     version_parts = args.version.split(".")
@@ -119,11 +129,11 @@ def main() -> int:
             "--audited-commit",
             args.audited_commit,
             "--tester",
-            args.tester,
+            tester,
             "--scope",
-            args.scope,
+            scope,
             "--date",
-            args.date,
+            date,
         ]
     )
     scratch.unlink()

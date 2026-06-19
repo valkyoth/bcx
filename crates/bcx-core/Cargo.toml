@@ -15,6 +15,7 @@ default = []
 alloc = []
 
 [dependencies]
+subtle.workspace = true
 zeroize.workspace = true
 
 [lints]

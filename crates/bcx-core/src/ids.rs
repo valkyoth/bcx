@@ -1,8 +1,9 @@
 use crate::ValidationError;
+use subtle::ConstantTimeEq;
 use zeroize::Zeroize;
 
 /// Fixed-width digest used for protocol commitments.
-#[derive(Clone, Copy, Eq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Eq)]
 pub struct Digest([u8; Self::LEN]);
 
 impl Digest {
@@ -23,14 +24,8 @@ impl Digest {
 
     /// Returns true when every byte is zero.
     #[must_use]
-    pub const fn is_zero(&self) -> bool {
-        let mut accumulated = 0;
-        let mut index = 0;
-        while index < Self::LEN {
-            accumulated |= self.0[index];
-            index += 1;
-        }
-        accumulated == 0
+    pub fn is_zero(&self) -> bool {
+        bool::from(self.0.ct_eq(&[0u8; Self::LEN]))
     }
 
     /// Compares two digests without data-dependent early exit.
@@ -38,13 +33,7 @@ impl Digest {
     /// This is also used by `PartialEq` to avoid byte-by-byte early exit.
     #[must_use]
     pub fn ct_eq(&self, other: &Self) -> bool {
-        let mut accumulated = 0u8;
-        let mut index = 0;
-        while index < Self::LEN {
-            accumulated |= self.0[index] ^ other.0[index];
-            index += 1;
-        }
-        core::hint::black_box(accumulated) == 0
+        bool::from(self.0.ct_eq(&other.0))
     }
 }
 
@@ -67,12 +56,12 @@ impl core::fmt::Debug for Digest {
 }
 
 /// Globally unique event identifier within a trust domain.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct EventId(Digest);
 
 impl EventId {
     /// Creates an event identifier when the digest is non-zero.
-    pub const fn new(digest: Digest) -> Result<Self, ValidationError> {
+    pub fn new(digest: Digest) -> Result<Self, ValidationError> {
         if digest.is_zero() {
             Err(ValidationError::ZeroValue)
         } else {
@@ -88,12 +77,12 @@ impl EventId {
 }
 
 /// Reference to a capability object or capability commitment.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CapabilityRef(Digest);
 
 impl CapabilityRef {
     /// Creates a capability reference when the digest is non-zero.
-    pub const fn new(digest: Digest) -> Result<Self, ValidationError> {
+    pub fn new(digest: Digest) -> Result<Self, ValidationError> {
         if digest.is_zero() {
             Err(ValidationError::ZeroValue)
         } else {
@@ -109,12 +98,12 @@ impl CapabilityRef {
 }
 
 /// Reference to a policy epoch.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct PolicyEpoch(Digest);
 
 impl PolicyEpoch {
     /// Creates a policy epoch when the digest is non-zero.
-    pub const fn new(digest: Digest) -> Result<Self, ValidationError> {
+    pub fn new(digest: Digest) -> Result<Self, ValidationError> {
         if digest.is_zero() {
             Err(ValidationError::ZeroValue)
         } else {
@@ -168,7 +157,7 @@ impl OperationSequence {
 }
 
 /// Nonce bytes carried by signed invocations and WHY queries.
-#[derive(Clone, Eq, Ord, PartialOrd)]
+#[derive(Clone, Eq)]
 pub struct Nonce([u8; Self::LEN]);
 
 impl Nonce {
@@ -177,13 +166,7 @@ impl Nonce {
 
     /// Creates a nonce from non-zero raw bytes.
     pub fn new(bytes: [u8; Self::LEN]) -> Result<Self, ValidationError> {
-        let mut accumulated = 0u8;
-        let mut index = 0;
-        while index < Self::LEN {
-            accumulated |= bytes[index];
-            index += 1;
-        }
-        if core::hint::black_box(accumulated) == 0 {
+        if bool::from(bytes.ct_eq(&[0u8; Self::LEN])) {
             Err(ValidationError::ZeroValue)
         } else {
             Ok(Self(bytes))
@@ -199,13 +182,7 @@ impl Nonce {
     /// Compares two nonces without data-dependent early exit.
     #[must_use]
     pub fn ct_eq(&self, other: &Self) -> bool {
-        let mut accumulated = 0u8;
-        let mut index = 0;
-        while index < Self::LEN {
-            accumulated |= self.0[index] ^ other.0[index];
-            index += 1;
-        }
-        core::hint::black_box(accumulated) == 0
+        bool::from(self.0.ct_eq(&other.0))
     }
 }
 

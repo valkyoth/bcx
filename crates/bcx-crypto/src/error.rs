@@ -5,6 +5,8 @@ pub enum VerificationError {
     EmptySignature,
     /// The signature payload exceeded the active profile bound.
     SignatureTooLarge,
+    /// The detached canonical payload exceeded the active profile bound.
+    PayloadTooLarge,
     /// The key identifier was all zeros.
     EmptyKeyId,
     /// The algorithm is not admitted by local policy.

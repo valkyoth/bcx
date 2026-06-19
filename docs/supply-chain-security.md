@@ -21,4 +21,5 @@ Unknown registries and unknown git sources are denied by `deny.toml`.
 
 | Crate | Version | Used by | Reason |
 | --- | --- | --- | --- |
+| `subtle` | `2.6.1` | `bcx-core` | Provides optimizer-resistant constant-time equality for fixed-width identifiers and nonces. |
 | `zeroize` | `1.9.0` | `bcx-core` | Clears nonce memory on drop without adding local unsafe code. |

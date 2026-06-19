@@ -1,4 +1,5 @@
 use bcx_core::{CapabilityRef, EventId, PolicyEpoch, ValidationError};
+use bcx_wire::WireLimits;
 
 /// Relationship between a BCX event and one of its parents.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -130,7 +131,7 @@ impl<'a> CauseCapsule<'a> {
     /// Creates a validated compact cause capsule.
     pub const fn new(
         parts: CauseCapsuleParts<'a>,
-        maximum_parents: usize,
+        limits: WireLimits,
     ) -> Result<Self, ValidationError> {
         let capsule = Self {
             event_id: parts.event_id,
@@ -141,18 +142,18 @@ impl<'a> CauseCapsule<'a> {
             authority: parts.authority,
             policy_epoch: parts.policy_epoch,
         };
-        match capsule.validate(maximum_parents) {
+        match capsule.validate(limits) {
             Ok(()) => Ok(capsule),
             Err(error) => Err(error),
         }
     }
 
     /// Validates bounded capsule shape.
-    pub const fn validate(&self, maximum_parents: usize) -> Result<(), ValidationError> {
+    pub const fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
         if self.parents.is_empty() {
             return Err(ValidationError::Empty);
         }
-        if self.parents.len() > maximum_parents {
+        if self.parents.len() > limits.maximum_parent_events() {
             Err(ValidationError::TooLarge)
         } else {
             Ok(())

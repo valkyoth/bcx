@@ -26,7 +26,14 @@ publication.
 - Tie signature envelope length checks to `WireLimits`.
 - Use `u32` for wire payload lengths instead of platform-dependent `usize`.
 - Warn on multiple dependency versions in `cargo-deny`.
+- Confirm `cargo-deny 0.19.9` requires `all` for unmaintained and unsound advisory coverage.
 - Admit `zeroize 1.9.0` for no-std nonce clearing.
+- Admit `subtle 2.6.1` for constant-time digest and nonce equality.
+- Remove ordering from digest and nonce-backed identifier types.
+- Document and expose the hybrid Ed25519 plus ML-DSA-65 signature split.
+- Bound detached payload verification by `WireLimits`.
+- Bind `CauseCapsule` parent limits to `WireLimits`.
+- Sanitize pentest report metadata arguments.
 
 ## Deferred
 

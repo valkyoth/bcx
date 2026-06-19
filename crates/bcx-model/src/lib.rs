@@ -14,6 +14,7 @@ pub use truth::{AssuranceLevel, TruthStatus};
 mod tests {
     use super::*;
     use bcx_core::{Digest, EventId, ValidationError};
+    use bcx_wire::WireLimits;
 
     fn event(byte: u8) -> Result<EventId, ValidationError> {
         EventId::new(Digest::new([byte; Digest::LEN]))
@@ -32,7 +33,7 @@ mod tests {
                     authority: None,
                     policy_epoch: None,
                 },
-                1,
+                WireLimits::DEVELOPMENT,
             ),
             Err(ValidationError::Empty)
         );
@@ -42,6 +43,7 @@ mod tests {
     #[test]
     fn cause_capsule_rejects_too_many_parents() -> Result<(), ValidationError> {
         let parents = [event(2)?, event(3)?];
+        let limits = WireLimits::new(1, 1, 1, 1)?;
 
         assert_eq!(
             CauseCapsule::new(
@@ -54,7 +56,7 @@ mod tests {
                     authority: None,
                     policy_epoch: None,
                 },
-                1,
+                limits,
             ),
             Err(ValidationError::TooLarge)
         );

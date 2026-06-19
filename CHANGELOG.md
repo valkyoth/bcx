@@ -17,6 +17,13 @@ All notable BCX changes will be documented here.
 - Tie signature envelope bounds to `WireLimits`.
 - Use fixed-width wire payload lengths.
 - Warn on multiple dependency versions in `cargo-deny`.
+- Use `subtle` for constant-time digest and nonce equality.
+- Remove ordering from digest and nonce-backed identifier types.
+- Document and expose the hybrid Ed25519 plus ML-DSA-65 signature split.
+- Bound detached payload verification by `WireLimits`.
+- Bind `CauseCapsule` parent limits to `WireLimits`.
+- Sanitize pentest report metadata arguments.
+- Confirm `cargo-deny 0.19.9` requires `all` for unmaintained and unsound advisory coverage.
 
 ## 0.1.0 - 2026-06-19
 
