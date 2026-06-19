@@ -14,6 +14,8 @@ publication.
   release tag.
 - Require pentest reports to point at the exact commit that was audited.
 - Record a SHA-256 digest of root `PENTEST.md` in the permanent pentest report.
+- Add a release finalizer that records the pentest report, runs the release
+  gate, commits the report, and creates the local tag.
 - Add a dedicated `v0.2.0` release gate.
 - Harden `Digest` and `Nonce` equality against byte-by-byte early exit.
 - Reject all-zero nonces and clear nonce memory on drop with `zeroize`.

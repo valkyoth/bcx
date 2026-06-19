@@ -85,7 +85,22 @@ Use this loop for every version:
    release notes are updated, and `PENTEST.md` is deleted.
 4. Local gates run again.
 5. The maintainer reruns pentest if needed.
-6. When GitHub CI and CodeQL default setup are green, record the scratch report:
+6. When GitHub CI and CodeQL default setup are green, the preferred automated
+   flow is:
+
+```bash
+scripts/finalize_release.py \
+  --version X.Y.Z \
+  --audited-commit <commit-that-was-pentested> \
+  --tester "<tester>" \
+  --scope "<scope>" \
+  --date YYYY-MM-DD
+```
+
+This records the scratch report, deletes root `PENTEST.md`, commits the
+permanent report, runs the version release gate, and creates the local tag.
+
+The lower-level report-only command is:
 
 ```bash
 scripts/record_pentest_report.py \
@@ -96,8 +111,8 @@ scripts/record_pentest_report.py \
   --date YYYY-MM-DD
 ```
 
-7. Review `security/pentest/<tag>.md`, delete root `PENTEST.md`, and commit the
-   permanent report. The final tag commit is allowed to be this report commit.
+7. Review `security/pentest/<tag>.md`. The final tag commit is allowed to be
+   the permanent report commit.
 8. `scripts/validate-release-readiness.sh <tag>` passes.
 9. Tagging and pushing tags happen only when explicitly requested.
 10. Publishing uses `scripts/release_crate.py --version X.Y.Z --require-tag`;

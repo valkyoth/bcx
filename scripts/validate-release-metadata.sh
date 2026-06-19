@@ -18,6 +18,7 @@ required=(
     "scripts/validate-release-readiness.sh"
     "scripts/validate-latest-tools.sh"
     "scripts/record_pentest_report.py"
+    "scripts/finalize_release.py"
     "scripts/release_crate.py"
 )
 
