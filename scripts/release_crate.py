@@ -242,11 +242,15 @@ def selected_steps(start_at: str) -> tuple[str, ...]:
     return ALL_PACKAGES[index:]
 
 
-def check_only(version: str) -> None:
+def check_only(version: str | None) -> None:
     verify_package_set()
-    verify_versions(version)
-    check_release_notes(version)
-    print(f"release script check passed for BCX {version}")
+    run(["scripts/validate-crate-version-matrix.py"], dry_run=False)
+    if version is not None:
+        verify_versions(version)
+        check_release_notes(version)
+        print(f"release script check passed for BCX {version}")
+    else:
+        print("release script check passed for BCX workspace")
 
 
 def main() -> int:
@@ -255,8 +259,10 @@ def main() -> int:
     )
     parser.add_argument(
         "--version",
-        default=workspace_version(),
-        help="Expected workspace/package version. Defaults to workspace version.",
+        help=(
+            "Expected package version for same-version releases. "
+            "Defaults to workspace version when publishing."
+        ),
     )
     parser.add_argument(
         "--start-at",
@@ -304,6 +310,9 @@ def main() -> int:
     if args.check:
         check_only(args.version)
         return 0
+
+    if args.version is None:
+        args.version = workspace_version()
 
     require_clean_tree(allow_dirty=args.allow_dirty or args.dry_run)
     verify_package_set()

@@ -17,6 +17,14 @@ v1.0.0      first production-ready BCX protocol foundation
 Protocol versions and crate versions are separate. For example, `bcx-http`
 crate `0.12.3` may still implement `BCX-HTTP/1`.
 
+Crate package versions are tracked in
+[`CRATE_VERSION_MATRIX.md`](CRATE_VERSION_MATRIX.md). The matrix exists so BCX
+can grow into many crates without republishing every crate for every milestone.
+The release gate checks that the matrix matches Cargo metadata, that local path
+dependency version requirements match the referenced local packages, and that
+crate source or manifest changes since the latest tag are accompanied by a
+package-version bump.
+
 ## Release Principles
 
 Every release must have:
@@ -38,6 +46,26 @@ Every release should prefer:
 - explicit capability-aware APIs even when enforcement is still simple.
 
 No production claim is allowed before `1.0.0`.
+
+## Crate Package Versioning
+
+Milestone tags such as `v0.3.0` describe the repository release. Individual
+crate package versions describe publishable crate artifacts.
+
+Rules:
+
+- publish only crates whose package contents changed or whose dependency pins
+  need to move,
+- do not bump a leaf crate just because another unrelated crate changed,
+- bump the root `bcx` facade when its exports, embedded docs, or local
+  dependency pins change,
+- update `docs/CRATE_VERSION_MATRIX.md` whenever any package version changes,
+- keep local path dependency `version = "..."`
+  requirements synchronized with the referenced local package version,
+- run `scripts/validate-crate-version-matrix.py` before release handoff.
+
+This avoids unnecessary crates.io uploads while keeping compatibility metadata
+reviewable.
 
 ## Pentest Before Tags
 

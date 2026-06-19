@@ -42,6 +42,7 @@ check_installed_target thumbv7em-none-eabihf --no-default-features
 
 scripts/validate-modularity-policy.sh
 scripts/validate-release-metadata.sh
+scripts/validate-crate-version-matrix.py
 scripts/release_crate.py --check
 
 cargo package -p bcx-core --allow-dirty --list >/dev/null

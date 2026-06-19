@@ -83,6 +83,10 @@ Future crates are organized by family:
 
 The root `bcx` crate and foundation crates must remain independent of these
 future families unless a release explicitly admits a new dependency boundary.
+Package versions are tracked in
+[Crate Version Matrix](docs/CRATE_VERSION_MATRIX.md) so future releases can
+publish only the crates that changed instead of republishing the whole
+ecosystem.
 
 ## Verification
 

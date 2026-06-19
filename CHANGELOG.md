@@ -2,7 +2,15 @@
 
 All notable BCX changes will be documented here.
 
-## 0.2.0 - Unreleased
+## Unreleased
+
+- Add a crate version matrix for future independent subcrate releases.
+- Add a release gate that checks matrix entries against Cargo metadata and
+  local path dependency version requirements.
+- Make routine release-script checks stop assuming every workspace crate shares
+  one package version.
+
+## 0.2.0 - 2026-06-19
 
 - Reframe BCX as Bifrost Causal Exchange: a semantic overlay protocol with one
   invariant core and optional native profiles.

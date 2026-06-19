@@ -17,3 +17,6 @@ when their release milestone is reached.
 
 Profiles, integrations, proof providers, domain profiles, and services belong
 in their top-level family directories, not in the core crate set.
+
+Package versions are tracked in `docs/CRATE_VERSION_MATRIX.md`. A crate should
+only bump and publish when its package contents or local dependency pins change.
