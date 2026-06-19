@@ -14,6 +14,7 @@ required=(
     "release-notes/RELEASE_NOTES_0.1.0.md"
     "scripts/validate-release-readiness.sh"
     "scripts/validate-latest-tools.sh"
+    "scripts/release_crate.py"
 )
 
 for path in "${required[@]}"; do
