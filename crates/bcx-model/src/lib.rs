@@ -33,7 +33,7 @@ mod tests {
                     authority: None,
                     policy_epoch: None,
                 },
-                WireLimits::DEVELOPMENT,
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
             ),
             Err(ValidationError::Empty)
         );

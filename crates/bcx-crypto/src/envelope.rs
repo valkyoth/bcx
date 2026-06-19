@@ -68,9 +68,23 @@ pub struct AlgorithmPolicy<'a> {
 
 impl<'a> AlgorithmPolicy<'a> {
     /// Creates an algorithm admission policy from an explicit allow-list.
+    ///
+    /// Admitting several algorithms lets the sender choose any admitted
+    /// algorithm, including the weakest one. High-assurance deployments should
+    /// admit exactly one algorithm for an operation class unless downgrade
+    /// behavior is explicitly part of the profile security contract.
+    pub const fn new(admitted: &'a [SignatureAlgorithm]) -> Result<Self, VerificationError> {
+        if admitted.is_empty() {
+            Err(VerificationError::EmptyAlgorithmPolicy)
+        } else {
+            Ok(Self { admitted })
+        }
+    }
+
+    /// Creates an explicit deny-all algorithm policy.
     #[must_use]
-    pub const fn new(admitted: &'a [SignatureAlgorithm]) -> Self {
-        Self { admitted }
+    pub const fn deny_all() -> Self {
+        Self { admitted: &[] }
     }
 
     /// Returns true when the algorithm is admitted by this policy.
@@ -138,7 +152,7 @@ impl<'a> SignatureEnvelope<'a> {
     }
 
     /// Validates envelope shape before algorithm dispatch.
-    pub fn validate(&self, limits: WireLimits) -> Result<(), VerificationError> {
+    pub(crate) fn validate(&self, limits: WireLimits) -> Result<(), VerificationError> {
         if self.key_id.is_zero() {
             return Err(VerificationError::EmptyKeyId);
         }
@@ -266,6 +280,11 @@ pub trait HybridVerifier {
     ) -> Result<(), VerificationError>;
 
     /// Verifies both components of a hybrid signature.
+    ///
+    /// Implementors must run component verification to completion and must not
+    /// use intermediate component failures to skip later component work. The
+    /// default implementation always invokes both component methods before
+    /// combining their results.
     fn verify_hybrid(
         &self,
         envelope: &SignatureEnvelope<'_>,
@@ -275,9 +294,13 @@ pub trait HybridVerifier {
             .algorithm()
             .split_hybrid(envelope.signature())
             .ok_or(VerificationError::InvalidSignature)?;
-        self.verify_ed25519(ed25519, canonical_payload)?;
-        self.verify_ml_dsa_65(ml_dsa_65, canonical_payload)?;
-        Ok(HybridVerified(()))
+        let ed25519_ok = self.verify_ed25519(ed25519, canonical_payload).is_ok();
+        let ml_dsa_65_ok = self.verify_ml_dsa_65(ml_dsa_65, canonical_payload).is_ok();
+        if ed25519_ok & ml_dsa_65_ok {
+            Ok(HybridVerified(()))
+        } else {
+            Err(VerificationError::InvalidSignature)
+        }
     }
 }
 

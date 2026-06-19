@@ -10,6 +10,16 @@ All notable BCX changes will be documented here.
   `ProofSuiteId`, `PolicyId`, `CheckpointId`, and `NativeBindingId`.
 - Validate identifier constructors for empty, malformed length, too-large
   length, and all-zero values.
+- Make variable-length identifier equality avoid length-based short-circuiting.
+- Zeroize variable-length identifier backing storage on drop.
+- Remove `Hash` from `Nonce`.
+- Make hybrid signature verification invoke both component verifiers before
+  combining the result.
+- Require non-empty `AlgorithmPolicy::new` input and add explicit
+  `AlgorithmPolicy::deny_all`.
+- Rename development wire limits to
+  `UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION`.
+- Keep signature-envelope and wire-header revalidation internal.
 - Move `bcx-core`, `bcx-wire`, `bcx-crypto`, `bcx-model`, and root `bcx` to
   package version `0.3.0`.
 - Keep `bcx-policy` at package version `0.2.0` because it has no `0.3.0`

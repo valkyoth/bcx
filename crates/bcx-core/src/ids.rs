@@ -1,8 +1,8 @@
 use crate::ValidationError;
-use subtle::ConstantTimeEq;
+use subtle::{Choice, ConstantTimeEq};
 use zeroize::Zeroize;
 
-#[derive(Clone, Copy, Eq)]
+#[derive(Eq)]
 struct IdentifierBytes<const MIN: usize, const MAX: usize> {
     bytes: [u8; MAX],
     len: u8,
@@ -16,19 +16,17 @@ impl<const MIN: usize, const MAX: usize> IdentifierBytes<MIN, MAX> {
         if bytes.len() < MIN {
             return Err(ValidationError::Malformed);
         }
-        if bytes.len() > MAX || bytes.len() > u8::MAX as usize {
+        if bytes.len() > MAX {
             return Err(ValidationError::TooLarge);
         }
         if bytes.iter().all(|byte| *byte == 0) {
             return Err(ValidationError::ZeroValue);
         }
 
+        let len = u8::try_from(bytes.len()).map_err(|_| ValidationError::TooLarge)?;
         let mut stored = [0; MAX];
         stored[..bytes.len()].copy_from_slice(bytes);
-        Ok(Self {
-            bytes: stored,
-            len: bytes.len() as u8,
-        })
+        Ok(Self { bytes: stored, len })
     }
 
     fn as_bytes(&self) -> &[u8] {
@@ -40,7 +38,9 @@ impl<const MIN: usize, const MAX: usize> IdentifierBytes<MIN, MAX> {
     }
 
     fn ct_eq(&self, other: &Self) -> bool {
-        self.len == other.len && bool::from(self.bytes.ct_eq(&other.bytes))
+        let len_eq: Choice = self.len.ct_eq(&other.len);
+        let bytes_eq: Choice = self.bytes.ct_eq(&other.bytes);
+        bool::from(len_eq & bytes_eq)
     }
 }
 
@@ -50,16 +50,17 @@ impl<const MIN: usize, const MAX: usize> PartialEq for IdentifierBytes<MIN, MAX>
     }
 }
 
-impl<const MIN: usize, const MAX: usize> core::hash::Hash for IdentifierBytes<MIN, MAX> {
-    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
-        core::hash::Hash::hash(self.as_bytes(), state);
+impl<const MIN: usize, const MAX: usize> Drop for IdentifierBytes<MIN, MAX> {
+    fn drop(&mut self) {
+        self.bytes.zeroize();
+        self.len.zeroize();
     }
 }
 
 macro_rules! define_identifier {
     ($(#[$meta:meta])* $name:ident, $min:expr, $max:expr) => {
         $(#[$meta])*
-        #[derive(Clone, Copy, Eq, Hash, PartialEq)]
+        #[derive(Eq, PartialEq)]
         pub struct $name(IdentifierBytes<{ $min }, { $max }>);
 
         impl $name {
@@ -314,6 +315,9 @@ impl OperationSequence {
 ///
 /// `Nonce` intentionally does not implement `Clone` or `Copy`; duplicating
 /// nonce bytes increases the number of plaintext copies that must be cleared.
+/// It also intentionally does not implement `Hash`; replay caches should use
+/// a keyed or constant-time structure instead of exposing nonce bytes to a
+/// general-purpose hash table.
 #[derive(Eq)]
 pub struct Nonce([u8; Self::LEN]);
 
@@ -346,18 +350,6 @@ impl Nonce {
 impl PartialEq for Nonce {
     fn eq(&self, other: &Self) -> bool {
         self.ct_eq(other)
-    }
-}
-
-impl core::hash::Hash for Nonce {
-    /// Hashes nonce bytes for non-adversarial collection use.
-    ///
-    /// This hash operation is not constant-time. Replay caches for
-    /// high-assurance deployments should use a keyed structure that accounts
-    /// for timing and bucket-collision behavior instead of treating `Hash` as
-    /// a security boundary.
-    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
-        core::hash::Hash::hash(&self.0, state);
     }
 }
 

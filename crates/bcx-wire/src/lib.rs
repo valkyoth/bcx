@@ -57,8 +57,11 @@ impl WireLimits {
     /// Hard upper bound for events returned in one explanation.
     pub const MAXIMUM_EXPLANATION_EVENTS: usize = 10_000;
 
-    /// Default limits for the first development profile.
-    pub const DEVELOPMENT: Self = Self {
+    /// Unsafe development/test limits.
+    ///
+    /// Production profiles must construct explicit limits with `WireLimits::new`
+    /// rather than reusing this convenience constant.
+    pub const UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION: Self = Self {
         maximum_message_len: 1_048_576,
         maximum_parent_events: 16,
         maximum_why_depth: 5,
@@ -144,7 +147,7 @@ impl WireHeader {
     }
 
     /// Validates protocol version and payload length.
-    pub fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
+    pub(crate) fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
         if self.version.major() != ProtocolVersion::CURRENT.major() {
             return Err(ValidationError::NotPermitted);
         }
@@ -182,7 +185,11 @@ mod tests {
     #[test]
     fn header_rejects_empty_payload() {
         assert_eq!(
-            WireHeader::new(ProtocolVersion::CURRENT, 0, WireLimits::DEVELOPMENT),
+            WireHeader::new(
+                ProtocolVersion::CURRENT,
+                0,
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
             Err(ValidationError::Empty)
         );
     }
@@ -190,7 +197,11 @@ mod tests {
     #[test]
     fn header_rejects_future_minor_version() {
         assert_eq!(
-            WireHeader::new(ProtocolVersion::new(1, 1), 1, WireLimits::DEVELOPMENT),
+            WireHeader::new(
+                ProtocolVersion::new(1, 1),
+                1,
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
             Err(ValidationError::NotPermitted)
         );
     }

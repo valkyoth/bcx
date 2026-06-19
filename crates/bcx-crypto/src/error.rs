@@ -9,6 +9,8 @@ pub enum VerificationError {
     PayloadTooLarge,
     /// The key identifier was all zeros.
     EmptyKeyId,
+    /// The algorithm policy was empty without using an explicit deny-all policy.
+    EmptyAlgorithmPolicy,
     /// The algorithm is not admitted by local policy.
     AlgorithmNotAdmitted,
     /// Signature verification failed.
