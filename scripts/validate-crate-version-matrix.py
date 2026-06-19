@@ -148,14 +148,62 @@ def package_version_at(tag: str, manifest: str) -> str | None:
     return None
 
 
-def package_content_changed(path: str, changed: set[str]) -> bool:
+def normalized_manifest(text: str) -> str:
+    lines = []
+    in_package = False
+    in_workspace_package = False
+
+    for line in text.splitlines():
+        if line == "[package]":
+            in_package = True
+            in_workspace_package = False
+            lines.append(line)
+            continue
+        if line == "[workspace.package]":
+            in_package = False
+            in_workspace_package = True
+            lines.append(line)
+            continue
+        if line.startswith("["):
+            in_package = False
+            in_workspace_package = False
+            lines.append(line)
+            continue
+        if in_package and (line.startswith("version = ") or line == "version.workspace = true"):
+            continue
+        if in_workspace_package and line.startswith("version = "):
+            continue
+        lines.append(line)
+
+    return "\n".join(lines)
+
+
+def manifest_content_changed_since(tag: str, manifest: str) -> bool:
+    old_text = file_at_tag(tag, manifest)
+    if old_text is None:
+        return True
+    current_text = (ROOT / manifest).read_text(encoding="utf-8")
+    return normalized_manifest(old_text) != normalized_manifest(current_text)
+
+
+def package_content_changed(path: str, manifest: str, tag: str, changed: set[str]) -> bool:
     if path == ".":
         prefixes = ("src/",)
-        exact = {"Cargo.toml"}
+        manifest_path = "Cargo.toml"
     else:
         prefixes = (f"{path}/src/",)
-        exact = {f"{path}/Cargo.toml"}
-    return any(item in exact or item.startswith(prefixes) for item in changed)
+        manifest_path = f"{path}/Cargo.toml"
+
+    if any(item.startswith(prefixes) for item in changed):
+        return True
+    if manifest_path in changed:
+        return manifest_content_changed_since(tag, manifest)
+    return False
+
+
+def package_version_changed_since(tag: str, package: dict[str, str]) -> bool:
+    old_version = package_version_at(tag, package["manifest"])
+    return old_version != package["version"]
 
 
 def dependency_bump_requirements(
@@ -222,10 +270,10 @@ def validate() -> None:
     for name, package in sorted(packages.items()):
         old_version = package_version_at(tag, package["manifest"])
         old_versions[name] = old_version
-        if old_version != package["version"]:
+        if package_version_changed_since(tag, package):
             changed_versions.add(name)
 
-        if not package_content_changed(package["path"], changed):
+        if not package_content_changed(package["path"], package["manifest"], tag, changed):
             continue
         if old_version == package["version"]:
             raise RuntimeError(

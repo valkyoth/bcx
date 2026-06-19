@@ -13,12 +13,12 @@ Cargo metadata.
 
 | Crate | Manifest path | Package version | Protocol/API line | Publish policy |
 | --- | --- | --- | --- | --- |
-| `bcx` | `.` | `0.2.0` | facade API | publish when facade exports, docs embedded in the crate, or dependency pins change |
-| `bcx-core` | `crates/bcx-core` | `0.2.0` | BCX-CORE foundation | publish when identifiers, digest/nonce semantics, validation errors, or core dependency policy change |
-| `bcx-crypto` | `crates/bcx-crypto` | `0.2.0` | BCX proof-envelope foundation | publish when signature envelope, verifier traits, algorithm policy, or crypto boundary semantics change |
-| `bcx-model` | `crates/bcx-model` | `0.2.0` | BCX statement/model foundation | publish when causal model, admission/effect vocabulary, truth, or assurance semantics change |
+| `bcx` | `.` | `0.3.0` | facade API | publish when facade exports, docs embedded in the crate, or dependency pins change |
+| `bcx-core` | `crates/bcx-core` | `0.3.0` | BCX-CORE foundation | publish when identifiers, digest/nonce semantics, validation errors, or core dependency policy change |
+| `bcx-crypto` | `crates/bcx-crypto` | `0.3.0` | BCX proof-envelope foundation | publish when signature envelope, verifier traits, algorithm policy, or crypto boundary semantics change |
+| `bcx-model` | `crates/bcx-model` | `0.3.0` | BCX statement/model foundation | publish when causal model, admission/effect vocabulary, truth, or assurance semantics change |
 | `bcx-policy` | `crates/bcx-policy` | `0.2.0` | BCX policy foundation | publish when profile, proof-level, disclosure, replay, or settlement policy vocabulary changes |
-| `bcx-wire` | `crates/bcx-wire` | `0.2.0` | BCX wire-limit foundation | publish when protocol version, message bounds, or profile-carried header behavior changes |
+| `bcx-wire` | `crates/bcx-wire` | `0.3.0` | BCX wire-limit foundation | publish when protocol version, message bounds, or profile-carried header behavior changes |
 
 ## Rules
 

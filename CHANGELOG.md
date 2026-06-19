@@ -4,11 +4,24 @@ All notable BCX changes will be documented here.
 
 ## Unreleased
 
+## 0.3.0 - Unreleased
+
+- Add no-std `StatementId`, `SubjectId`, `RealmId`, `ProfileId`,
+  `ProofSuiteId`, `PolicyId`, `CheckpointId`, and `NativeBindingId`.
+- Validate identifier constructors for empty, malformed length, too-large
+  length, and all-zero values.
+- Move `bcx-core`, `bcx-wire`, `bcx-crypto`, `bcx-model`, and root `bcx` to
+  package version `0.3.0`.
+- Keep `bcx-policy` at package version `0.2.0` because it has no `0.3.0`
+  package-content changes.
 - Add a crate version matrix for future independent subcrate releases.
 - Add a release gate that checks matrix entries against Cargo metadata and
   local path dependency version requirements.
+- Add dependency-chain package-version propagation to the crate matrix gate.
 - Make routine release-script checks stop assuming every workspace crate shares
   one package version.
+- Make publish sequencing skip workspace crates whose package version does not
+  match the repository release version being published.
 
 ## 0.2.0 - 2026-06-19
 

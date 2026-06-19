@@ -8,7 +8,10 @@ mod error;
 mod ids;
 
 pub use error::ValidationError;
-pub use ids::{CapabilityRef, Digest, EventId, Nonce, OperationSequence, PolicyEpoch};
+pub use ids::{
+    CapabilityRef, CheckpointId, Digest, EventId, NativeBindingId, Nonce, OperationSequence,
+    PolicyEpoch, PolicyId, ProfileId, ProofSuiteId, RealmId, StatementId, SubjectId,
+};
 
 #[cfg(test)]
 mod tests {
@@ -72,5 +75,61 @@ mod tests {
             OperationSequence::new(u64::MAX).and_then(OperationSequence::next),
             Err(ValidationError::TooLarge)
         );
+    }
+
+    #[test]
+    fn statement_and_checkpoint_ids_require_digest_length() {
+        assert_eq!(StatementId::new(&[]), Err(ValidationError::Empty));
+        assert_eq!(
+            StatementId::new(&[1; Digest::LEN - 1]),
+            Err(ValidationError::Malformed)
+        );
+        assert_eq!(
+            CheckpointId::new(&[1; Digest::LEN + 1]),
+            Err(ValidationError::TooLarge)
+        );
+
+        let statement = StatementId::new(&[1; Digest::LEN]);
+        assert_eq!(statement.map(|id| id.len()), Ok(Digest::LEN));
+    }
+
+    #[test]
+    fn public_identifier_constructors_reject_zero_values() {
+        assert_eq!(
+            StatementId::new(&[0; Digest::LEN]),
+            Err(ValidationError::ZeroValue)
+        );
+        assert_eq!(SubjectId::new(&[0]), Err(ValidationError::ZeroValue));
+        assert_eq!(RealmId::new(&[0]), Err(ValidationError::ZeroValue));
+        assert_eq!(ProfileId::new(&[0]), Err(ValidationError::ZeroValue));
+        assert_eq!(ProofSuiteId::new(&[0]), Err(ValidationError::ZeroValue));
+        assert_eq!(PolicyId::new(&[0]), Err(ValidationError::ZeroValue));
+        assert_eq!(
+            CheckpointId::new(&[0; Digest::LEN]),
+            Err(ValidationError::ZeroValue)
+        );
+        assert_eq!(NativeBindingId::new(&[0]), Err(ValidationError::ZeroValue));
+    }
+
+    #[test]
+    fn bounded_identifiers_validate_lengths_and_preserve_bytes() -> Result<(), ValidationError> {
+        let subject = SubjectId::new(b"subject:invoice:123")?;
+        let realm = RealmId::new(b"realm:valkyoth")?;
+        let profile = ProfileId::new(b"bcx-core")?;
+        let proof_suite = ProofSuiteId::new(b"ed25519")?;
+        let policy = PolicyId::new(b"strict")?;
+        let native = NativeBindingId::new(b"fluxheim/request")?;
+
+        assert_eq!(subject.as_bytes(), b"subject:invoice:123");
+        assert_eq!(realm.as_bytes(), b"realm:valkyoth");
+        assert_eq!(profile.as_bytes(), b"bcx-core");
+        assert_eq!(proof_suite.as_bytes(), b"ed25519");
+        assert_eq!(policy.as_bytes(), b"strict");
+        assert_eq!(native.as_bytes(), b"fluxheim/request");
+        assert_eq!(
+            SubjectId::new(&[1; SubjectId::MAX_LEN + 1]),
+            Err(ValidationError::TooLarge)
+        );
+        Ok(())
     }
 }

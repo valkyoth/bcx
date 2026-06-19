@@ -1,6 +1,6 @@
 [package]
 name = "bcx-crypto"
-version.workspace = true
+version = "0.3.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -15,8 +15,8 @@ default = []
 alloc = []
 
 [dependencies]
-bcx-core = { version = "0.2.0", path = "../bcx-core", default-features = false }
-bcx-wire = { version = "0.2.0", path = "../bcx-wire", default-features = false }
+bcx-core = { version = "0.3.0", path = "../bcx-core", default-features = false }
+bcx-wire = { version = "0.3.0", path = "../bcx-wire", default-features = false }
 
 [lints]
 workspace = true

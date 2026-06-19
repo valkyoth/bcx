@@ -14,7 +14,9 @@ pub use bcx_wire::ProtocolVersion;
 /// Items commonly needed by BCX integrators.
 pub mod prelude {
     pub use bcx_core::{
-        CapabilityRef, Digest, EventId, Nonce, OperationSequence, PolicyEpoch, ValidationError,
+        CapabilityRef, CheckpointId, Digest, EventId, NativeBindingId, Nonce, OperationSequence,
+        PolicyEpoch, PolicyId, ProfileId, ProofSuiteId, RealmId, StatementId, SubjectId,
+        ValidationError,
     };
     pub use bcx_crypto::{
         AlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope, VerificationError, Verifier,

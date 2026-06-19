@@ -100,12 +100,15 @@ def verify_package_set() -> None:
         )
 
 
-def verify_versions(expected_version: str) -> None:
-    for package, actual in sorted(workspace_package_versions().items()):
-        if actual != expected_version:
-            raise RuntimeError(
-                f"{package} is version {actual}, expected {expected_version}"
-            )
+def packages_at_version(version: str) -> tuple[str, ...]:
+    versions = workspace_package_versions()
+    return tuple(package for package in ALL_PACKAGES if versions[package] == version)
+
+
+def verify_release_has_packages(version: str) -> None:
+    packages = packages_at_version(version)
+    if not packages:
+        raise RuntimeError(f"no workspace packages are version {version}")
 
 
 def check_release_notes(version: str) -> None:
@@ -246,7 +249,7 @@ def check_only(version: str | None) -> None:
     verify_package_set()
     run(["scripts/validate-crate-version-matrix.py"], dry_run=False)
     if version is not None:
-        verify_versions(version)
+        verify_release_has_packages(version)
         check_release_notes(version)
         print(f"release script check passed for BCX {version}")
     else:
@@ -260,8 +263,8 @@ def main() -> int:
     parser.add_argument(
         "--version",
         help=(
-            "Expected package version for same-version releases. "
-            "Defaults to workspace version when publishing."
+            "Repository release version. Only workspace packages at this "
+            "package version are published. Defaults to workspace version."
         ),
     )
     parser.add_argument(
@@ -316,12 +319,17 @@ def main() -> int:
 
     require_clean_tree(allow_dirty=args.allow_dirty or args.dry_run)
     verify_package_set()
-    verify_versions(args.version)
+    verify_release_has_packages(args.version)
     check_release_notes(args.version)
     check_release_tag(args.version, require_tag=args.require_tag)
     check_publish_readiness(args.version, require_tag=args.require_tag)
 
-    steps = selected_steps(args.start_at)
+    publish_packages = set(packages_at_version(args.version))
+    steps = tuple(package for package in selected_steps(args.start_at) if package in publish_packages)
+    if not steps:
+        raise RuntimeError(
+            f"no packages at version {args.version} remain at or after {args.start_at}"
+        )
 
     print(f"Workspace root: {ROOT}")
     print(f"Release version: {args.version}")
@@ -346,7 +354,7 @@ def main() -> int:
     print()
     print("BCX release publish sequence completed.")
     print("Recommended follow-up:")
-    for package in ALL_PACKAGES:
+    for package in packages_at_version(args.version):
         print(f"  cargo info {package}@{args.version}")
     return 0
 

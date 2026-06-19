@@ -2,6 +2,104 @@ use crate::ValidationError;
 use subtle::ConstantTimeEq;
 use zeroize::Zeroize;
 
+#[derive(Clone, Copy, Eq)]
+struct IdentifierBytes<const MIN: usize, const MAX: usize> {
+    bytes: [u8; MAX],
+    len: u8,
+}
+
+impl<const MIN: usize, const MAX: usize> IdentifierBytes<MIN, MAX> {
+    fn new(bytes: &[u8]) -> Result<Self, ValidationError> {
+        if bytes.is_empty() {
+            return Err(ValidationError::Empty);
+        }
+        if bytes.len() < MIN {
+            return Err(ValidationError::Malformed);
+        }
+        if bytes.len() > MAX || bytes.len() > u8::MAX as usize {
+            return Err(ValidationError::TooLarge);
+        }
+        if bytes.iter().all(|byte| *byte == 0) {
+            return Err(ValidationError::ZeroValue);
+        }
+
+        let mut stored = [0; MAX];
+        stored[..bytes.len()].copy_from_slice(bytes);
+        Ok(Self {
+            bytes: stored,
+            len: bytes.len() as u8,
+        })
+    }
+
+    fn as_bytes(&self) -> &[u8] {
+        self.bytes.split_at(self.len as usize).0
+    }
+
+    const fn len(&self) -> usize {
+        self.len as usize
+    }
+
+    fn ct_eq(&self, other: &Self) -> bool {
+        self.len == other.len && bool::from(self.bytes.ct_eq(&other.bytes))
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> PartialEq for IdentifierBytes<MIN, MAX> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ct_eq(other)
+    }
+}
+
+impl<const MIN: usize, const MAX: usize> core::hash::Hash for IdentifierBytes<MIN, MAX> {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        core::hash::Hash::hash(self.as_bytes(), state);
+    }
+}
+
+macro_rules! define_identifier {
+    ($(#[$meta:meta])* $name:ident, $min:expr, $max:expr) => {
+        $(#[$meta])*
+        #[derive(Clone, Copy, Eq, Hash, PartialEq)]
+        pub struct $name(IdentifierBytes<{ $min }, { $max }>);
+
+        impl $name {
+            /// Minimum accepted identifier length in bytes.
+            pub const MIN_LEN: usize = $min;
+            /// Maximum accepted identifier length in bytes.
+            pub const MAX_LEN: usize = $max;
+
+            /// Creates a validated identifier from canonical bytes.
+            pub fn new(bytes: &[u8]) -> Result<Self, ValidationError> {
+                IdentifierBytes::new(bytes).map(Self)
+            }
+
+            /// Returns the canonical identifier bytes.
+            #[must_use]
+            pub fn as_bytes(&self) -> &[u8] {
+                self.0.as_bytes()
+            }
+
+            /// Returns the canonical identifier length in bytes.
+            #[must_use]
+            pub const fn len(&self) -> usize {
+                self.0.len()
+            }
+
+            /// Returns false because validated BCX identifiers cannot be empty.
+            #[must_use]
+            pub const fn is_empty(&self) -> bool {
+                false
+            }
+        }
+
+        impl core::fmt::Debug for $name {
+            fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                formatter.write_str(concat!(stringify!($name), "(..)"))
+            }
+        }
+    };
+}
+
 /// Fixed-width digest used for protocol commitments.
 #[derive(Clone, Copy, Eq)]
 pub struct Digest([u8; Self::LEN]);
@@ -54,6 +152,62 @@ impl core::fmt::Debug for Digest {
         formatter.write_str("Digest(..)")
     }
 }
+
+define_identifier!(
+    /// Statement identifier for BCX causal statements.
+    StatementId,
+    Digest::LEN,
+    Digest::LEN
+);
+
+define_identifier!(
+    /// Subject identifier for the thing a statement describes or affects.
+    SubjectId,
+    1,
+    64
+);
+
+define_identifier!(
+    /// Realm identifier for an authority, namespace, tenant, or trust domain.
+    RealmId,
+    1,
+    64
+);
+
+define_identifier!(
+    /// Profile identifier for a BCX profile or native binding family.
+    ProfileId,
+    1,
+    32
+);
+
+define_identifier!(
+    /// Proof-suite identifier for signature or verification policy families.
+    ProofSuiteId,
+    1,
+    32
+);
+
+define_identifier!(
+    /// Policy identifier for disclosure, replay, settlement, or admission rules.
+    PolicyId,
+    1,
+    32
+);
+
+define_identifier!(
+    /// Checkpoint identifier for committed state, graph, or settlement checkpoints.
+    CheckpointId,
+    Digest::LEN,
+    Digest::LEN
+);
+
+define_identifier!(
+    /// Native binding identifier for host-system specific anchors.
+    NativeBindingId,
+    1,
+    64
+);
 
 /// Globally unique event identifier within a trust domain.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
