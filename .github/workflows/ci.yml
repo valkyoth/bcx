@@ -18,20 +18,20 @@ env:
 jobs:
   checks:
     name: Format, lint, test, and audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
 
       - name: Install Rust toolchain
         run: rustup show
 
       - name: Install security tools
         run: |
-          cargo install --locked cargo-deny
-          cargo install --locked cargo-audit
+          cargo install --locked cargo-deny@0.19.9
+          cargo install --locked cargo-audit@0.22.2
 
       - name: Run local gate
         run: scripts/checks.sh

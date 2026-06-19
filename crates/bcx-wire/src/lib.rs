@@ -27,16 +27,25 @@ impl ProtocolVersion {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct WireLimits {
     /// Maximum single message length in bytes.
-    pub maximum_message_len: usize,
+    maximum_message_len: usize,
     /// Maximum parent events in a compact cause capsule.
-    pub maximum_parent_events: usize,
+    maximum_parent_events: usize,
     /// Maximum WHY graph traversal depth.
-    pub maximum_why_depth: usize,
+    maximum_why_depth: usize,
     /// Maximum events returned by one explanation query.
-    pub maximum_explanation_events: usize,
+    maximum_explanation_events: usize,
 }
 
 impl WireLimits {
+    /// Hard upper bound for one canonical message.
+    pub const MAXIMUM_MESSAGE_LEN: usize = 16 * 1024 * 1024;
+    /// Hard upper bound for compact parent references.
+    pub const MAXIMUM_PARENT_EVENTS: usize = 1_024;
+    /// Hard upper bound for WHY traversal depth.
+    pub const MAXIMUM_WHY_DEPTH: usize = 32;
+    /// Hard upper bound for events returned in one explanation.
+    pub const MAXIMUM_EXPLANATION_EVENTS: usize = 10_000;
+
     /// Default limits for the first development profile.
     pub const DEVELOPMENT: Self = Self {
         maximum_message_len: 1_048_576,
@@ -44,6 +53,59 @@ impl WireLimits {
         maximum_why_depth: 5,
         maximum_explanation_events: 100,
     };
+
+    /// Creates validated wire limits.
+    pub const fn new(
+        maximum_message_len: usize,
+        maximum_parent_events: usize,
+        maximum_why_depth: usize,
+        maximum_explanation_events: usize,
+    ) -> Result<Self, ValidationError> {
+        if maximum_message_len == 0
+            || maximum_parent_events == 0
+            || maximum_why_depth == 0
+            || maximum_explanation_events == 0
+        {
+            return Err(ValidationError::Empty);
+        }
+        if maximum_message_len > Self::MAXIMUM_MESSAGE_LEN
+            || maximum_parent_events > Self::MAXIMUM_PARENT_EVENTS
+            || maximum_why_depth > Self::MAXIMUM_WHY_DEPTH
+            || maximum_explanation_events > Self::MAXIMUM_EXPLANATION_EVENTS
+        {
+            return Err(ValidationError::TooLarge);
+        }
+        Ok(Self {
+            maximum_message_len,
+            maximum_parent_events,
+            maximum_why_depth,
+            maximum_explanation_events,
+        })
+    }
+
+    /// Returns the maximum single message length in bytes.
+    #[must_use]
+    pub const fn maximum_message_len(self) -> usize {
+        self.maximum_message_len
+    }
+
+    /// Returns the maximum parent events in a compact cause capsule.
+    #[must_use]
+    pub const fn maximum_parent_events(self) -> usize {
+        self.maximum_parent_events
+    }
+
+    /// Returns the maximum WHY graph traversal depth.
+    #[must_use]
+    pub const fn maximum_why_depth(self) -> usize {
+        self.maximum_why_depth
+    }
+
+    /// Returns the maximum events returned by one explanation query.
+    #[must_use]
+    pub const fn maximum_explanation_events(self) -> usize {
+        self.maximum_explanation_events
+    }
 }
 
 /// Fixed header metadata common to native and HTTP-carried BCX messages.
@@ -61,10 +123,13 @@ impl WireHeader {
         if self.version.major != ProtocolVersion::CURRENT.major {
             return Err(ValidationError::NotPermitted);
         }
+        if self.version.minor != ProtocolVersion::CURRENT.minor {
+            return Err(ValidationError::NotPermitted);
+        }
         if self.payload_len == 0 {
             return Err(ValidationError::Empty);
         }
-        if self.payload_len > limits.maximum_message_len {
+        if self.payload_len > limits.maximum_message_len() {
             return Err(ValidationError::TooLarge);
         }
         Ok(())
@@ -86,5 +151,27 @@ mod tests {
             header.validate(WireLimits::DEVELOPMENT),
             Err(ValidationError::Empty)
         );
+    }
+
+    #[test]
+    fn header_rejects_future_minor_version() {
+        let header = WireHeader {
+            version: ProtocolVersion::new(1, 1),
+            payload_len: 1,
+        };
+
+        assert_eq!(
+            header.validate(WireLimits::DEVELOPMENT),
+            Err(ValidationError::NotPermitted)
+        );
+    }
+
+    #[test]
+    fn limits_reject_unbounded_values() {
+        assert_eq!(
+            WireLimits::new(usize::MAX, 1, 1, 1),
+            Err(ValidationError::TooLarge)
+        );
+        assert_eq!(WireLimits::new(1, 0, 1, 1), Err(ValidationError::Empty));
     }
 }

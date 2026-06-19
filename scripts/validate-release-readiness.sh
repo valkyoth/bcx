@@ -38,7 +38,7 @@ fi
 
 required_patterns=(
     '^Status: PASS$'
-    '^Commit: [0-9a-fA-F]{7,40}$'
+    '^Commit: [0-9a-fA-F]{40}$'
     '^Tester: .+'
     '^Scope: .+'
     '^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$'

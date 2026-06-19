@@ -16,7 +16,9 @@ pub mod prelude {
     pub use bcx_core::{
         CapabilityRef, Digest, EventId, Nonce, OperationSequence, PolicyEpoch, ValidationError,
     };
-    pub use bcx_crypto::{SignatureAlgorithm, SignatureEnvelope, VerificationError, Verifier};
+    pub use bcx_crypto::{
+        AlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope, VerificationError, Verifier,
+    };
     pub use bcx_model::{
         AdmissionResult, AssuranceLevel, CauseKind, EffectResult, OperationAction,
         RelationshipKind, TruthStatus,

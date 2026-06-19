@@ -23,14 +23,28 @@ impl Digest {
     /// Returns true when every byte is zero.
     #[must_use]
     pub const fn is_zero(&self) -> bool {
+        let mut accumulated = 0;
         let mut index = 0;
         while index < Self::LEN {
-            if self.0[index] != 0 {
-                return false;
-            }
+            accumulated |= self.0[index];
             index += 1;
         }
-        true
+        accumulated == 0
+    }
+
+    /// Compares two digests without data-dependent early exit.
+    ///
+    /// Use this method in security-sensitive paths. The derived `PartialEq`
+    /// implementation remains available for ordinary structural comparisons.
+    #[must_use]
+    pub const fn ct_eq(&self, other: &Self) -> bool {
+        let mut accumulated = 0;
+        let mut index = 0;
+        while index < Self::LEN {
+            accumulated |= self.0[index] ^ other.0[index];
+            index += 1;
+        }
+        accumulated == 0
     }
 }
 
@@ -74,6 +88,12 @@ impl CapabilityRef {
             Ok(Self(digest))
         }
     }
+
+    /// Returns the underlying digest commitment.
+    #[must_use]
+    pub const fn digest(&self) -> Digest {
+        self.0
+    }
 }
 
 /// Reference to a policy epoch.
@@ -88,6 +108,12 @@ impl PolicyEpoch {
         } else {
             Ok(Self(digest))
         }
+    }
+
+    /// Returns the underlying digest commitment.
+    #[must_use]
+    pub const fn digest(&self) -> Digest {
+        self.0
     }
 }
 
@@ -113,7 +139,7 @@ impl OperationSequence {
 }
 
 /// Nonce bytes carried by signed invocations and WHY queries.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Nonce([u8; Self::LEN]);
 
 impl Nonce {
@@ -130,5 +156,11 @@ impl Nonce {
     #[must_use]
     pub const fn as_bytes(&self) -> &[u8; Self::LEN] {
         &self.0
+    }
+}
+
+impl core::fmt::Debug for Nonce {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        formatter.write_str("Nonce(..)")
     }
 }
