@@ -12,6 +12,7 @@ required=(
     "docs/modularity-policy.md"
     "docs/toolchain-policy.md"
     "release-notes/RELEASE_NOTES_0.1.0.md"
+    "scripts/validate-release-readiness.sh"
 )
 
 for path in "${required[@]}"; do

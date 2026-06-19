@@ -2,44 +2,95 @@
 
 Status: planning document
 
+This plan is intentionally granular. BCX is a security-sensitive protocol
+crate, so each tag should be a small, testable step with a clean stop before
+pentest and tagging.
+
 Tags use:
 
 ```text
 v0.N.0      milestone release
-v0.N.P      patch/fix release
+v0.N.P      patch/fix release for milestone N
 v1.0.0      first serious production-ready BCX crate
 ```
+
+The list below is not a maximum. Add patch tags or split milestones further
+whenever a release would otherwise mix too many security surfaces.
 
 ## Release Principles
 
 Every release must have:
 
-- definition of done,
-- local verification command,
+- a clear definition of done,
+- a local verification command,
 - security review notes,
 - known limitations,
 - release notes,
+- a completed pentest report for the exact commit being tagged,
 - no hidden dependency on one developer machine.
+
+Every release should prefer:
+
+- small protocol increments,
+- no-std model tests before transport integration,
+- deterministic behavior before provider-specific behavior,
+- bounded parsing and graph traversal before federation,
+- explicit capability-aware APIs even when enforcement is still simple.
 
 No production claim is allowed before `1.0.0`.
 
 ## Pentest Before Tags
 
-When implementation criteria for a version are done, stop before tagging and
-ask for pentest of that exact commit.
+Every version must pass security review and pentest before it is tagged. This
+applies to tiny `v0.N.P` patch tags as well as milestone tags.
 
-Flow:
+A version is not tag-ready until:
 
-1. Local gates pass: `scripts/checks.sh`, `cargo deny check`, and `cargo audit`.
-2. Maintainer writes temporary findings to root `PENTEST.md`.
-3. Findings are fixed or explicitly deferred outside the release scope.
-4. `PENTEST.md` is removed.
-5. Local gates run again.
-6. Permanent report is written under `security/pentest/<tag>.md` only for a tag
-   candidate with `Status: PASS`.
-7. Tags are created only when explicitly requested.
+- `scripts/checks.sh` passes,
+- `cargo deny check` passes,
+- `cargo audit` passes,
+- release notes exist at `release-notes/RELEASE_NOTES_<version>.md`,
+- a pentest report exists at `security/pentest/<tag>.md`,
+- the pentest report names the exact `Commit:` being tagged,
+- the pentest report has `Status: PASS`,
+- the pentest report has non-blank `Tester:` and `Scope:` fields,
+- the pentest report has a `Date: YYYY-MM-DD` field,
+- root `PENTEST.md` does not exist,
+- the tag does not already exist locally,
+- `scripts/validate-release-readiness.sh <tag>` passes.
 
-## v0.1.0 - Repository Foundation
+When a version's implementation criteria are done, stop before tagging and say:
+
+```text
+vX.Y.Z implementation stop reached. Run pentest for this exact commit.
+```
+
+Do not tag until the pentest has been completed, findings have been fixed, and
+the permanent report is committed.
+
+### Pentest Handoff Flow
+
+Use this loop for every version:
+
+1. The implementation owner finishes the criteria and reports the exact commit
+   for review.
+2. The maintainer runs pentest and writes temporary findings to root
+   `PENTEST.md`.
+3. Findings are reviewed, release-scope issues are fixed, documentation or
+   release notes are updated, and `PENTEST.md` is deleted.
+4. Local gates run again.
+5. The maintainer reruns pentest if needed.
+6. When GitHub CI and CodeQL default setup are green, the maintainer writes
+   `security/pentest/<tag>.md` with exact commit, `Status: PASS`, tester, date,
+   and scope.
+7. `scripts/validate-release-readiness.sh <tag>` passes.
+8. Tagging and pushing tags happen only when explicitly requested.
+
+Never commit root `PENTEST.md`; it is scratch input and is ignored by git.
+
+## Phase 0: Repository Foundation
+
+### v0.1.0 - Repository Foundation
 
 Goal: initialize the serious Rust workspace and policy baseline.
 
@@ -56,195 +107,1105 @@ Deliverables:
 Verification:
 
 - `scripts/checks.sh`
+- `scripts/validate-release-readiness.sh v0.1.0` after pentest report exists
+
+Exit criteria:
+
+- a contributor can understand the 1.0 target from the README and plans,
+- all non-generated Rust files stay under 500 lines,
+- implementation stop is reported before any tag.
+
+### v0.2.0 - Toolchain And Release Gate
+
+Goal: make release readiness mechanically checkable before protocol expansion.
+
+Deliverables:
+
+- release-readiness validator,
+- pentest report metadata checks,
+- release-note filename checks,
+- existing-tag rejection,
+- root `PENTEST.md` rejection.
+
+Verification:
+
+- `scripts/checks.sh`
+- negative tests by temporarily omitting required release files locally
+
+Exit criteria:
+
+- the project cannot accidentally tag without release notes and pentest report
+  metadata.
+
+## Phase 1: Core Protocol Vocabulary
+
+### v0.3.0 - Identifier Kernel
+
+Goal: harden core IDs and commitments.
+
+Deliverables:
+
+- event ID validation,
+- digest commitment types,
+- nonce type,
+- issuer sequence type,
+- zero-value rejection tests.
+
+Verification:
+
+- `cargo test -p bcx-core`
+- `cargo test --workspace --no-default-features`
+
+Exit criteria:
+
+- every public constructor rejects invalid zero or empty authority values where
+  required.
+
+### v0.4.0 - Causal Vocabulary
+
+Goal: model operation causes and parent edges without receipts yet.
+
+Deliverables:
+
+- relationship kinds,
+- cause kinds,
+- operation actions,
+- compact cause capsule,
+- parent-count validation.
+
+Verification:
+
+- `cargo test -p bcx-model`
+- model fixture tests for parent limit failures
+
+Exit criteria:
+
+- BCX can represent local causal parentage without relying on transport fields.
+
+### v0.5.0 - Truth And Assurance Vocabulary
+
+Goal: make explanation claims honest about evidence quality.
+
+Deliverables:
+
+- truth status model,
+- assurance level model,
+- ordering tests for assurance levels,
+- docs describing declared versus observed versus verified claims.
+
+Verification:
+
+- `cargo test -p bcx-model`
+- doc build with warnings denied
+
+Exit criteria:
+
+- no explanation API can collapse declared purpose into verified truth.
+
+### v0.6.0 - Wire Version And Limits
+
+Goal: enforce cheap bounds before expensive parsing or verification.
+
+Deliverables:
+
+- protocol version model,
+- wire header validation,
+- default development limits,
+- negative tests for empty, oversized, and wrong-major messages.
+
+Verification:
+
+- `cargo test -p bcx-wire`
+- `cargo clippy --workspace --all-targets -- -D warnings`
+
+Exit criteria:
+
+- every future decoder has a common bounded-entry policy.
+
+## Phase 2: Canonical Encoding
+
+### v0.7.0 - Encoding Format Decision
+
+Goal: choose and document the canonical encoding boundary.
+
+Deliverables:
+
+- encoding decision record,
+- accepted canonical format,
+- rejected alternatives,
+- no-std and alloc impact analysis,
+- dependency admission notes if a third-party crate is needed.
+
+Verification:
+
+- docs checks,
+- dependency policy review if a crate is admitted.
+
+Exit criteria:
+
+- implementation cannot proceed with ad hoc JSON or Rust layout encoding.
+
+### v0.8.0 - Decoder Bounds
+
+Goal: add bounded decode scaffolding before full object encoding.
+
+Deliverables:
+
+- maximum depth,
+- maximum item counts,
+- maximum byte lengths,
+- malformed-input error model,
+- tests for fail-fast bounds.
+
+Verification:
+
+- `cargo test --workspace --no-default-features`
+- malformed fixture tests
+
+Exit criteria:
+
+- invalid payloads fail before signature or graph work begins.
+
+### v0.9.0 - Canonical Core Encoding
+
+Goal: encode core IDs and model enums deterministically.
+
+Deliverables:
+
+- canonical bytes for IDs,
+- canonical bytes for cause vocabulary,
+- stable test vectors,
+- cross-platform byte-equivalence tests.
+
+Verification:
+
 - `cargo test --workspace`
+- fixture regeneration check if fixtures are introduced
 
-## v0.2.0 - Canonical Type Kernel
+Exit criteria:
 
-Goal: make BCX causal primitives complete enough to model local Fluxheim WHY
-events.
+- two supported platforms produce identical canonical bytes for core values.
+
+### v0.10.0 - Canonical Invocation Skeleton
+
+Goal: make the first signed object payload shape stable enough for review.
 
 Deliverables:
 
 - invocation skeleton,
-- parent edge model,
-- cause capsule validation,
-- bounded lists,
-- explicit truth-status handling,
-- negative tests for malformed and ambiguous claims.
+- issuer and audience fields,
+- parent event fields,
+- action and target commitment fields,
+- nonce, expiry, and sequence fields.
 
-## v0.3.0 - Deterministic Encoding Boundary
+Verification:
 
-Goal: define canonical bytes without relying on Rust layout or JSON.
+- canonical test vectors,
+- invalid field tests,
+- no-default-features test pass.
 
-Deliverables:
+Exit criteria:
 
-- admitted encoding format decision,
-- schema/version model,
-- strict decoder limits,
-- malformed-input tests,
-- cross-platform byte-equivalence tests.
+- an invocation can be encoded without any transport dependency.
 
-## v0.4.0 - Crypto Envelope And Verification Traits
+## Phase 3: Crypto Envelopes
 
-Goal: make signed BCX objects verifiable through provider traits.
+### v0.11.0 - Signature Envelope Bounds
 
-Deliverables:
-
-- signature-set bounds,
-- algorithm allow-list policy,
-- key identifier bounds,
-- audience binding,
-- signature verification trait,
-- negative tests for empty, oversized, unknown, and mismatched signatures.
-
-## v0.5.0 - Capability And Replay Model
-
-Goal: make authority and replay explicit.
+Goal: validate signature metadata before provider dispatch.
 
 Deliverables:
 
-- proof-of-possession capability metadata,
-- attenuation model,
-- issuer sequence model,
-- nonce and expiry checks,
-- replay-cache trait,
-- tests for stolen bytes, replay, expired, and wrong-audience operations.
+- signature envelope validation,
+- key ID bounds,
+- signature payload bounds,
+- algorithm ID closed-list checks.
 
-## v0.6.0 - Admission Receipts
+Verification:
 
-Goal: record why an operation was allowed, narrowed, denied, or quarantined.
+- `cargo test -p bcx-crypto`
+- negative tests for empty, oversized, and unknown signatures.
+
+Exit criteria:
+
+- malformed signature envelopes fail without invoking crypto providers.
+
+### v0.12.0 - Verifier Provider Trait
+
+Goal: define the crypto provider boundary without choosing a provider.
+
+Deliverables:
+
+- verifier trait,
+- provider error model,
+- admitted algorithm policy hook,
+- test verifier for fixtures.
+
+Verification:
+
+- unit tests using a deterministic test verifier,
+- clippy with warnings denied.
+
+Exit criteria:
+
+- real crypto crates can be added later without changing signed-object semantics.
+
+### v0.13.0 - Signed Invocation Verification
+
+Goal: verify invocation signatures over canonical bytes.
+
+Deliverables:
+
+- signed invocation envelope,
+- audience binding check,
+- expiry check hook,
+- sequence and nonce presence checks,
+- wrong-audience and changed-payload tests.
+
+Verification:
+
+- `cargo test --workspace`
+- tamper fixture tests.
+
+Exit criteria:
+
+- changing any security-relevant invocation field invalidates verification.
+
+## Phase 4: Capabilities And Replay
+
+### v0.14.0 - Capability Metadata
+
+Goal: define proof-of-possession capability metadata.
+
+Deliverables:
+
+- capability subject,
+- holder key commitment,
+- audience,
+- scope,
+- expiry,
+- delegation caveat fields.
+
+Verification:
+
+- constructor and validation tests,
+- docs for bearer-token rejection.
+
+Exit criteria:
+
+- BCX has no bearer-only capability path for consequential operations.
+
+### v0.15.0 - Capability Attenuation
+
+Goal: allow child capabilities to narrow but never silently broaden authority.
+
+Deliverables:
+
+- attenuation rules,
+- scope narrowing checks,
+- purpose and retention narrowing checks,
+- delegation-depth bounds.
+
+Verification:
+
+- tests for valid narrowing,
+- tests for scope, purpose, retention, and depth broadening failures.
+
+Exit criteria:
+
+- child operations cannot remove parent restrictions.
+
+### v0.16.0 - Replay Protection Hooks
+
+Goal: make replay resistance explicit before receipts exist.
+
+Deliverables:
+
+- replay cache trait,
+- issuer sequence validation,
+- nonce validation,
+- expiry window validation,
+- idempotency-key metadata.
+
+Verification:
+
+- replay fixture tests,
+- expired invocation tests,
+- duplicate sequence tests.
+
+Exit criteria:
+
+- repeated consequential invocations are rejected by the verification layer.
+
+## Phase 5: Receipts
+
+### v0.17.0 - Admission Receipt Skeleton
+
+Goal: record why an operation was allowed, denied, narrowed, or quarantined.
 
 Deliverables:
 
 - admission receipt type,
+- admission result,
 - policy digest,
 - configuration digest,
-- identity and capability status,
-- obligations,
-- tests for required fields and policy mismatch.
+- identity and capability status.
 
-## v0.7.0 - Effect Receipts
+Verification:
 
-Goal: record what actually happened.
+- required-field tests,
+- policy mismatch tests.
+
+Exit criteria:
+
+- a verifier can distinguish admission from execution.
+
+### v0.18.0 - Admission Obligations
+
+Goal: attach enforceable obligations to admission decisions.
+
+Deliverables:
+
+- retention obligation fields,
+- disclosure obligation fields,
+- onward-sharing markers,
+- human-review markers,
+- obligation bounds.
+
+Verification:
+
+- obligation validation tests,
+- malformed and oversized obligation tests.
+
+Exit criteria:
+
+- admission can narrow or condition an operation without executing it yet.
+
+### v0.19.0 - Effect Receipt Skeleton
+
+Goal: record what actually happened after execution.
 
 Deliverables:
 
 - effect receipt type,
-- response and state commitments,
-- child invocation references,
-- effect assurance levels,
-- tests that gateway receipts cannot claim application-only effects.
+- effect result,
+- response commitment,
+- state transition commitment,
+- child invocation references.
 
-## v0.8.0 - Explanation Bundles
+Verification:
 
-Goal: answer bounded WHY queries locally.
+- receipt validation tests,
+- child-reference bound tests.
+
+Exit criteria:
+
+- BCX can represent actual effects separately from requested intent.
+
+### v0.20.0 - Effect Assurance Rules
+
+Goal: prevent gateways from claiming effects they cannot observe.
+
+Deliverables:
+
+- effect source model,
+- gateway-observed effect class,
+- application-observed effect class,
+- database/storage-observed effect class,
+- negative tests for overclaiming.
+
+Verification:
+
+- gateway overclaim tests,
+- application receipt fixture tests.
+
+Exit criteria:
+
+- effect receipts name what component had authority to observe the effect.
+
+## Phase 6: Local Explanation
+
+### v0.21.0 - Explanation Query Bounds
+
+Goal: make local WHY queries bounded before graph traversal.
 
 Deliverables:
 
 - explanation query type,
+- direction,
+- maximum depth,
+- maximum events,
+- maximum response bytes,
+- requested claim classes.
+
+Verification:
+
+- query validation tests,
+- oversized query tests.
+
+Exit criteria:
+
+- no WHY query can request unbounded work.
+
+### v0.22.0 - Explanation Bundle
+
+Goal: return bounded proof bundles for local events.
+
+Deliverables:
+
 - explanation bundle type,
-- redacted and missing edges,
-- contradiction reporting,
-- query budget enforcement,
-- tests for depth, node, and byte limits.
+- signed event references,
+- verified edge list,
+- missing event list,
+- redacted edge list,
+- verification summary.
 
-## v0.9.0 - Append-Only Store Traits
+Verification:
 
-Goal: support durable local event chains without selecting one database.
+- bundle validation tests,
+- missing-parent fixture tests.
 
-Deliverables:
+Exit criteria:
 
-- append-only event store trait,
-- Merkle-root or hash-chain metadata,
-- retention markers,
-- witness commitment hooks,
-- tests for tamper and missing-parent detection.
+- missing and redacted information is explicit, never silently omitted.
 
-## v0.10.0 - Fluxheim Local Integration
+### v0.23.0 - Contradiction Reporting
 
-Goal: make Fluxheim produce local BCX events at its security boundary.
+Goal: report conflicting claims without hiding disagreement.
 
 Deliverables:
 
-- local ingress and route events,
-- auth and policy decisions,
-- upstream dispatch and response receipts,
-- `fluxheim why` prototype,
-- fixture tests.
+- contradictory claim model,
+- assurance comparison,
+- conflict categories,
+- deterministic ordering.
 
-## v0.11.0 - HTTP Compatibility Binding
+Verification:
 
-Goal: carry canonical BCX objects over HTTP without trusting the HTTP wrapper.
+- conflicting-parent tests,
+- mismatched-receipt tests.
+
+Exit criteria:
+
+- BCX can report contradiction instead of choosing a convenient story.
+
+## Phase 7: Local Storage And CLI
+
+### v0.24.0 - Append-Only Store Trait
+
+Goal: define durable local event storage without selecting a database.
+
+Deliverables:
+
+- append-only store trait,
+- event lookup trait,
+- retention metadata,
+- tamper-evidence hooks.
+
+Verification:
+
+- in-memory store tests,
+- missing-parent tests.
+
+Exit criteria:
+
+- local event chains can be recorded and queried behind a stable trait.
+
+### v0.25.0 - Hash Chain Or Merkle Commitments
+
+Goal: make local storage tamper-evident.
+
+Deliverables:
+
+- chain or Merkle root metadata,
+- batch commitment type,
+- witness commitment hook,
+- tamper fixture tests.
+
+Verification:
+
+- altered event tests,
+- missing batch tests,
+- deterministic commitment tests.
+
+Exit criteria:
+
+- local store corruption is detected instead of silently accepted.
+
+### v0.26.0 - CLI Verify
+
+Goal: provide offline verification before live federation.
+
+Deliverables:
+
+- `bcx-cli` crate,
+- `bcx verify` command,
+- bundle input format,
+- human-readable verification summary.
+
+Verification:
+
+- CLI fixture tests,
+- invalid bundle tests.
+
+Exit criteria:
+
+- signed proof bundles can be verified without Fluxheim running.
+
+### v0.27.0 - CLI Why Local
+
+Goal: provide a local WHY command over stored events.
+
+Deliverables:
+
+- `bcx why` command,
+- ancestor traversal,
+- descendant traversal,
+- missing/redacted output,
+- bounded query flags.
+
+Verification:
+
+- CLI local graph fixtures,
+- depth and node limit tests.
+
+Exit criteria:
+
+- local WHY answers can be inspected without federation.
+
+## Phase 8: Fluxheim Local Integration
+
+### v0.28.0 - Fluxheim Ingress Events
+
+Goal: make Fluxheim produce BCX events at request ingress.
+
+Deliverables:
+
+- ingress event mapping,
+- authentication result mapping,
+- route policy digest,
+- request target commitment.
+
+Verification:
+
+- Fluxheim fixture tests,
+- local BCX validation tests.
+
+Exit criteria:
+
+- Fluxheim can explain that a request arrived and which route policy handled it.
+
+### v0.29.0 - Fluxheim Upstream And Response Events
+
+Goal: link ingress events to upstream dispatch and response observations.
+
+Deliverables:
+
+- upstream dispatch event,
+- upstream acknowledgement event,
+- response commitment,
+- local child edge.
+
+Verification:
+
+- Fluxheim local chain tests,
+- tampered child edge tests.
+
+Exit criteria:
+
+- one Fluxheim request can produce an end-to-end local causal chain.
+
+### v0.30.0 - Fluxheim Local Why
+
+Goal: expose local WHY for Fluxheim operators.
+
+Deliverables:
+
+- `fluxheim why` prototype or integration hook,
+- local explanation bundle,
+- policy digest display,
+- missing evidence display.
+
+Verification:
+
+- local WHY fixture tests,
+- operator output snapshot tests.
+
+Exit criteria:
+
+- Fluxheim can answer local "why did this request happen?" without federation.
+
+## Phase 9: HTTP Compatibility Binding
+
+### v0.31.0 - HTTP Carrier Mapping
+
+Goal: carry BCX objects over HTTP without trusting the HTTP wrapper.
 
 Deliverables:
 
 - `bcx-http` crate,
-- `.well-known/bcx` endpoint shape,
-- request and response mapping,
-- no silent downgrade rule,
-- tampered-wrapper tests.
+- request mapping,
+- response mapping,
+- content type,
+- `.well-known/bcx` endpoint shape.
 
-## v0.12.0 - Federated Peer Model
+Verification:
 
-Goal: let two BCX-aware peers exchange signed causal facts.
+- mapping tests,
+- invalid content-type tests.
+
+Exit criteria:
+
+- HTTP can transport canonical BCX bytes without becoming the security source.
+
+### v0.32.0 - HTTP Downgrade Rejection
+
+Goal: make HTTP compatibility fail closed.
 
 Deliverables:
 
-- peer identity model,
+- required-mode policy,
+- optional-mode policy,
+- unsigned request rejection,
+- unsupported version rejection.
+
+Verification:
+
+- downgrade tests,
+- unsigned request tests,
+- wrong-version tests.
+
+Exit criteria:
+
+- an attacker cannot silently strip BCX and continue as ordinary HTTP.
+
+### v0.33.0 - HTTP Tamper Fixtures
+
+Goal: prove wrapper mutation cannot alter the signed operation.
+
+Deliverables:
+
+- tampered target fixture,
+- tampered method fixture,
+- tampered digest fixture,
+- proxy rewrite fixture.
+
+Verification:
+
+- all tamper fixtures fail closed.
+
+Exit criteria:
+
+- BCX verification depends on canonical signed payloads, not mutable HTTP
+  decoration.
+
+## Phase 10: Federated Peer Model
+
+### v0.34.0 - Peer Identity And Trust Domains
+
+Goal: model peer trust without global identity.
+
+Deliverables:
+
+- peer identity type,
 - trust-domain metadata,
-- cross-acknowledged edges,
-- key revocation metadata,
-- tests for untrusted peer and false-parent claims.
+- pairwise event identifier support,
+- peer policy reference.
 
-## v0.13.0 - Federated WHY
+Verification:
 
-Goal: query another peer safely.
+- peer validation tests,
+- wrong-domain tests.
+
+Exit criteria:
+
+- cross-domain events carry explicit peer and trust-domain context.
+
+### v0.35.0 - Cross-Acknowledged Edges
+
+Goal: prevent one peer from fabricating a federated graph alone.
 
 Deliverables:
 
-- audit capability checks,
-- selective disclosure,
+- sender observation,
+- receiver observation,
+- cross-acknowledgement receipt,
+- edge assurance upgrade rules.
+
+Verification:
+
+- false-parent tests,
+- sender-only claim tests,
+- receiver mismatch tests.
+
+Exit criteria:
+
+- strong federated edges require both participant perspectives.
+
+### v0.36.0 - Key Revocation Metadata
+
+Goal: make key compromise and revocation visible to verification.
+
+Deliverables:
+
+- key epoch metadata,
+- revocation reference,
+- verification-time revocation status,
+- affected-event markers.
+
+Verification:
+
+- revoked key tests,
+- old valid receipt tests,
+- compromised epoch tests.
+
+Exit criteria:
+
+- verification reports revocation impact instead of silently trusting old keys.
+
+## Phase 11: Federated WHY
+
+### v0.37.0 - WHY Query Authentication
+
+Goal: require authorization for federated explanation queries.
+
+Deliverables:
+
+- audit capability reference,
+- requester signature,
 - query purpose,
-- depth and node budgets,
-- cycle detection,
-- redacted explanation tests.
+- audience binding,
+- nonce.
 
-## v0.14.0 - Native QUIC Mapping
+Verification:
 
-Goal: add `bcx/1` over QUIC as the high-security transport.
+- unauthenticated query tests,
+- wrong-audience tests,
+- replayed query tests.
+
+Exit criteria:
+
+- remote WHY cannot be used as an unauthenticated graph crawler.
+
+### v0.38.0 - Selective Disclosure
+
+Goal: control what a peer may disclose.
 
 Deliverables:
 
-- ALPN profile,
-- frame state machine,
-- no state-changing 0-RTT rule,
-- stream budget limits,
+- plaintext disclosure,
+- encrypted disclosure,
+- hash commitment,
+- redacted presence,
+- complete withholding.
+
+Verification:
+
+- disclosure policy tests,
+- unauthorized field tests.
+
+Exit criteria:
+
+- sensitive fields can be withheld without making the explanation misleading.
+
+### v0.39.0 - Federated Query Budgets
+
+Goal: prevent recursive federation abuse.
+
+Deliverables:
+
+- maximum depth,
+- maximum nodes,
+- maximum response bytes,
+- cycle detection,
+- peer recursion policy.
+
+Verification:
+
+- cycle tests,
+- amplification tests,
+- over-budget query tests.
+
+Exit criteria:
+
+- federated WHY work is bounded and policy-controlled.
+
+### v0.40.0 - Federated Explanation Bundle
+
+Goal: return verifiable remote explanations.
+
+Deliverables:
+
+- remote signed facts,
+- redacted remote edges,
+- missing remote events,
+- trust assumptions,
+- verification summary.
+
+Verification:
+
+- two-peer fixture,
+- redacted peer fixture,
+- unreachable peer fixture.
+
+Exit criteria:
+
+- a verifier can distinguish local evidence, remote evidence, and unknowns.
+
+## Phase 12: Native QUIC Transport
+
+### v0.41.0 - QUIC Transport Decision
+
+Goal: admit the initial QUIC provider and native transport shape.
+
+Deliverables:
+
+- provider review,
+- ALPN string,
+- frame family decision,
+- dependency policy update,
+- threat-model update.
+
+Verification:
+
+- dependency checks,
+- docs and security review.
+
+Exit criteria:
+
+- native transport work has an admitted provider and documented security model.
+
+### v0.42.0 - Native Frame Parser
+
+Goal: parse native BCX frames with strict bounds.
+
+Deliverables:
+
+- frame header,
+- frame type model,
+- length checks,
 - malformed frame tests.
 
-## v0.15.0 - Sovereign Profile
+Verification:
+
+- parser tests,
+- malformed corpus tests.
+
+Exit criteria:
+
+- native frames fail closed before invoking protocol logic.
+
+### v0.43.0 - Native Invoke Flow
+
+Goal: run invocation, admission, data, and effect over native streams.
+
+Deliverables:
+
+- invoke frame,
+- admission frame,
+- data frame,
+- effect frame,
+- stream state machine.
+
+Verification:
+
+- happy-path stream tests,
+- wrong-order frame tests,
+- cancelled stream tests.
+
+Exit criteria:
+
+- native peers can exchange one signed operation and receipt.
+
+### v0.44.0 - No State-Changing 0-RTT
+
+Goal: enforce replay-safe native transport behavior.
+
+Deliverables:
+
+- early-data policy,
+- action classification,
+- state-changing rejection,
+- immutable-read exception tests if admitted.
+
+Verification:
+
+- 0-RTT rejection tests,
+- replay fixture tests.
+
+Exit criteria:
+
+- consequential operations cannot execute as replayable early data.
+
+## Phase 13: Sovereign Profile
+
+### v0.45.0 - Sovereign Profile Rules
 
 Goal: define strict high-assurance deployment behavior.
 
 Deliverables:
 
 - mandatory signatures,
-- mandatory mutual peer auth,
-- no bearer-only capabilities,
-- no downgrade,
-- receipt storage requirements,
-- profile conformance tests.
+- mutual peer authentication requirement,
+- no bearer-only capability rule,
+- no downgrade rule,
+- receipt storage requirement.
 
-## v0.16.0 - Provider Qualification Hooks
+Verification:
 
-Goal: prepare for admitted crypto, storage, and transport providers.
+- profile conformance tests,
+- negative config tests.
+
+Exit criteria:
+
+- Sovereign profile requirements are machine-checkable.
+
+### v0.46.0 - Sovereign Verification Gate
+
+Goal: enforce Sovereign profile decisions in verification.
 
 Deliverables:
 
-- provider capability traits,
-- provider self-description,
-- audit metadata,
-- dependency review templates,
-- test vectors.
+- profile-aware verifier,
+- rejected unsigned invocation tests,
+- rejected missing receipt tests,
+- rejected downgraded transport tests.
+
+Verification:
+
+- `cargo test --workspace --all-features`
+- Sovereign fixture suite.
+
+Exit criteria:
+
+- a Sovereign deployment fails closed when required evidence is missing.
+
+### v0.47.0 - Remote Attestation Metadata
+
+Goal: support attestation evidence without depending on one attestation stack.
+
+Deliverables:
+
+- attestation reference type,
+- verifier result metadata,
+- relying-party decision field,
+- trust-assumption reporting.
+
+Verification:
+
+- attestation metadata tests,
+- missing verifier result tests.
+
+Exit criteria:
+
+- BCX can carry attestation evidence as evidence, not as automatic truth.
+
+## Phase 14: Provider Qualification And 1.0 Hardening
+
+### v0.48.0 - Provider Qualification Hooks
+
+Goal: prepare crypto, storage, and transport providers for review.
+
+Deliverables:
+
+- provider self-description trait,
+- provider capability metadata,
+- provider audit metadata,
+- dependency review template.
+
+Verification:
+
+- provider fixture tests,
+- docs review.
+
+Exit criteria:
+
+- providers can expose what they claim and what they do not claim.
+
+### v0.49.0 - Interoperability Test Vectors
+
+Goal: make independent implementations possible.
+
+Deliverables:
+
+- canonical encoding vectors,
+- signature vectors,
+- receipt vectors,
+- WHY bundle vectors,
+- tamper vectors.
+
+Verification:
+
+- all vectors verified by local test harness.
+
+Exit criteria:
+
+- another implementation can test compatibility without reading BCX internals.
+
+### v0.50.0 - Security Documentation Freeze
+
+Goal: close the 1.0 security documentation gap.
+
+Deliverables:
+
+- complete threat model,
+- security controls,
+- supply-chain security,
+- unsafe policy,
+- transport security notes,
+- known limitations.
+
+Verification:
+
+- docs warnings denied,
+- release metadata validator.
+
+Exit criteria:
+
+- security documentation matches the implemented behavior, not future intent.
+
+### v0.51.0 - API Stabilization Candidate
+
+Goal: freeze public API shape before 1.0.
+
+Deliverables:
+
+- public API review,
+- deprecated experimental names removed or gated,
+- feature matrix documented,
+- migration notes from pre-1.0.
+
+Verification:
+
+- public API review checklist,
+- full local gate.
+
+Exit criteria:
+
+- no known API rename is intentionally deferred past 1.0.
+
+### v0.52.0 - Release Candidate
+
+Goal: produce the final 1.0 candidate for pentest and integration testing.
+
+Deliverables:
+
+- release candidate notes,
+- Fluxheim reference integration pass,
+- HTTP compatibility pass,
+- native QUIC pass,
+- federated WHY pass,
+- Sovereign profile pass.
+
+Verification:
+
+- `scripts/checks.sh`
+- integration fixture suite,
+- release readiness script after pentest report exists.
+
+Exit criteria:
+
+- all known release-blocking issues are fixed or the 1.0 release is postponed.
 
 ## v1.0.0 - Production Protocol Crate
 
@@ -260,5 +1221,20 @@ Deliverables:
 - native QUIC binding,
 - full threat model,
 - release notes,
-- SBOM,
 - pentest pass for exact commit.
+
+Verification:
+
+- `scripts/checks.sh`
+- `cargo deny check`
+- `cargo audit`
+- `scripts/validate-release-readiness.sh v1.0.0`
+- GitHub CI green
+- GitHub CodeQL default setup green
+
+Exit criteria:
+
+- permanent pentest report has `Status: PASS`,
+- no root `PENTEST.md`,
+- no release-blocking findings,
+- maintainer explicitly requests tag creation.
