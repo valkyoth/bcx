@@ -6,7 +6,15 @@ toolchain_doc="docs/toolchain-policy.md"
 
 extract_crate_version() {
     crate="$1"
-    cargo search "$crate" --limit 1 | awk -F '"' -v name="$crate" '$1 ~ "^" name " = " { print $2; exit }'
+    version="$(cargo info "$crate" 2>/dev/null | awk '/^version:/ { print $2; exit }')"
+
+    if [ -n "$version" ]; then
+        printf '%s\n' "$version"
+        return 0
+    fi
+
+    cargo search "$crate" --limit 20 \
+        | awk -F '"' -v name="$crate" '$1 ~ "^" name " = " { print $2; exit }'
 }
 
 extract_pinned_tool_version() {
@@ -77,15 +85,15 @@ check_checkout_action() {
 }
 
 check_toolchain_doc_mentions() {
-    if ! rg -q 'cargo-deny 0\.19\.9' "$toolchain_doc"; then
+    if ! grep -Eq 'cargo-deny 0\.19\.9' "$toolchain_doc"; then
         printf 'toolchain policy does not mention pinned cargo-deny version\n' >&2
         exit 1
     fi
-    if ! rg -q 'cargo-audit 0\.22\.2' "$toolchain_doc"; then
+    if ! grep -Eq 'cargo-audit 0\.22\.2' "$toolchain_doc"; then
         printf 'toolchain policy does not mention pinned cargo-audit version\n' >&2
         exit 1
     fi
-    if ! rg -q 'actions/checkout v7\.0\.0' "$toolchain_doc"; then
+    if ! grep -Eq 'actions/checkout v7\.0\.0' "$toolchain_doc"; then
         printf 'toolchain policy does not mention pinned actions/checkout version\n' >&2
         exit 1
     fi
