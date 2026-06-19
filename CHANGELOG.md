@@ -9,6 +9,8 @@ All notable BCX changes will be documented here.
 - Treat pentest reports as release approval artifacts rather than git commit
   attestations.
 - Add an automated release finalizer for the pentest-report/tag flow.
+- Allow release finalization from an existing permanent pentest report after
+  root `PENTEST.md` has been removed.
 - Add the `v0.2.0` release gate and publication metadata.
 - Harden digest and nonce comparisons against byte-by-byte early exit.
 - Reject all-zero nonces and clear nonce memory on drop with `zeroize`.

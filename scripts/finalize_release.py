@@ -30,12 +30,15 @@ def workspace_version() -> str:
     raise RuntimeError("could not determine workspace version")
 
 
-def require_clean_tracked_tree() -> None:
+def require_clean_release_tree(report: Path) -> None:
     status = capture(["git", "status", "--porcelain"])
+    report_path = str(report.relative_to(ROOT))
     tracked_or_unignored = [
         line
         for line in status.splitlines()
-        if not line.endswith(" PENTEST.md") and "PENTEST.md" not in line
+        if not line.endswith(" PENTEST.md")
+        and not line.endswith(f" {report_path}")
+        and "PENTEST.md" not in line
     ]
     if tracked_or_unignored:
         print("Refusing to finalize from a dirty tracked worktree:", file=sys.stderr)
@@ -54,6 +57,15 @@ def require_no_tag(tag: str) -> None:
     if result.returncode == 0:
         print(f"tag already exists locally: {tag}", file=sys.stderr)
         sys.exit(1)
+
+
+def commit_report_if_changed(report: Path, tag: str) -> None:
+    run(["git", "add", str(report.relative_to(ROOT))])
+    staged = capture(["git", "diff", "--cached", "--name-only"])
+    if str(report.relative_to(ROOT)) in staged.splitlines():
+        run(["git", "commit", "-m", f"Add {tag} pentest report"])
+    else:
+        print(f"{report.relative_to(ROOT)} already committed.")
 
 
 def validate_report_arg(name: str, value: str, pattern: str = r"^[^\n\r]+$") -> str:
@@ -103,11 +115,14 @@ def main() -> int:
     scratch = ROOT / "PENTEST.md"
     report = ROOT / "security" / "pentest" / f"{tag}.md"
 
-    if not scratch.is_file():
-        print("missing root PENTEST.md scratch report", file=sys.stderr)
+    if not scratch.is_file() and not report.is_file():
+        print(
+            f"missing root PENTEST.md scratch report and {report.relative_to(ROOT)}",
+            file=sys.stderr,
+        )
         return 1
 
-    require_clean_tracked_tree()
+    require_clean_release_tree(report)
     require_no_tag(tag)
 
     if not args.yes:
@@ -116,22 +131,25 @@ def main() -> int:
             print("version confirmation did not match; aborting", file=sys.stderr)
             return 1
 
-    run(
-        [
-            "scripts/record_pentest_report.py",
-            "--version",
-            args.version,
-            "--tester",
-            tester,
-            "--scope",
-            scope,
-            "--date",
-            date,
-        ]
-    )
-    scratch.unlink()
-    run(["git", "add", str(report.relative_to(ROOT))])
-    run(["git", "commit", "-m", f"Add {tag} pentest report"])
+    if scratch.is_file():
+        run(
+            [
+                "scripts/record_pentest_report.py",
+                "--version",
+                args.version,
+                "--tester",
+                tester,
+                "--scope",
+                scope,
+                "--date",
+                date,
+            ]
+        )
+        scratch.unlink()
+    else:
+        print(f"using existing {report.relative_to(ROOT)}")
+
+    commit_report_if_changed(report, tag)
     run([gate])
     run(["git", "tag", "-a", tag, "-m", f"BCX {args.version}"])
 

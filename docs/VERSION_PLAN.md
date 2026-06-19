@@ -79,8 +79,10 @@ Use this loop for every version:
    ready for review.
 2. The maintainer runs pentest and writes temporary findings to root
    `PENTEST.md`.
-3. Findings are reviewed, release-scope issues are fixed, documentation or
-   release notes are updated, and `PENTEST.md` is deleted.
+3. If the scratch report needs to be preserved before fixes, run
+   `scripts/record_pentest_report.py` first so `security/pentest/<tag>.md`
+   records its digest. Then release-scope issues are fixed, documentation or
+   release notes are updated, and root `PENTEST.md` is deleted.
 4. Local gates run again.
 5. The maintainer reruns pentest if needed.
 6. When GitHub CI and CodeQL default setup are green, the preferred automated
@@ -94,8 +96,11 @@ scripts/finalize_release.py \
   --date YYYY-MM-DD
 ```
 
-This records the scratch report, deletes root `PENTEST.md`, commits the
-permanent report, runs the version release gate, and creates the local tag.
+If root `PENTEST.md` exists, this records the scratch report, deletes root
+`PENTEST.md`, commits the permanent report, runs the version release gate, and
+creates the local tag. If root `PENTEST.md` has already been removed and
+`security/pentest/<tag>.md` exists, the finalizer uses the permanent report and
+does not require the scratch file.
 The pentest report is a release approval artifact. It records the digest of the
 scratch `PENTEST.md` that the maintainer supplied, but it does not bind the
 approval to a single git commit. After the maintainer confirms pentest and
