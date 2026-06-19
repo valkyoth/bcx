@@ -12,6 +12,7 @@ Baseline:
 - Resolver: `3`
 - Default build: `no_std`
 - CI security tools: `cargo-deny 0.19.9`, `cargo-audit 0.22.2`
+- GitHub Actions: `actions/checkout v7.0.0` pinned by commit SHA.
 
 Compatibility target:
 
