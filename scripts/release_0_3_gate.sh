@@ -1,10 +1,12 @@
 #!/usr/bin/env sh
 set -eu
 
+version="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n 1)"
+
 scripts/checks.sh
 scripts/validate-latest-tools.sh
-scripts/release_crate.py --check --version 0.3.0
-scripts/validate-release-readiness.sh v0.3.0
+scripts/release_crate.py --check --version "$version"
+scripts/validate-release-readiness.sh "v$version"
 
 for toolchain in 1.90.0 1.91.0 1.92.0 1.93.0 1.94.0 1.95.0 1.96.0; do
     cargo "+$toolchain" check --workspace --all-features

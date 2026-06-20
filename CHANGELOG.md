@@ -4,7 +4,13 @@ All notable BCX changes will be documented here.
 
 ## Unreleased
 
-## 0.3.0 - Unreleased
+- Add the BCX README image and restructure the root README after the
+  sanitization crate documentation model.
+- Add packaged README files for every current BCX foundation subcrate.
+- Move current workspace crates to package version `0.3.1` for the README and
+  package metadata update.
+
+## 0.3.0 - 2026-06-20
 
 - Add no-std `StatementId`, `SubjectId`, `RealmId`, `ProfileId`,
   `ProofSuiteId`, `PolicyId`, `CheckpointId`, and `NativeBindingId`.

@@ -1,11 +1,12 @@
 [package]
 name = "bcx-crypto"
-version = "0.3.0"
+version = "0.3.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 homepage.workspace = true
 repository.workspace = true
+readme = "README.md"
 description = "Crypto-agile BCX envelope metadata and verifier traits."
 keywords = ["bcx", "cryptography", "signature", "no-std"]
 categories = ["cryptography", "no-std"]
@@ -15,8 +16,8 @@ default = []
 alloc = []
 
 [dependencies]
-bcx-core = { version = "0.3.0", path = "../bcx-core", default-features = false }
-bcx-wire = { version = "0.3.0", path = "../bcx-wire", default-features = false }
+bcx-core = { version = "0.3.1", path = "../bcx-core", default-features = false }
+bcx-wire = { version = "0.3.1", path = "../bcx-wire", default-features = false }
 
 [lints]
 workspace = true

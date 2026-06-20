@@ -3,6 +3,7 @@ set -euo pipefail
 
 required=(
     "README.md"
+    ".github/images/bcx.webp"
     "CHANGELOG.md"
     "LICENSE"
     "SECURITY.md"
@@ -23,6 +24,7 @@ required=(
     "release-notes/RELEASE_NOTES_0.1.0.md"
     "release-notes/RELEASE_NOTES_0.2.0.md"
     "release-notes/RELEASE_NOTES_0.3.0.md"
+    "release-notes/RELEASE_NOTES_0.3.1.md"
     "scripts/release_0_1_gate.sh"
     "scripts/release_0_2_gate.sh"
     "scripts/release_0_3_gate.sh"
