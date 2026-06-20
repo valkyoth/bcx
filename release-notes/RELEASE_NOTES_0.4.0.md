@@ -43,6 +43,9 @@ landed after `v0.3.0`.
   `ZeroizedDigest`.
 - `HybridVerifier` documentation now keeps the no-short-circuit verification
   requirement visible for custom backends.
+- `ZeroizedDigest::digest()` documentation now warns that the returned `Digest`
+  copy is not zeroed on drop.
+- `ZeroizedDigest` is now exported from the root `bcx::prelude`.
 
 ## Security Review
 
@@ -57,6 +60,10 @@ The v0.4.0 pentest findings were handled as follows:
 - `INFORMATIONAL-1`: documented the compact capsule relationship constraint.
 - `INFORMATIONAL-2`: kept the hybrid verifier no-short-circuit rule prominent
   in the trait contract.
+- Follow-up `LOW-1`: fixed with explicit copy-hazard documentation on
+  `ZeroizedDigest::digest()`.
+- Follow-up `LOW-2`: fixed by exporting `ZeroizedDigest` from
+  `bcx::prelude`.
 
 ## Known Limitations
 
