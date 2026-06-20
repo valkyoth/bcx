@@ -4,11 +4,16 @@ All notable BCX changes will be documented here.
 
 ## Unreleased
 
+## 0.4.0 - Unreleased
+
+- Add no-std `StatementKind`, `Intent`, `Admission`, `Effect`, `Delegation`,
+  `Revocation`, `Checkpoint`, and `Contradiction`.
+- Validate minimum statement body invariants for self-referential links and
+  same-subject delegation.
 - Add the BCX README image and restructure the root README after the
   sanitization crate documentation model.
 - Add packaged README files for every current BCX foundation subcrate.
-- Move current workspace crates to package version `0.3.1` for the README and
-  package metadata update.
+- Move current workspace crates to package version `0.4.0`.
 
 ## 0.3.0 - 2026-06-20
 

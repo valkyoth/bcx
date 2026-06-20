@@ -54,6 +54,8 @@ Implemented now:
 - crypto-agile signature envelope metadata and verifier traits.
 - hybrid Ed25519 plus ML-DSA-65 metadata with both-component verification
   requirements at the BCX trait boundary.
+- first statement body vocabulary: intent, admission, effect, delegation,
+  revocation, checkpoint, and contradiction.
 - crate version matrix for independent subcrate publication.
 - local check script, modularity guard, release metadata guard, and GitHub CI.
 - implementation, version, protocol-family, threat-model, toolchain,
@@ -64,7 +66,7 @@ Implemented now:
 Not implemented yet:
 
 - canonical encoding.
-- statement body vocabulary beyond the first identifier foundation.
+- statement envelopes and canonical statement encoding.
 - real cryptographic providers.
 - capability verification.
 - receipts or WHY bundles.
@@ -111,7 +113,7 @@ Compatibility evidence:
 
 ```toml
 [dependencies]
-bcx = "0.3.1"
+bcx = "0.4.0"
 ```
 
 Default builds are `no_std`.
@@ -120,14 +122,14 @@ For heap-enabled future APIs and dependent crate `alloc` surfaces:
 
 ```toml
 [dependencies]
-bcx = { version = "0.3.1", features = ["alloc"] }
+bcx = { version = "0.4.0", features = ["alloc"] }
 ```
 
 For `std` applications:
 
 ```toml
 [dependencies]
-bcx = { version = "0.3.1", features = ["std"] }
+bcx = { version = "0.4.0", features = ["std"] }
 ```
 
 ## Features

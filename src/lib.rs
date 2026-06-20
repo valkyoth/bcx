@@ -22,8 +22,9 @@ pub mod prelude {
         AlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope, VerificationError, Verifier,
     };
     pub use bcx_model::{
-        AdmissionResult, AssuranceLevel, CauseKind, EffectResult, OperationAction,
-        RelationshipKind, TruthStatus,
+        Admission, AdmissionResult, AssuranceLevel, CauseKind, Checkpoint, Contradiction,
+        Delegation, Effect, EffectResult, Intent, OperationAction, RelationshipKind, Revocation,
+        StatementKind, TruthStatus,
     };
     pub use bcx_policy::{DisclosureLevel, ProofLevel, ProtocolProfile};
     pub use bcx_wire::{ProtocolVersion, WireHeader, WireLimits};

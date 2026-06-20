@@ -11,9 +11,9 @@ is not meant to be used as a standalone protocol product. Prefer depending on
 ## Example
 
 ```rust
-use bcx_core::{Digest, EventId};
+use bcx_core::{Digest, EventId, StatementId, SubjectId};
 use bcx_model::{
-    CauseCapsule, CauseCapsuleParts, CauseKind, OperationAction, RelationshipKind,
+    CauseCapsule, CauseCapsuleParts, CauseKind, Intent, OperationAction, RelationshipKind,
 };
 use bcx_wire::WireLimits;
 
@@ -36,10 +36,18 @@ let capsule = CauseCapsule::new(
 .unwrap();
 
 assert_eq!(capsule.parents().len(), 1);
+
+let intent = Intent::new(
+    StatementId::new(&[3; Digest::LEN]).unwrap(),
+    SubjectId::new(b"subject:invoice:123").unwrap(),
+    OperationAction::Create,
+);
+
+assert_eq!(intent.action(), OperationAction::Create);
 ```
 
 ## Notes
 
 - `no_std` by default.
 - Model constructors enforce current BCX shape and bound rules.
-- Canonical encoding and full statement bodies are future milestones.
+- Canonical encoding and statement envelopes are future milestones.
