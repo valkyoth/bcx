@@ -23,7 +23,7 @@
 
 # bcx
 
-`bcx` is the Rust crate for **Bifrost Causal Exchange**.
+`bcx` is the Rust crate for **Bifröst Causal Exchange**.
 
 BCX is a `no_std`-first protocol foundation for signed causal meaning, proof
 composition, native bindings, checkpoints, and bounded explanations across
