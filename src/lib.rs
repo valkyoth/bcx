@@ -16,7 +16,7 @@ pub mod prelude {
     pub use bcx_core::{
         CapabilityRef, CheckpointId, Digest, EventId, NativeBindingId, Nonce, OperationSequence,
         PolicyEpoch, PolicyId, ProfileId, ProofSuiteId, RealmId, StatementId, SubjectId,
-        ValidationError,
+        ValidationError, ZeroizedDigest,
     };
     pub use bcx_crypto::{
         AlgorithmPolicy, ExactAlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope,
@@ -44,5 +44,14 @@ mod tests {
     #[test]
     fn facade_reports_current_protocol_version() {
         assert_eq!(protocol_version(), ProtocolVersion::new(1, 0));
+    }
+
+    #[test]
+    fn prelude_exports_zeroized_digest() {
+        use crate::prelude::*;
+
+        let digest = ZeroizedDigest::new(Digest::new([1; Digest::LEN]));
+
+        assert_eq!(digest.as_bytes(), &[1; Digest::LEN]);
     }
 }

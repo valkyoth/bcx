@@ -174,6 +174,9 @@ impl ZeroizedDigest {
     }
 
     /// Returns a copy of the wrapped digest.
+    ///
+    /// The returned [`Digest`] is `Copy` and will not be zeroed on drop. Do not
+    /// store the return value beyond its immediate use.
     #[must_use]
     pub const fn digest(&self) -> Digest {
         self.0
