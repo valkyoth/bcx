@@ -101,6 +101,35 @@ impl<'a> AlgorithmPolicy<'a> {
     }
 }
 
+/// Single-algorithm admission policy for high-assurance verification contexts.
+///
+/// This avoids sender-choice downgrade behavior entirely: exactly one
+/// algorithm is admitted for the operation class.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExactAlgorithmPolicy {
+    admitted: SignatureAlgorithm,
+}
+
+impl ExactAlgorithmPolicy {
+    /// Creates a policy that admits exactly one signature algorithm.
+    #[must_use]
+    pub const fn new(admitted: SignatureAlgorithm) -> Self {
+        Self { admitted }
+    }
+
+    /// Returns the only admitted algorithm.
+    #[must_use]
+    pub const fn algorithm(self) -> SignatureAlgorithm {
+        self.admitted
+    }
+
+    /// Returns true when the algorithm is the exact admitted algorithm.
+    #[must_use]
+    pub const fn admits(self, algorithm: SignatureAlgorithm) -> bool {
+        self.admitted.eq_const(algorithm)
+    }
+}
+
 impl SignatureAlgorithm {
     const fn eq_const(self, other: Self) -> bool {
         match (self, other) {
@@ -230,6 +259,32 @@ impl<'a, T> SignedEnvelope<'a, T> {
         if !algorithm_policy.admits(self.signature.algorithm) {
             return Err(VerificationError::AlgorithmNotAdmitted);
         }
+        self.verify_admitted_detached_bytes(verifier, canonical_payload, limits)
+    }
+
+    /// Verifies detached bytes with an exact single-algorithm policy.
+    ///
+    /// Prefer this helper for high-assurance profiles where sender-choice
+    /// algorithm downgrade is not acceptable.
+    pub fn verify_detached_bytes_exact<V: Verifier>(
+        &self,
+        verifier: &V,
+        algorithm_policy: ExactAlgorithmPolicy,
+        canonical_payload: &[u8],
+        limits: WireLimits,
+    ) -> Result<(), VerificationError> {
+        if !algorithm_policy.admits(self.signature.algorithm) {
+            return Err(VerificationError::AlgorithmNotAdmitted);
+        }
+        self.verify_admitted_detached_bytes(verifier, canonical_payload, limits)
+    }
+
+    fn verify_admitted_detached_bytes<V: Verifier>(
+        &self,
+        verifier: &V,
+        canonical_payload: &[u8],
+        limits: WireLimits,
+    ) -> Result<(), VerificationError> {
         self.signature.validate(limits)?;
         if canonical_payload.len() > limits.maximum_message_len() {
             return Err(VerificationError::PayloadTooLarge);

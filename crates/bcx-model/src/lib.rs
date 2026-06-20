@@ -91,6 +91,29 @@ mod tests {
     }
 
     #[test]
+    fn cause_capsule_rejects_self_referential_parent() -> Result<(), ValidationError> {
+        let event_id = event(1)?;
+        let parents = [event_id];
+
+        assert_eq!(
+            CauseCapsule::new(
+                CauseCapsuleParts {
+                    event_id,
+                    parents: &parents,
+                    relationship: RelationshipKind::CausedBy,
+                    cause_kind: CauseKind::ApplicationAction,
+                    action: OperationAction::Execute,
+                    authority: None,
+                    policy_epoch: None,
+                },
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(ValidationError::Malformed)
+        );
+        Ok(())
+    }
+
+    #[test]
     fn statement_body_kinds_match_constructors() -> Result<(), ValidationError> {
         let intent = Intent::new(
             statement(1)?,

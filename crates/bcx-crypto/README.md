@@ -12,7 +12,7 @@ is not meant to be used as a standalone protocol product. Prefer depending on
 
 ```rust
 use bcx_core::Digest;
-use bcx_crypto::{AlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope};
+use bcx_crypto::{ExactAlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope};
 use bcx_wire::WireLimits;
 
 let signature = [7; SignatureAlgorithm::ED25519_SIGNATURE_LEN];
@@ -24,7 +24,7 @@ let envelope = SignatureEnvelope::new(
     limits,
 )
 .unwrap();
-let policy = AlgorithmPolicy::new(&[SignatureAlgorithm::Ed25519]).unwrap();
+let policy = ExactAlgorithmPolicy::new(SignatureAlgorithm::Ed25519);
 
 assert!(policy.admits(envelope.algorithm()));
 ```

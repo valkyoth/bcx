@@ -19,7 +19,8 @@ pub mod prelude {
         ValidationError,
     };
     pub use bcx_crypto::{
-        AlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope, VerificationError, Verifier,
+        AlgorithmPolicy, ExactAlgorithmPolicy, SignatureAlgorithm, SignatureEnvelope,
+        VerificationError, Verifier,
     };
     pub use bcx_model::{
         Admission, AdmissionResult, AssuranceLevel, CauseKind, Checkpoint, Contradiction,

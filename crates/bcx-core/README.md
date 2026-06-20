@@ -11,13 +11,15 @@ is not meant to be used as a standalone protocol product. Prefer depending on
 ## Example
 
 ```rust
-use bcx_core::{Digest, StatementId, SubjectId};
+use bcx_core::{Digest, StatementId, SubjectId, ZeroizedDigest};
 
 let statement = StatementId::new(&[7; Digest::LEN]).unwrap();
 let subject = SubjectId::new(b"subject:invoice:123").unwrap();
+let boundary_digest = ZeroizedDigest::new(Digest::new([9; Digest::LEN]));
 
 assert_eq!(statement.len(), Digest::LEN);
 assert_eq!(subject.as_bytes(), b"subject:invoice:123");
+assert_eq!(boundary_digest.as_bytes(), &[9; Digest::LEN]);
 ```
 
 ## Notes

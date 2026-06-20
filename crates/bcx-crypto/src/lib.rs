@@ -5,8 +5,8 @@ mod envelope;
 mod error;
 
 pub use envelope::{
-    AlgorithmPolicy, HybridVerified, HybridVerifier, SignatureAlgorithm, SignatureEnvelope,
-    SignedEnvelope, Verifier,
+    AlgorithmPolicy, ExactAlgorithmPolicy, HybridVerified, HybridVerifier, SignatureAlgorithm,
+    SignatureEnvelope, SignedEnvelope, Verifier,
 };
 pub use error::VerificationError;
 
@@ -65,6 +65,15 @@ mod tests {
             Err(VerificationError::EmptyAlgorithmPolicy)
         );
         assert!(!AlgorithmPolicy::deny_all().admits(SignatureAlgorithm::Ed25519));
+    }
+
+    #[test]
+    fn exact_algorithm_policy_admits_only_one_algorithm() {
+        let policy = ExactAlgorithmPolicy::new(SignatureAlgorithm::HybridEd25519MlDsa65);
+
+        assert_eq!(policy.algorithm(), SignatureAlgorithm::HybridEd25519MlDsa65);
+        assert!(policy.admits(SignatureAlgorithm::HybridEd25519MlDsa65));
+        assert!(!policy.admits(SignatureAlgorithm::Ed25519));
     }
 
     #[test]
@@ -173,6 +182,62 @@ mod tests {
         assert_eq!(
             envelope.verify_detached_bytes(&AcceptingVerifier, &policy, &payload, limits),
             Err(VerificationError::PayloadTooLarge)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn exact_policy_rejects_algorithm_downgrade() -> Result<(), VerificationError> {
+        struct AcceptingVerifier;
+
+        impl HybridVerifier for AcceptingVerifier {
+            fn verify_ed25519(
+                &self,
+                _ed25519_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Ok(())
+            }
+
+            fn verify_ml_dsa_65(
+                &self,
+                _ml_dsa_65_signature: &[u8],
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Ok(())
+            }
+        }
+
+        impl Verifier for AcceptingVerifier {
+            fn verify(
+                &self,
+                _envelope: &SignatureEnvelope<'_>,
+                _canonical_payload: &[u8],
+            ) -> Result<(), VerificationError> {
+                Ok(())
+            }
+        }
+
+        let signature = [1; SignatureAlgorithm::ED25519_SIGNATURE_LEN];
+        let envelope = SignedEnvelope::new(
+            (),
+            SignatureEnvelope::new(
+                Digest::new([1; Digest::LEN]),
+                SignatureAlgorithm::Ed25519,
+                &signature,
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            )?,
+        );
+        let policy = ExactAlgorithmPolicy::new(SignatureAlgorithm::HybridEd25519MlDsa65);
+
+        assert_eq!(
+            envelope.verify_detached_bytes_exact(
+                &AcceptingVerifier,
+                policy,
+                b"payload",
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(VerificationError::AlgorithmNotAdmitted)
         );
         Ok(())
     }

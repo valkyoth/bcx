@@ -296,10 +296,10 @@ Deliverables:
 - protocol version,
 - realm,
 - subject,
-- optional audience,
+- optional audience type and signed audience binding,
 - parents,
 - policy references,
-- validity window,
+- validity window field shape,
 - replay policy reference,
 - disclosure policy reference,
 - payload/body.
@@ -307,7 +307,7 @@ Deliverables:
 Verification:
 
 - constructor tests,
-- invalid audience and expiry tests.
+- invalid audience and expiry shape tests.
 
 Exit criteria:
 
@@ -520,6 +520,7 @@ Goal: make replay resistance explicit before any carrier profile exists.
 Deliverables:
 
 - validity window,
+- expiry/freshness type with overflow-safe remaining-time checks,
 - nonce policy,
 - issuer sequence policy,
 - idempotency policy,
@@ -628,8 +629,8 @@ Deliverables:
 
 - statement ID verification,
 - required field checks,
-- audience checks,
-- expiry checks,
+- audience binding checks,
+- expiry/freshness checks,
 - policy reference checks.
 
 Verification:

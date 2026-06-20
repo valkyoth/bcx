@@ -102,6 +102,10 @@ macro_rules! define_identifier {
 }
 
 /// Fixed-width digest used for protocol commitments.
+///
+/// `Digest` is `Copy` for ergonomic identifier wrappers and therefore cannot
+/// zero its backing bytes on drop. Use [`ZeroizedDigest`] at processing
+/// boundaries where digest residue must not survive the scope.
 #[derive(Clone, Copy, Eq)]
 pub struct Digest([u8; Self::LEN]);
 
@@ -151,6 +155,64 @@ impl core::hash::Hash for Digest {
 impl core::fmt::Debug for Digest {
     fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         formatter.write_str("Digest(..)")
+    }
+}
+
+/// Digest wrapper that clears its backing bytes when dropped.
+///
+/// Use this for key identifiers, event commitments, or capability references
+/// held at a boundary where memory residue is part of the threat model. The
+/// base [`Digest`] remains `Copy`; this wrapper intentionally does not.
+#[derive(Eq)]
+pub struct ZeroizedDigest(Digest);
+
+impl ZeroizedDigest {
+    /// Wraps a digest so its local backing bytes are cleared on drop.
+    #[must_use]
+    pub const fn new(digest: Digest) -> Self {
+        Self(digest)
+    }
+
+    /// Returns a copy of the wrapped digest.
+    #[must_use]
+    pub const fn digest(&self) -> Digest {
+        self.0
+    }
+
+    /// Returns the wrapped digest bytes.
+    #[must_use]
+    pub const fn as_bytes(&self) -> &[u8; Digest::LEN] {
+        self.0.as_bytes()
+    }
+
+    /// Compares two wrapped digests without data-dependent early exit.
+    #[must_use]
+    pub fn ct_eq(&self, other: &Self) -> bool {
+        self.0.ct_eq(&other.0)
+    }
+}
+
+impl From<Digest> for ZeroizedDigest {
+    fn from(digest: Digest) -> Self {
+        Self::new(digest)
+    }
+}
+
+impl PartialEq for ZeroizedDigest {
+    fn eq(&self, other: &Self) -> bool {
+        self.ct_eq(other)
+    }
+}
+
+impl Drop for ZeroizedDigest {
+    fn drop(&mut self) {
+        self.0.0.zeroize();
+    }
+}
+
+impl core::fmt::Debug for ZeroizedDigest {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        formatter.write_str("ZeroizedDigest(..)")
     }
 }
 

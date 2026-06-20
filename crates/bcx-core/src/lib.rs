@@ -11,6 +11,7 @@ pub use error::ValidationError;
 pub use ids::{
     CapabilityRef, CheckpointId, Digest, EventId, NativeBindingId, Nonce, OperationSequence,
     PolicyEpoch, PolicyId, ProfileId, ProofSuiteId, RealmId, StatementId, SubjectId,
+    ZeroizedDigest,
 };
 
 #[cfg(test)]
@@ -32,6 +33,17 @@ mod tests {
 
         assert!(left.ct_eq(&same));
         assert!(!left.ct_eq(&different));
+    }
+
+    #[test]
+    fn zeroized_digest_exposes_redacted_boundary_wrapper() {
+        let wrapped = ZeroizedDigest::new(Digest::new([7; Digest::LEN]));
+        let same = ZeroizedDigest::new(Digest::new([7; Digest::LEN]));
+
+        assert_eq!(wrapped.as_bytes(), &[7; Digest::LEN]);
+        assert_eq!(wrapped.digest(), Digest::new([7; Digest::LEN]));
+        assert!(wrapped.ct_eq(&same));
+        assert_eq!(format!("{wrapped:?}"), String::from("ZeroizedDigest(..)"));
     }
 
     #[test]

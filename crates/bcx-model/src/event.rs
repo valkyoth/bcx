@@ -102,6 +102,10 @@ pub struct CauseCapsuleParts<'a> {
     /// Local event identifier.
     pub event_id: EventId,
     /// Parent event identifiers.
+    ///
+    /// The compact capsule uses the same [`RelationshipKind`] for every
+    /// parent. Use separate capsules when parents need different relationship
+    /// meanings.
     pub parents: &'a [EventId],
     /// Relationship used for every parent in this compact capsule.
     pub relationship: RelationshipKind,
@@ -129,10 +133,7 @@ pub struct CauseCapsule<'a> {
 
 impl<'a> CauseCapsule<'a> {
     /// Creates a validated compact cause capsule.
-    pub const fn new(
-        parts: CauseCapsuleParts<'a>,
-        limits: WireLimits,
-    ) -> Result<Self, ValidationError> {
+    pub fn new(parts: CauseCapsuleParts<'a>, limits: WireLimits) -> Result<Self, ValidationError> {
         let capsule = Self {
             event_id: parts.event_id,
             parents: parts.parents,
@@ -148,16 +149,18 @@ impl<'a> CauseCapsule<'a> {
         }
     }
 
-    /// Validates bounded capsule shape.
-    pub const fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
+    /// Validates bounded capsule shape and rejects direct self-parent cycles.
+    pub fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
         if self.parents.is_empty() {
             return Err(ValidationError::Empty);
         }
         if self.parents.len() > limits.maximum_parent_events() {
-            Err(ValidationError::TooLarge)
-        } else {
-            Ok(())
+            return Err(ValidationError::TooLarge);
         }
+        if self.parents.iter().any(|parent| parent == &self.event_id) {
+            return Err(ValidationError::Malformed);
+        }
+        Ok(())
     }
 
     /// Returns the local event identifier.
