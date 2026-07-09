@@ -11,7 +11,7 @@ default-members = ["."]
 resolver = "3"
 
 [workspace.package]
-version = "0.4.0"
+version = "0.5.0"
 edition = "2024"
 rust-version = "1.90"
 license = "EUPL-1.2"
@@ -37,7 +37,7 @@ zeroize = { version = "1.9.0", default-features = false }
 
 [package]
 name = "bcx"
-version = "0.4.0"
+version = "0.5.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -60,11 +60,11 @@ alloc = [
 std = ["alloc"]
 
 [dependencies]
-bcx-core = { version = "0.4.0", path = "crates/bcx-core", default-features = false }
-bcx-crypto = { version = "0.4.0", path = "crates/bcx-crypto", default-features = false }
-bcx-model = { version = "0.4.0", path = "crates/bcx-model", default-features = false }
-bcx-policy = { version = "0.4.0", path = "crates/bcx-policy", default-features = false }
-bcx-wire = { version = "0.4.0", path = "crates/bcx-wire", default-features = false }
+bcx-core = { version = "0.5.0", path = "crates/bcx-core", default-features = false }
+bcx-crypto = { version = "0.5.0", path = "crates/bcx-crypto", default-features = false }
+bcx-model = { version = "0.5.0", path = "crates/bcx-model", default-features = false }
+bcx-policy = { version = "0.5.0", path = "crates/bcx-policy", default-features = false }
+bcx-wire = { version = "0.5.0", path = "crates/bcx-wire", default-features = false }
 
 [lints]
 workspace = true

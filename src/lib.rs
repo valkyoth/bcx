@@ -23,8 +23,9 @@ pub mod prelude {
         VerificationError, Verifier,
     };
     pub use bcx_model::{
-        Admission, AdmissionResult, AssuranceLevel, CauseKind, Checkpoint, Contradiction,
-        Delegation, Effect, EffectResult, Intent, OperationAction, RelationshipKind, Revocation,
+        Admission, AdmissionResult, AssuranceLevel, CausalCycleGuard, CausalEdge, CausalEdgeSet,
+        CausalEdgeSetParts, CauseKind, Checkpoint, Contradiction, Delegation, Effect, EffectResult,
+        Intent, NoKnownCycles, OperationAction, ParentStatus, RelationshipKind, Revocation,
         StatementKind, TruthStatus,
     };
     pub use bcx_policy::{DisclosureLevel, ProofLevel, ProtocolProfile};

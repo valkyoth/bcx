@@ -4,7 +4,19 @@ All notable BCX changes will be documented here.
 
 ## Unreleased
 
-## 0.4.0 - Unreleased
+## 0.5.0 - Unreleased
+
+- Add no-std `CausalEdge`, `CausalEdgeSet`, `CausalEdgeSetParts`,
+  `ParentStatus`, `CausalCycleGuard`, and `NoKnownCycles`.
+- Validate causal edge sets for empty parents, parent-count bounds,
+  self-parent cycles, duplicate parents, and caller-reported graph cycles.
+- Represent missing parents explicitly for offline or partial graph
+  explanation flows.
+- Move all current workspace packages to package version `0.5.0`.
+- Count crate README files as package content in the crate version matrix
+  guard.
+
+## 0.4.0 - 2026-06-20
 
 - Add no-std `StatementKind`, `Intent`, `Admission`, `Effect`, `Delegation`,
   `Revocation`, `Checkpoint`, and `Contradiction`.

@@ -56,6 +56,8 @@ Implemented now:
   requirements at the BCX trait boundary.
 - first statement body vocabulary: intent, admission, effect, delegation,
   revocation, checkpoint, and contradiction.
+- explicit causal edge sets with per-parent relationship kinds, missing-parent
+  markers, duplicate-parent rejection, and cycle-prevention hooks.
 - crate version matrix for independent subcrate publication.
 - local check script, modularity guard, release metadata guard, and GitHub CI.
 - implementation, version, protocol-family, threat-model, toolchain,
@@ -113,7 +115,7 @@ Compatibility evidence:
 
 ```toml
 [dependencies]
-bcx = "0.4.0"
+bcx = "0.5.0"
 ```
 
 Default builds are `no_std`.
@@ -122,14 +124,14 @@ For heap-enabled future APIs and dependent crate `alloc` surfaces:
 
 ```toml
 [dependencies]
-bcx = { version = "0.4.0", features = ["alloc"] }
+bcx = { version = "0.5.0", features = ["alloc"] }
 ```
 
 For `std` applications:
 
 ```toml
 [dependencies]
-bcx = { version = "0.4.0", features = ["std"] }
+bcx = { version = "0.5.0", features = ["std"] }
 ```
 
 ## Features

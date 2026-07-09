@@ -189,12 +189,16 @@ def manifest_content_changed_since(tag: str, manifest: str) -> bool:
 def package_content_changed(path: str, manifest: str, tag: str, changed: set[str]) -> bool:
     if path == ".":
         prefixes = ("src/",)
+        package_files = ("Cargo.toml", "README.md")
         manifest_path = "Cargo.toml"
     else:
         prefixes = (f"{path}/src/",)
+        package_files = (f"{path}/Cargo.toml", f"{path}/README.md")
         manifest_path = f"{path}/Cargo.toml"
 
     if any(item.startswith(prefixes) for item in changed):
+        return True
+    if any(item in changed for item in package_files if item != manifest_path):
         return True
     if manifest_path in changed:
         return manifest_content_changed_since(tag, manifest)

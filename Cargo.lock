@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "bcx"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bcx-core",
  "bcx-crypto",
@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "bcx-core"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "subtle",
  "zeroize",
@@ -23,7 +23,7 @@ dependencies = [
 
 [[package]]
 name = "bcx-crypto"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bcx-core",
  "bcx-wire",
@@ -31,7 +31,7 @@ dependencies = [
 
 [[package]]
 name = "bcx-model"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bcx-core",
  "bcx-wire",
@@ -39,11 +39,11 @@ dependencies = [
 
 [[package]]
 name = "bcx-policy"
-version = "0.4.0"
+version = "0.5.0"
 
 [[package]]
 name = "bcx-wire"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bcx-core",
 ]

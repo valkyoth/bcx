@@ -6,7 +6,8 @@ mod statement;
 mod truth;
 
 pub use event::{
-    AdmissionResult, CauseCapsule, CauseCapsuleParts, CauseKind, EffectResult, OperationAction,
+    AdmissionResult, CausalCycleGuard, CausalEdge, CausalEdgeSet, CausalEdgeSetParts, CauseCapsule,
+    CauseCapsuleParts, CauseKind, EffectResult, NoKnownCycles, OperationAction, ParentStatus,
     RelationshipKind,
 };
 pub use statement::{
@@ -107,6 +108,130 @@ mod tests {
                     policy_epoch: None,
                 },
                 WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(ValidationError::Malformed)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn causal_edge_set_accepts_multi_parent_fixture() -> Result<(), ValidationError> {
+        let edges = [
+            CausalEdge::present(event(2)?, RelationshipKind::CausedBy),
+            CausalEdge::present(event(3)?, RelationshipKind::DelegatedFrom),
+            CausalEdge::missing(event(4)?, RelationshipKind::JoinedFrom),
+        ];
+        let edge_set = CausalEdgeSet::new(
+            CausalEdgeSetParts {
+                event_id: event(1)?,
+                edges: &edges,
+            },
+            WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+        )?;
+
+        assert_eq!(edge_set.event_id(), event(1)?);
+        assert_eq!(edge_set.edges().len(), 3);
+        assert_eq!(
+            edge_set.edges()[1].relationship(),
+            RelationshipKind::DelegatedFrom
+        );
+        assert_eq!(edge_set.edges()[2].parent_status(), ParentStatus::Missing);
+        assert!(edge_set.has_missing_parent());
+        Ok(())
+    }
+
+    #[test]
+    fn causal_edge_set_rejects_shape_violations() -> Result<(), ValidationError> {
+        let event_id = event(1)?;
+        let duplicate_parent = event(2)?;
+        let duplicates = [
+            CausalEdge::present(duplicate_parent, RelationshipKind::CausedBy),
+            CausalEdge::present(duplicate_parent, RelationshipKind::RetryOf),
+        ];
+        let self_parent = [CausalEdge::present(event_id, RelationshipKind::CausedBy)];
+
+        assert_eq!(
+            CausalEdgeSet::new(
+                CausalEdgeSetParts {
+                    event_id,
+                    edges: &[],
+                },
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(ValidationError::Empty)
+        );
+        assert_eq!(
+            CausalEdgeSet::new(
+                CausalEdgeSetParts {
+                    event_id,
+                    edges: &self_parent,
+                },
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(ValidationError::Malformed)
+        );
+        assert_eq!(
+            CausalEdgeSet::new(
+                CausalEdgeSetParts {
+                    event_id,
+                    edges: &duplicates,
+                },
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(ValidationError::Malformed)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn causal_edge_set_rejects_too_many_edges() -> Result<(), ValidationError> {
+        let edges = [
+            CausalEdge::present(event(2)?, RelationshipKind::CausedBy),
+            CausalEdge::present(event(3)?, RelationshipKind::JoinedFrom),
+        ];
+        let limits = WireLimits::new(1, 1, 1, 1)?;
+
+        assert_eq!(
+            CausalEdgeSet::new(
+                CausalEdgeSetParts {
+                    event_id: event(1)?,
+                    edges: &edges,
+                },
+                limits,
+            ),
+            Err(ValidationError::TooLarge)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn causal_edge_set_uses_cycle_guard_hook() -> Result<(), ValidationError> {
+        struct RejectParent {
+            parent: EventId,
+        }
+
+        impl CausalCycleGuard for RejectParent {
+            fn would_create_cycle(&self, _child: EventId, parent: EventId) -> bool {
+                parent == self.parent
+            }
+        }
+
+        let rejected_parent = event(2)?;
+        let edges = [CausalEdge::present(
+            rejected_parent,
+            RelationshipKind::DerivedFrom,
+        )];
+
+        assert_eq!(
+            CausalEdgeSet::new_with_cycle_guard(
+                CausalEdgeSetParts {
+                    event_id: event(1)?,
+                    edges: &edges,
+                },
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+                &RejectParent {
+                    parent: rejected_parent,
+                },
             ),
             Err(ValidationError::Malformed)
         );

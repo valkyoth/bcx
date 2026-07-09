@@ -18,6 +18,179 @@ pub enum RelationshipKind {
     JoinedFrom,
 }
 
+/// Whether a referenced parent event is available to the local verifier.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ParentStatus {
+    /// The parent event is available for verification or explanation.
+    Present,
+    /// The parent event is referenced but unavailable at this boundary.
+    Missing,
+}
+
+impl ParentStatus {
+    /// Returns true when the parent event is unavailable.
+    #[must_use]
+    pub const fn is_missing(self) -> bool {
+        matches!(self, Self::Missing)
+    }
+}
+
+/// One explicit causal edge from an event to a parent event.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CausalEdge {
+    parent: EventId,
+    relationship: RelationshipKind,
+    parent_status: ParentStatus,
+}
+
+impl CausalEdge {
+    /// Creates an edge whose parent is available locally.
+    #[must_use]
+    pub const fn present(parent: EventId, relationship: RelationshipKind) -> Self {
+        Self {
+            parent,
+            relationship,
+            parent_status: ParentStatus::Present,
+        }
+    }
+
+    /// Creates an edge whose parent is referenced but missing locally.
+    #[must_use]
+    pub const fn missing(parent: EventId, relationship: RelationshipKind) -> Self {
+        Self {
+            parent,
+            relationship,
+            parent_status: ParentStatus::Missing,
+        }
+    }
+
+    /// Returns the parent event identifier.
+    #[must_use]
+    pub const fn parent(self) -> EventId {
+        self.parent
+    }
+
+    /// Returns the relationship to the parent.
+    #[must_use]
+    pub const fn relationship(self) -> RelationshipKind {
+        self.relationship
+    }
+
+    /// Returns the local parent availability status.
+    #[must_use]
+    pub const fn parent_status(self) -> ParentStatus {
+        self.parent_status
+    }
+}
+
+/// Caller-provided graph hook for cycle prevention beyond direct self-parent checks.
+pub trait CausalCycleGuard {
+    /// Returns true when adding `child -> parent` would create a causal cycle.
+    fn would_create_cycle(&self, child: EventId, parent: EventId) -> bool;
+}
+
+/// Cycle guard for contexts that have no additional graph knowledge yet.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct NoKnownCycles;
+
+impl CausalCycleGuard for NoKnownCycles {
+    fn would_create_cycle(&self, _child: EventId, _parent: EventId) -> bool {
+        false
+    }
+}
+
+/// Input fields for a validated causal edge set.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CausalEdgeSetParts<'a> {
+    /// Local event identifier.
+    pub event_id: EventId,
+    /// Per-parent causal edges.
+    pub edges: &'a [CausalEdge],
+}
+
+/// Validated causal edges for one event.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CausalEdgeSet<'a> {
+    event_id: EventId,
+    edges: &'a [CausalEdge],
+}
+
+impl<'a> CausalEdgeSet<'a> {
+    /// Creates a validated causal edge set with direct cycle checks.
+    pub fn new(parts: CausalEdgeSetParts<'a>, limits: WireLimits) -> Result<Self, ValidationError> {
+        Self::new_with_cycle_guard(parts, limits, &NoKnownCycles)
+    }
+
+    /// Creates a validated causal edge set using a caller-provided cycle guard.
+    pub fn new_with_cycle_guard<G: CausalCycleGuard>(
+        parts: CausalEdgeSetParts<'a>,
+        limits: WireLimits,
+        cycle_guard: &G,
+    ) -> Result<Self, ValidationError> {
+        let edge_set = Self {
+            event_id: parts.event_id,
+            edges: parts.edges,
+        };
+        edge_set.validate_with_cycle_guard(limits, cycle_guard)?;
+        Ok(edge_set)
+    }
+
+    /// Validates bounded edge shape with direct cycle and duplicate checks.
+    pub fn validate(&self, limits: WireLimits) -> Result<(), ValidationError> {
+        self.validate_with_cycle_guard(limits, &NoKnownCycles)
+    }
+
+    /// Validates bounded edge shape and asks `cycle_guard` about graph cycles.
+    pub fn validate_with_cycle_guard<G: CausalCycleGuard>(
+        &self,
+        limits: WireLimits,
+        cycle_guard: &G,
+    ) -> Result<(), ValidationError> {
+        if self.edges.is_empty() {
+            return Err(ValidationError::Empty);
+        }
+        if self.edges.len() > limits.maximum_parent_events() {
+            return Err(ValidationError::TooLarge);
+        }
+        let mut index = 0;
+        while index < self.edges.len() {
+            let parent = self.edges[index].parent;
+            if parent == self.event_id || cycle_guard.would_create_cycle(self.event_id, parent) {
+                return Err(ValidationError::Malformed);
+            }
+            let mut duplicate_index = index + 1;
+            while duplicate_index < self.edges.len() {
+                if parent == self.edges[duplicate_index].parent {
+                    return Err(ValidationError::Malformed);
+                }
+                duplicate_index += 1;
+            }
+            index += 1;
+        }
+        Ok(())
+    }
+
+    /// Returns the local event identifier.
+    #[must_use]
+    pub const fn event_id(&self) -> EventId {
+        self.event_id
+    }
+
+    /// Returns validated causal edges.
+    #[must_use]
+    pub const fn edges(&self) -> &'a [CausalEdge] {
+        self.edges
+    }
+
+    /// Returns true when at least one parent is referenced but missing locally.
+    #[must_use]
+    pub fn has_missing_parent(&self) -> bool {
+        self.edges
+            .iter()
+            .any(|edge| edge.parent_status().is_missing())
+    }
+}
+
 /// Observable cause class for an operation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CauseKind {
