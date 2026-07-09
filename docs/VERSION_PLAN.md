@@ -143,6 +143,25 @@ pentest for the evidence commit itself.
 
 Never commit root `PENTEST.md`; it is scratch input and is ignored by git.
 
+## Completeness Review Register
+
+Every planning, implementation, and pentest pass must check this register for
+implied work that is not assigned to a release. If a row affects the `1.0.0`
+foundation scope, it must have a concrete pre-1.0 milestone before work
+continues past the relevant dependency point.
+
+| Gap | Resolution |
+| --- | --- |
+| The tokenless semantic-overlay position could be read as philosophy rather than an enforceable design contract. | Added `v0.52.0 - Tokenless Operation Contract`. |
+| `bcx-state` was named as a future crate but did not have implementation milestones. | Added `v0.53.0` through `v0.57.0` for deterministic state contracts, crate skeleton, local transitions, program identity, and effect proof inputs. |
+| Smart-contract-like local execution was implied by state and proof crates but not versioned. | Added `v0.65.0 - Local Contract Workflow Fixture` and `v0.66.0 - Tokenless Offline Institution Demo`. |
+| COSE was listed as the likely proof foundation but not assigned to a crate milestone. | Added `v0.58.0 - COSE Proof Crate`. |
+| Threshold witness proofs were listed as future but not assigned to a concrete release. | Added `v0.59.0 - Threshold Proof Crate`. |
+| ZK proof integrations were named but did not have provider-boundary and implementation milestones. | Added `v0.60.0` through `v0.62.0` for the ZK proof contract, SP1 provider crate, and RISC Zero provider crate. |
+| `bcx-witness` was named as a service but did not have a profile contract or service milestone. | Added `v0.63.0 - Witness Service Contract` and `v0.64.0 - Witness Service Skeleton`. |
+| Blockchain-independent double-spend/order prevention needed an explicit non-chain path. | Added witness, threshold proof, offline demo, and settlement-policy milestones before public-chain profiles become the only examples. |
+| The `1.0.0` scope did not explicitly require local deterministic execution and tokenless proof workflows. | Updated the `1.0.0` required scope with deterministic state, COSE, threshold witness, and local contract workflow evidence. |
+
 ## Phase 0: Published Foundation And Direction Pivot
 
 ### v0.1.0 - Repository Foundation
@@ -385,14 +404,15 @@ Exit criteria:
 
 ## Phase 2: Canonical Codec And Test Vectors
 
-### v0.11.0 - Canonical Codec Decision
+### v0.11.0 - Canonical CBOR Codec Contract
 
-Goal: formally choose the first canonical binary representation.
+Goal: define deterministic CBOR as the first canonical binary representation.
 
 Deliverables:
 
-- encoding decision record,
-- deterministic CBOR admission review if selected,
+- deterministic CBOR security contract,
+- canonical map ordering rules,
+- integer and byte-string canonicality rules,
 - JSON inspection boundary,
 - no-std and alloc impact analysis,
 - dependency admission notes.
@@ -400,7 +420,7 @@ Deliverables:
 Verification:
 
 - docs checks,
-- dependency policy review if a crate is admitted.
+- dependency policy review for the CBOR crate admission.
 
 Exit criteria:
 
@@ -1098,16 +1118,16 @@ Exit criteria:
 
 - telemetry remains operational context, not cryptographic evidence.
 
-### v0.45.0 - Bitcoin Profile Decision
+### v0.45.0 - Bitcoin Anchoring Profile Contract
 
-Goal: decide whether and how Bitcoin fits as anchoring, settlement, or payment
-evidence.
+Goal: define how Bitcoin fits as anchoring and payment evidence.
 
 Deliverables:
 
-- security contract draft,
+- security contract,
 - finality model,
 - transaction commitment model,
+- output and script commitment rules,
 - privacy review,
 - dependency plan.
 
@@ -1118,17 +1138,19 @@ Verification:
 
 Exit criteria:
 
-- Bitcoin is either scoped clearly or deferred with reasons.
+- Bitcoin has a concrete BCX profile contract before any Bitcoin crate is
+  implemented.
 
-### v0.46.0 - XRP Profile Decision
+### v0.46.0 - XRP Payment Evidence Profile Contract
 
-Goal: decide whether and how XRP Ledger fits as payment or settlement evidence.
+Goal: define how XRP Ledger fits as payment and settlement evidence.
 
 Deliverables:
 
-- security contract draft,
+- security contract,
 - ledger finality model,
 - transaction evidence model,
+- destination tag and memo commitment rules,
 - account and memo privacy review,
 - dependency plan.
 
@@ -1139,7 +1161,7 @@ Verification:
 
 Exit criteria:
 
-- XRP is either scoped clearly or deferred with reasons.
+- XRP has a concrete BCX profile contract before any XRP crate is implemented.
 
 ## Phase 9: Conformance And Registry
 
@@ -1247,9 +1269,342 @@ Exit criteria:
 
 - agent workflows can use BCX without weakening the core.
 
-## Phase 11: Hardening Toward 1.0
+## Phase 11: Tokenless Local Execution And Proofs
 
-### v0.52.0 - Fuzzing And Negative Corpus
+### v0.52.0 - Tokenless Operation Contract
+
+Goal: make the no-token, no-global-validator BCX operating model normative.
+
+Deliverables:
+
+- tokenless operation contract,
+- external security-budget model,
+- local admission and rate-limit assumptions,
+- public-chain anchoring boundary,
+- private witness boundary.
+
+Verification:
+
+- docs checks,
+- threat-model update,
+- security-controls update.
+
+Exit criteria:
+
+- BCX clearly states that it does not run validators, mint a token, or require
+  a blockchain for local proof-carrying operation.
+
+### v0.53.0 - Deterministic State Contract
+
+Goal: define `bcx-state` before implementation.
+
+Deliverables:
+
+- deterministic state transition contract,
+- state root vocabulary,
+- input commitment rules,
+- output commitment rules,
+- fail-closed non-determinism rules.
+
+Verification:
+
+- docs checks,
+- adversarial determinism review.
+
+Exit criteria:
+
+- local state execution has a written security contract before any state crate
+  exists.
+
+### v0.54.0 - State Crate Skeleton
+
+Goal: add `bcx-state` as a dependency-light core crate.
+
+Deliverables:
+
+- crate scaffold,
+- state transition trait,
+- state root type,
+- transition input and output bounds,
+- deterministic test state.
+
+Verification:
+
+- `cargo test -p bcx-state`
+- `cargo test --workspace --no-default-features`
+
+Exit criteria:
+
+- BCX can model local state transitions without pulling in a runtime, database,
+  VM, or blockchain dependency.
+
+### v0.55.0 - Local State Transition Verification
+
+Goal: verify deterministic state transitions as BCX effects.
+
+Deliverables:
+
+- transition verifier,
+- pre-state and post-state commitment checks,
+- transition effect binding,
+- mutation tests.
+
+Verification:
+
+- valid transition fixture tests,
+- mutated input, output, and state-root tests.
+
+Exit criteria:
+
+- a local transition can produce a verifiable `Effect` without global
+  execution.
+
+### v0.56.0 - Program Identity And Admission
+
+Goal: bind local contract-like programs to explicit BCX admission.
+
+Deliverables:
+
+- program identifier type,
+- program version commitment,
+- admission policy link,
+- deterministic input schema commitment,
+- program downgrade rejection tests.
+
+Verification:
+
+- `cargo test -p bcx-state`
+- downgrade and wrong-program fixtures.
+
+Exit criteria:
+
+- a state transition is admitted for one exact program identity and cannot be
+  silently reinterpreted as another program.
+
+### v0.57.0 - Effect Proof Inputs
+
+Goal: define common public inputs for local and ZK effect proofs.
+
+Deliverables:
+
+- effect proof input model,
+- statement ID input,
+- program ID input,
+- pre-state and post-state inputs,
+- admission ID input,
+- canonical input ordering.
+
+Verification:
+
+- proof input fixture tests,
+- ordering mutation tests.
+
+Exit criteria:
+
+- every proof provider can consume the same BCX effect-proof input shape.
+
+### v0.58.0 - COSE Proof Crate
+
+Goal: add `bcx-proof-cose` as the first standard proof-suite crate.
+
+Deliverables:
+
+- COSE proof-suite identifiers,
+- COSE signature envelope binding,
+- detached payload verification boundary,
+- key identifier binding,
+- negative fixtures.
+
+Verification:
+
+- `cargo test -p bcx-proof-cose`
+- malformed COSE fixture tests.
+
+Exit criteria:
+
+- BCX has a standard, deterministic signing proof suite before `1.0.0`.
+
+### v0.59.0 - Threshold Proof Crate
+
+Goal: add `bcx-proof-threshold` for private witness and institutional notary
+sets.
+
+Deliverables:
+
+- threshold policy vocabulary,
+- signer set commitment,
+- threshold count validation,
+- witness signature bundle model,
+- duplicate signer rejection.
+
+Verification:
+
+- `cargo test -p bcx-proof-threshold`
+- threshold mutation tests.
+
+Exit criteria:
+
+- a checkpoint can be witnessed by a private or federated group without using a
+  public blockchain.
+
+### v0.60.0 - ZK Proof Provider Contract
+
+Goal: define ZK proof integration rules before provider crates exist.
+
+Deliverables:
+
+- ZK proof provider trait,
+- proof system identifier,
+- program verification key commitment,
+- public input binding,
+- privacy and side-channel notes.
+
+Verification:
+
+- docs checks,
+- provider-boundary tests with a deterministic fake provider.
+
+Exit criteria:
+
+- ZK providers can plug into BCX without changing statement, effect, or
+  checkpoint semantics.
+
+### v0.61.0 - SP1 Proof Provider Crate
+
+Goal: add `bcx-proof-sp1` as an optional SP1 integration crate.
+
+Deliverables:
+
+- SP1 proof-suite identifier,
+- verification key commitment,
+- proof byte bounds,
+- public input adapter,
+- mocked verifier tests.
+
+Verification:
+
+- `cargo test -p bcx-proof-sp1`
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX can verify SP1-produced effect proofs through an optional provider
+  boundary.
+
+### v0.62.0 - RISC Zero Proof Provider Crate
+
+Goal: add `bcx-proof-risc0` as an optional RISC Zero integration crate.
+
+Deliverables:
+
+- RISC Zero proof-suite identifier,
+- image ID commitment,
+- receipt byte bounds,
+- public input adapter,
+- mocked verifier tests.
+
+Verification:
+
+- `cargo test -p bcx-proof-risc0`
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX can verify RISC Zero-produced effect proofs through an optional provider
+  boundary.
+
+### v0.63.0 - Witness Service Contract
+
+Goal: define `bcx-witness` before implementation.
+
+Deliverables:
+
+- witness service security contract,
+- checkpoint admission rules,
+- timestamp and ordering policy,
+- duplicate statement policy,
+- privacy and retention policy.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- non-chain ordering and double-spend prevention have a written BCX contract.
+
+### v0.64.0 - Witness Service Skeleton
+
+Goal: add `bcx-witness` as an optional service crate.
+
+Deliverables:
+
+- service crate scaffold,
+- in-memory witness store for tests,
+- checkpoint request model,
+- threshold proof output hook,
+- duplicate checkpoint rejection.
+
+Verification:
+
+- `cargo test -p bcx-witness`
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX has a local/federated witness path that does not depend on Ethereum,
+  Cardano, Bitcoin, or XRP.
+
+### v0.65.0 - Local Contract Workflow Fixture
+
+Goal: demonstrate smart-contract-like BCX operation without a blockchain.
+
+Deliverables:
+
+- local program fixture,
+- intent fixture,
+- admission fixture,
+- state transition effect fixture,
+- proof bundle fixture,
+- explanation output.
+
+Verification:
+
+- local workflow smoke test,
+- tamper tests for program ID, admission ID, state roots, and proof inputs.
+
+Exit criteria:
+
+- BCX can show `Intent -> Admission -> Effect` for deterministic local logic
+  with verifiable proof evidence and no global VM.
+
+### v0.66.0 - Tokenless Offline Institution Demo
+
+Goal: prove a complete tokenless BCX path between known parties.
+
+Deliverables:
+
+- offline bundle,
+- local deterministic effect,
+- COSE attestation,
+- threshold witness checkpoint,
+- WHY explanation bundle,
+- replay and duplicate rejection fixture.
+
+Verification:
+
+- end-to-end offline smoke script,
+- tamper and replay tests.
+
+Exit criteria:
+
+- BCX demonstrates a free, tokenless, blockchain-independent workflow before
+  relying on public-chain settlement profiles.
+
+## Phase 12: Hardening Toward 1.0
+
+### v0.90.0 - Fuzzing And Negative Corpus
 
 Goal: expand malformed input and mutation testing.
 
@@ -1258,7 +1613,8 @@ Deliverables:
 - fuzz harness plan,
 - malformed corpus,
 - decode and verification negative corpus,
-- CI integration if tooling is stable.
+- CI integration plan,
+- deterministic corpus regression tests.
 
 Verification:
 
@@ -1269,7 +1625,7 @@ Exit criteria:
 
 - known malformed cases fail closed.
 
-### v0.53.0 - MSRV Matrix Evidence
+### v0.91.0 - MSRV Matrix Evidence
 
 Goal: prove Rust `1.90.0` through `1.96.0` compatibility.
 
@@ -1287,7 +1643,7 @@ Exit criteria:
 
 - MSRV support is evidence-based, not aspirational.
 
-### v0.54.0 - no_std And Dependency Audit
+### v0.92.0 - no_std And Dependency Audit
 
 Goal: verify the core remains no-std and dependency-light.
 
@@ -1305,9 +1661,10 @@ Verification:
 
 Exit criteria:
 
-- root/core crates do not accidentally pull transport or runtime dependencies.
+- root/core crates do not accidentally pull transport, runtime, database, VM,
+  proof-provider, or blockchain dependencies.
 
-### v0.55.0 - Security Specification Draft
+### v0.93.0 - Security Specification Draft
 
 Goal: turn implementation docs into normative specs.
 
@@ -1315,7 +1672,8 @@ Deliverables:
 
 - `BCX-CORE/1` draft,
 - `BCX-CODEC-CBOR/1` draft,
-- `BCX-PROOF-COSE/1` draft if COSE is admitted,
+- `BCX-PROOF-COSE/1` draft,
+- `BCX-STATE/1` draft,
 - profile spec template.
 
 Verification:
@@ -1327,14 +1685,16 @@ Exit criteria:
 
 - crate behavior is traceable to written protocol requirements.
 
-### v0.56.0 - Interop Demonstration
+### v0.94.0 - Interop Demonstration
 
 Goal: show one logical causal graph across multiple profiles.
 
 Deliverables:
 
 - offline bundle,
+- local state effect,
 - HTTP/Fluxheim evidence,
+- threshold witness checkpoint,
 - Ethereum or Cardano checkpoint receipt,
 - explanation bundle.
 
@@ -1345,9 +1705,10 @@ Verification:
 
 Exit criteria:
 
-- BCX is visibly one causal protocol with several bindings.
+- BCX is visibly one causal protocol with local, witness, carrier, and
+  settlement bindings.
 
-### v0.57.0 - API Freeze Candidate
+### v0.95.0 - API Freeze Candidate
 
 Goal: identify APIs intended to survive into `1.0.0`.
 
@@ -1367,7 +1728,7 @@ Exit criteria:
 
 - no unstable experimental API is accidentally presented as stable.
 
-### v0.58.0 - Release Candidate 1
+### v0.96.0 - Release Candidate 1
 
 Goal: cut the first `1.0.0` candidate.
 
@@ -1387,7 +1748,7 @@ Exit criteria:
 
 - only release-candidate fixes remain before `1.0.0`.
 
-### v0.59.0 - Release Candidate 2
+### v0.97.0 - Release Candidate 2
 
 Goal: resolve RC1 findings and repeat the release audit.
 
@@ -1417,9 +1778,13 @@ Required scope:
 - stable core statement, attestation, binding, checkpoint, and explanation
   vocabulary,
 - canonical encoding and conformance vectors,
-- standard proof-suite boundary,
+- standard COSE proof-suite boundary,
+- deterministic local state transition verification,
+- local contract workflow fixtures,
+- ZK proof provider boundaries for SP1 and RISC Zero,
 - replay, delegation, disclosure, and settlement policy checks,
 - local/offline WHY proof bundles,
+- threshold witness checkpoints for tokenless operation,
 - at least one carrier profile,
 - at least one live integration,
 - at least two checkpoint witness or settlement receipt models,

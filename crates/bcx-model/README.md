@@ -1,3 +1,28 @@
+<p align="center">
+  <b>causal statement model primitives for bcx.</b><br>
+  Intents, admissions, effects, contradictions, assurance states, and bounded causal links.
+</p>
+
+<div align="center">
+  <a href="https://crates.io/crates/bcx">bcx crate</a>
+  |
+  <a href="https://docs.rs/bcx-model">Docs.rs</a>
+  |
+  <a href="https://github.com/valkyoth/bcx/blob/main/docs/VERSION_PLAN.md">Version Plan</a>
+  |
+  <a href="https://github.com/valkyoth/bcx/blob/main/docs/threat-model.md">Threat Model</a>
+  |
+  <a href="https://github.com/valkyoth/bcx/blob/main/SECURITY.md">Security</a>
+</div>
+
+<br>
+
+<p align="center">
+  <a href="https://github.com/valkyoth/bcx">
+    <img src="https://raw.githubusercontent.com/valkyoth/bcx/main/.github/images/bcx.webp" alt="BCX Rust crate overview">
+  </a>
+</p>
+
 # bcx-model
 
 Causal model primitives for the main [`bcx`](https://crates.io/crates/bcx)
