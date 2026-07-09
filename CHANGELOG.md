@@ -15,6 +15,10 @@ All notable BCX changes will be documented here.
 - Move all current workspace packages to package version `0.5.0`.
 - Count crate README files as package content in the crate version matrix
   guard.
+- Update the preferred pinned Rust toolchain to `1.96.1` while retaining
+  compatibility checks from `1.90.0` through `1.96.1`.
+- Require future deferrals in roadmap, release notes, pentest responses, and
+  limitations to name the exact scheduled version or version range.
 
 ## 0.4.0 - 2026-06-20
 

@@ -6,7 +6,7 @@ BCX uses stable Rust.
 
 Baseline:
 
-- Preferred Rust: `1.96.0`
+- Preferred Rust: `1.96.1`
 - MSRV: `1.90.0`
 - Edition: `2024`
 - Resolver: `3`
@@ -26,7 +26,8 @@ Compatibility target:
 | `1.93.0` | `cargo check --all-features` |
 | `1.94.0` | `cargo check --all-features` |
 | `1.95.0` | `cargo check --all-features` |
-| `1.96.0` | full release gate |
+| `1.96.0` | `cargo check --all-features` |
+| `1.96.1` | full release gate |
 
 Before changing Rust versions, dependency versions, CI actions, or security
 tools, re-check current upstream status and document the reason in release
@@ -36,4 +37,4 @@ Normal CI uses `scripts/checks.sh` and must not depend on crates.io or GitHub
 latest-version lookups beyond normal cargo dependency resolution. Before a tag,
 run the matching release gate, such as `scripts/release_0_1_gate.sh`; that gate
 checks latest pinned cargo tools and GitHub Actions pins before compatibility
-checks across Rust `1.90.0` through `1.96.0`.
+checks across Rust `1.90.0` through `1.96.1`.

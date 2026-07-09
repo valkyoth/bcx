@@ -45,6 +45,10 @@ Every release should prefer:
 - bounded parsing and graph traversal before federation,
 - explicit capability-aware APIs even when enforcement is still simple.
 
+No roadmap, release note, pentest response, or limitation may defer work with
+phrases such as "future work", "later", or "deferred" unless it names the exact
+version or version range where the work is scheduled.
+
 No production claim is allowed before `1.0.0`.
 
 ## Crate Package Versioning
@@ -330,7 +334,8 @@ Verification:
 
 Exit criteria:
 
-- one statement shape can later be encoded and bound to any profile.
+- one statement shape is ready for canonical encoding in `v0.14.0` and native
+  binding in `v0.9.0`.
 
 ### v0.8.0 - Attestation Envelope
 
@@ -400,7 +405,8 @@ Verification:
 
 Exit criteria:
 
-- one checkpoint can later have many settlement receipts.
+- one checkpoint is ready for settlement policy in `v0.20.0` and multiple
+  receipt models in `v0.56.0`.
 
 ## Phase 2: Canonical Codec And Test Vectors
 
@@ -639,7 +645,8 @@ Verification:
 
 Exit criteria:
 
-- provider crates can be added later without changing statement semantics.
+- provider crates scheduled from `v0.58.0` through `v0.62.0` can be added
+  without changing statement semantics.
 
 ### v0.22.0 - Statement Verification
 
@@ -1627,7 +1634,7 @@ Exit criteria:
 
 ### v0.91.0 - MSRV Matrix Evidence
 
-Goal: prove Rust `1.90.0` through `1.96.0` compatibility.
+Goal: prove Rust `1.90.0` through `1.96.1` compatibility.
 
 Deliverables:
 

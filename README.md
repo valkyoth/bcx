@@ -80,7 +80,7 @@ Not implemented yet:
 | --- | --- |
 | License | `EUPL-1.2` |
 | MSRV | Rust `1.90.0` |
-| Preferred toolchain | Rust `1.96.0` |
+| Preferred toolchain | Rust `1.96.1` |
 | Default target | `no_std` |
 | Runtime dependencies | small, explicit, and audited |
 | Unsafe policy | `unsafe_code = "forbid"` |
@@ -109,7 +109,8 @@ Compatibility evidence:
 | `1.93.0` | `cargo check --workspace --all-features` |
 | `1.94.0` | `cargo check --workspace --all-features` |
 | `1.95.0` | `cargo check --workspace --all-features` |
-| `1.96.0` | current pinned toolchain |
+| `1.96.0` | `cargo check --workspace --all-features` |
+| `1.96.1` | current pinned toolchain |
 
 ## Install
 

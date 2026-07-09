@@ -38,9 +38,9 @@ Integrations make those bindings usable in real stacks.
 ## Non-Negotiable Engineering Rules
 
 - Root published crate name is `bcx`.
-- Rust stable `1.96.0` is the preferred toolchain.
+- Rust stable `1.96.1` is the preferred toolchain.
 - MSRV is Rust `1.90.0`.
-- Compatibility from Rust `1.90.0` through `1.96.0` must remain explicit in
+- Compatibility from Rust `1.90.0` through `1.96.1` must remain explicit in
   the README evidence table.
 - Edition 2024 and workspace resolver `3`.
 - Core crates are `no_std` by default.

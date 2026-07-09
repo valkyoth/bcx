@@ -30,6 +30,11 @@ multi-parent graphs, offline explanation, and graph-aware cycle prevention.
   README header updates made after `v0.4.0`.
 - Count crate README files as package content in the crate version matrix
   guard.
+- Update the preferred pinned Rust toolchain to `1.96.1`.
+- Expand release-gate compatibility checks to cover Rust `1.90.0` through
+  `1.96.1`.
+- Require every deferral in roadmap, release notes, pentest responses, and
+  limitations to name the exact scheduled version or version range.
 
 ## Known Limitations
 
@@ -38,5 +43,6 @@ multi-parent graphs, offline explanation, and graph-aware cycle prevention.
 - No full graph traversal crate yet.
 - `CausalCycleGuard` is a hook; BCX does not store or traverse a complete graph
   in this release.
-- Missing parents are represented, but recovery and WHY bundle behavior remain
-  future `bcx-explain` work.
+- Missing parents are represented; recovery and WHY bundle behavior are
+  scheduled for `v0.26.0` (`bcx-explain` skeleton) and `v0.27.0`
+  (explanation bundles).
