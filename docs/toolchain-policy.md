@@ -11,7 +11,7 @@ Baseline:
 - Edition: `2024`
 - Resolver: `3`
 - Default build: `no_std`
-- CI security tools: `cargo-deny 0.19.9`, `cargo-audit 0.22.2`
+- CI security tools: `cargo-deny 0.20.0`, `cargo-audit 0.22.2`
 - GitHub Actions: `actions/checkout v7.0.0` pinned by commit SHA.
 - Release publishing helper: `scripts/release_crate.py`.
 - Latest-tool validation runs in version-specific release gates, not normal CI.

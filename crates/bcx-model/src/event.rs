@@ -330,8 +330,20 @@ impl<'a> CauseCapsule<'a> {
         if self.parents.len() > limits.maximum_parent_events() {
             return Err(ValidationError::TooLarge);
         }
-        if self.parents.iter().any(|parent| parent == &self.event_id) {
-            return Err(ValidationError::Malformed);
+        let mut index = 0;
+        while index < self.parents.len() {
+            let parent = self.parents[index];
+            if parent == self.event_id {
+                return Err(ValidationError::Malformed);
+            }
+            let mut duplicate_index = index + 1;
+            while duplicate_index < self.parents.len() {
+                if parent == self.parents[duplicate_index] {
+                    return Err(ValidationError::Malformed);
+                }
+                duplicate_index += 1;
+            }
+            index += 1;
         }
         Ok(())
     }

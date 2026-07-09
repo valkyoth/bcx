@@ -35,6 +35,16 @@ multi-parent graphs, offline explanation, and graph-aware cycle prevention.
   `1.96.1`.
 - Require every deferral in roadmap, release notes, pentest responses, and
   limitations to name the exact scheduled version or version range.
+- Reject duplicate parent identifiers in `CauseCapsule` so compact capsules
+  and explicit causal edge sets enforce the same distinct-parent invariant.
+- Update the pinned CI `cargo-deny` tool to `0.20.0`.
+
+## Security Review
+
+The v0.5.0 pentest reported one medium finding: `CauseCapsule` accepted
+duplicate parent identifiers while `CausalEdgeSet` rejected them. This release
+now rejects duplicate compact parents and includes a regression test for that
+invariant.
 
 ## Known Limitations
 

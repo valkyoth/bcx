@@ -87,7 +87,7 @@ check_checkout_action() {
 }
 
 check_toolchain_doc_mentions() {
-    if ! grep -Eq 'cargo-deny 0\.19\.9' "$toolchain_doc"; then
+    if ! grep -Eq 'cargo-deny 0\.20\.0' "$toolchain_doc"; then
         echo "toolchain policy does not mention pinned cargo-deny version" >&2
         exit 1
     fi

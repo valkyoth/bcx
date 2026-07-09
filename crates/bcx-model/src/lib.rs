@@ -115,6 +115,29 @@ mod tests {
     }
 
     #[test]
+    fn cause_capsule_rejects_duplicate_parents() -> Result<(), ValidationError> {
+        let parent = event(2)?;
+        let parents = [parent, parent];
+
+        assert_eq!(
+            CauseCapsule::new(
+                CauseCapsuleParts {
+                    event_id: event(1)?,
+                    parents: &parents,
+                    relationship: RelationshipKind::JoinedFrom,
+                    cause_kind: CauseKind::ApplicationAction,
+                    action: OperationAction::Execute,
+                    authority: None,
+                    policy_epoch: None,
+                },
+                WireLimits::UNSAFE_DEVELOPMENT_DO_NOT_USE_IN_PRODUCTION,
+            ),
+            Err(ValidationError::Malformed)
+        );
+        Ok(())
+    }
+
+    #[test]
     fn causal_edge_set_accepts_multi_parent_fixture() -> Result<(), ValidationError> {
         let edges = [
             CausalEdge::present(event(2)?, RelationshipKind::CausedBy),

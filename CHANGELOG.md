@@ -19,6 +19,9 @@ All notable BCX changes will be documented here.
   compatibility checks from `1.90.0` through `1.96.1`.
 - Require future deferrals in roadmap, release notes, pentest responses, and
   limitations to name the exact scheduled version or version range.
+- Reject duplicate parent identifiers in `CauseCapsule` so the compact
+  capsule path matches the causal edge set invariant.
+- Update the pinned CI `cargo-deny` tool to `0.20.0`.
 
 ## 0.4.0 - 2026-06-20
 

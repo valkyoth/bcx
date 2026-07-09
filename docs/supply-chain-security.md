@@ -17,7 +17,7 @@ Before admitting a dependency:
 
 Unknown registries and unknown git sources are denied by `deny.toml`.
 
-`cargo-deny 0.19.9` uses `all`, `workspace`, `transitive`, and `none` as the
+`cargo-deny 0.20.0` uses `all`, `workspace`, `transitive`, and `none` as the
 valid values for `unmaintained` and `unsound` advisory coverage. BCX uses
 `all` so those advisory classes are checked across every dependency kind.
 
