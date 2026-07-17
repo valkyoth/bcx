@@ -37,8 +37,15 @@ internal motive.
 - Admission rejection mislabeled as effect failure.
 - Duplicate delivery creating a new effect attempt.
 - Retry amplification through unlimited effect attempts.
+- Retrying after policy or revocation roots changed without rechecking
+  admission authority.
 - Retry and reconciliation of an indeterminate attempt treated as the same
   operation.
+- Admission-level indeterminate resolution jumping directly to effect
+  execution.
+- Effect-level indeterminate resolution manufacturing admission after the fact.
+- Profile completion rules that overclaim finality or ignore pending attempts,
+  compensation, reorg, or receipt invalidation.
 - Effect-attempt state hiding operation-level evidence from another attempt.
 - Reused, overflowed, or unbound effect-attempt identifiers.
 - Portable lifecycle proof claims made from unauthenticated local journal data.
@@ -68,6 +75,8 @@ internal motive.
 - Treating a mutable operation status alone as complete evidence history.
 - Treating a portable transition event as the current lifecycle head without
   checkpoint, trusted receipt, witness, or equivalent profile head evidence.
+- Treating `Completed` as irreversible rather than completion evidenced under
+  a named profile policy and checkpoint or evaluation point.
 
 ## Security Claims
 
@@ -97,7 +106,7 @@ BCX must not claim:
 - missing effect evidence after admission proves that the effect failed or
   succeeded,
 - subsequent reorg, rollback, compensation, contradiction, or receipt invalidation
-  evidence erases the earlier observation.
+  evidence erases the earlier observation,
 - a failed latest attempt means an earlier observed or receipted attempt did
   not occur.
 

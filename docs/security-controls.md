@@ -24,7 +24,15 @@ Required controls from the first production profile:
   derived current status,
 - authorized `start_attempt`, attempt-limit, and cumulative effect-work budget
   controls for retryable effect execution,
+- admission-gated `start_attempt` with policy and revocation root rechecks
+  before retry when roots changed since admission,
 - distinct retry and reconciliation semantics for indeterminate attempts,
+- phase-specific indeterminate resolution that prevents admission-level
+  uncertainty from jumping directly to effect execution and prevents
+  effect-level uncertainty from manufacturing admission,
+- profile-bound completion rules with exact roots, evaluation point,
+  finality/checkpoint policy, pending-attempt policy, and
+  compensation/reorg/receipt-invalidation behavior,
 - canonical transition-event commitments before lifecycle history is exported
   as portable evidence,
 - transition-chain commitments with previous-transition links, strict

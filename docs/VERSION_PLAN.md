@@ -252,6 +252,7 @@ continues past the relevant dependency point.
 | Operation lifecycle needed deterministic transitions and evidence history rather than a mutable status flag. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `OperationKey`, one-statement binding, effect-attempt identifiers, transition authority, CAS or transaction requirements, append-only lifecycle journal semantics, duplicate responses for every state, and transition/concurrency/reorg fixtures. |
 | Operation lifecycle still needed optional reservation paths, admission rejection, explicit retry attempt creation, and portable transition evidence. | Expanded `v0.23.1 - Operation Execution Lifecycle` with initial `Absent` transitions, `ReservationExpired`, `Aborted`, `Rejected`, authorized `start_attempt`, attempt limits and cumulative effect-work budgets, canonical transition-event commitments, and matching conformance/vector fixtures through the `v0.16.1` scaffold. |
 | Operation and effect-attempt state needed separate state machines, and portable transition histories needed omission resistance. | Expanded `v0.23.1 - Operation Execution Lifecycle` with operation-derived status over all attempts, attempt-number and `EffectAttemptId` allocation rules, distinct retry versus reconciliation semantics, indeterminate phase reasons, transition-chain commitments, journal-head evidence, stale/incomplete markers, and truncation/reorder/fork/substitution fixtures. |
+| Operation-level transitions had dead ends and completion needed profile-bound meaning. | Expanded `v0.23.1 - Operation Execution Lifecycle` with `Active` resolution transitions, phase-specific indeterminate resolution, admission-gated `start_attempt`, policy/root rechecks before retry, profile-bound `CompletionRule`, and completion/reorg/revocation fixtures; attached profile completion-rule requirements to `v0.51.0 - Profile Normative Specification Pack`. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -1210,7 +1211,17 @@ Deliverables:
   `Reserved` to `Authenticated`,
   `Reserved` to `ReservationExpired` or `Aborted`,
   `Authenticated` to `Admitted`, `Rejected`, or `Indeterminate`,
-  and `Admitted` to `Active`, `Completed`, or `Indeterminate`,
+  `Indeterminate(authentication/admission)` to `Authenticated`, `Admitted`,
+  or `Rejected`,
+  `Admitted` to `Active`, `Completed`, or `Indeterminate`,
+  `Active` to `Active`, `Completed`, or `Indeterminate`,
+  and `Indeterminate(effect/finality)` to `Active` or `Completed`,
+- `Active` to `Active` records an append-only event or revision for starting
+  or reconciling an attempt and never overwrites operation state,
+- admission-level indeterminate resolution cannot jump directly to effect
+  execution,
+- effect-level or finality-level indeterminate resolution cannot retroactively
+  manufacture admission,
 - deterministic effect-attempt transition table:
   `Absent` to `Pending`,
   `Pending` to `Observed`, `Receipted`, `Failed`, or `Indeterminate`,
@@ -1244,6 +1255,11 @@ Deliverables:
 - new effect attempts require an explicit authorized `start_attempt` lifecycle
   operation,
 - `start_attempt` appends a new attempt under an already admitted operation,
+- `start_attempt` is permitted only when admission remains valid and the
+  derived operation state is `Admitted`, `Active`, or a profile-allowed
+  recovery state,
+- policy and revocation roots are rechecked before retry when they changed
+  since admission,
 - recovery policy defines which prior attempt states permit `start_attempt`,
 - retry from a failed or indeterminate attempt requires explicit recovery-policy
   authorization,
@@ -1263,6 +1279,18 @@ Deliverables:
   attempts,
 - operation-derived status considers every attempt; a failed latest attempt
   cannot hide an earlier observed or receipted effect,
+- profile-bound `CompletionRule` defining when the operation-derived state is
+  `Completed`,
+- `CompletionRule` alternatives include first valid receipted attempt, required
+  set of effect receipts, settlement or finality threshold, successful local
+  atomic transition, or externally reconciled completion,
+- `CompletionRule` binds required attempt or effect classes,
+  finality/checkpoint policy, whether all pending attempts must terminate,
+  compensation/reorg/receipt-invalidation effects on derived current status,
+  and exact roots plus evaluation point used for completion,
+- `Completed` means completion evidenced under profile policy and a named
+  checkpoint or evaluation point, not an irreversible assertion that subsequent
+  evidence cannot affect derived status,
 - same nonce with a different statement commitment is a conflict rather than an
   idempotent retry,
 - distinct evidence rules for replay commitment, admission receipt, and effect
@@ -1270,9 +1298,9 @@ Deliverables:
 - append-only operation transition journal or authenticated transition log;
   current operation status is derived from that history and checkpoint or
   profile finality policy rather than by overwriting evidence,
-- effect evidence remains preserved when subsequent reorg, rollback, compensation,
-  contradiction, or receipt invalidation evidence changes derived usability or
-  finality,
+- effect evidence remains preserved when subsequent reorg, rollback,
+  compensation, contradiction, or receipt invalidation evidence changes derived
+  usability or finality,
 - `Failed` cannot imply that no effect occurred when the effect may have
   happened but evidence is incomplete,
 - multiple effect attempts remain separately identifiable and cannot inflate
@@ -1308,7 +1336,14 @@ Verification:
   an earlier observed effect,
 - reservation expiry fixtures,
 - admission rejection fixtures,
+- active-to-completed fixtures,
+- admission-indeterminate resolution fixtures,
+- finality-indeterminate resolution fixtures,
 - explicit retry and concurrent attempt creation fixtures,
+- retry-after-policy-root-change fixtures,
+- attempt-start-after-revocation fixtures,
+- one-successful-and-one-pending-or-failed-attempt fixtures,
+- completion-followed-by-reorg-or-receipt-invalidation fixtures,
 - attempt-limit and cumulative effect-work budget exhaustion fixtures,
 - indeterminate phase and reason fixtures,
 - canonical transition-event conformance vectors through the `v0.16.1`
@@ -2500,6 +2535,10 @@ Deliverables:
 - downgrade rules,
 - finality rules,
 - operation lifecycle and recovery-model requirements from `v0.23.1`,
+- profile-bound completion-rule requirements from `v0.23.1`, including
+  required attempt/effect classes, finality/checkpoint policy, pending-attempt
+  termination policy, compensation/reorg/receipt-invalidation behavior, and
+  exact roots plus evaluation point,
 - replay/effect atomicity or reconciliation requirements,
 - rule that profiles document whether they provide at-most-once admission,
   idempotent execution, or externally reconciled execution,
