@@ -8,7 +8,10 @@ Required controls from the first production profile:
 - audience binding,
 - nonce and expiry,
 - issuer sequence numbers,
-- atomic replay `check_and_record` with scoped nonce and sequence policy,
+- atomic replay `check_and_record` with scoped nonce and sequence policy after
+  signature, key, audience, and basic authority verification, or bounded
+  reserve/verify/commit/abort semantics,
+- failed authentication never permanently consumes replay state,
 - proof-of-possession capabilities,
 - canonical policy records and signed policy-evaluation evidence,
 - immutable trust snapshots for key, policy, and revocation resolution,
@@ -17,6 +20,8 @@ Required controls from the first production profile:
 - production provider admission with provider assurance classes, secret
   zeroization, entropy-source health, fault-injection behavior, and external
   guarantee boundaries,
+- admitted primitive providers treated as trusted computing base for
+  cryptographic truth through `v1.0.0`,
 - hybrid all-component acceptance with composite key lifecycle, epoch,
   revocation, expiry, and fail-closed downgrade rules,
 - explicit native binding for each consequential carrier, ledger, or storage
@@ -26,15 +31,20 @@ Required controls from the first production profile:
   cryptographic verification,
 - checked `VerificationBudget` and versioned `VerificationCostSchedule`,
 - indeterminate resource-exhaustion outcomes that are not cached as invalid,
+- cacheability matrix by outcome class with replay-store generation/state
+  binding for replay results,
 - locally unsupported recognized suites and temporarily unavailable providers
   separated from structurally invalid or policy-forbidden suites,
 - verification receipts recording cost schedule, consumed units, completion
   state, signer role, roots, and policy epoch,
+- verification receipts using a distinct receipt-signature domain and direct
+  receipt verification path,
 - sender-provided verification receipts accepted only through explicit local
   policy or re-execution,
 - bounded WHY depth and node count,
-- bounded unresolved-parent staging, orphan retention, fetch attempts, and
-  referenced bytes,
+- bounded unresolved-parent staging, orphan retention, fetch attempts,
+  referenced bytes, unauthenticated source quotas, and authenticated per-issuer
+  quotas only after issuer authentication,
 - explicit distinction between declared, observed, verified, enforced,
   acknowledged, witnessed, settled, contradicted, and unknown or incomplete
   evaluation outcomes,

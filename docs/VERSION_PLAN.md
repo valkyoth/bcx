@@ -242,6 +242,11 @@ continues past the relevant dependency point.
 | Threshold quorum safety needed exact mathematics. | Expanded `v0.79.0` with supported fault model, exact quorum formula, weighted-quorum policy, overflow-safe arithmetic, and policy-time rejection of impossible configurations. |
 | Provider side-channel wording could admit variable-time signing into high-assurance profiles. | Added provider assurance classes in `v0.28.1` and required high-assurance profiles to admit only constant-time software or appropriately isolated hardware signing providers. |
 | Invalid-result caching needed a complete semantic cache key. | Added cache-key requirements to `v0.17.1` covering statement, policy, trust, revocation, conflict, checkpoint, suite, and profile roots. |
+| Replay stores could be poisoned before authentication. | Expanded `v0.23.0 - Validity And Atomic Replay Policy` with authenticate-before-commit ordering, bounded reservation semantics, advisory early duplicate checks, and invalid-signature/crash fixtures. |
+| Provider threat claims needed a precise trust boundary. | Expanded `v0.28.1 - Provider Assurance Classes` so admitted primitive providers are part of the trusted computing base; provider crashes, format errors, resource abuse, and capability misreporting are defended, but arbitrary false cryptographic success from an admitted compromised provider is a trusted-boundary failure through `v1.0.0`. |
+| Verification cacheability needed per-outcome rules. | Expanded `v0.17.1 - Verification Outcome And Receipt Model` with a cacheability matrix for decoding, crypto, policy, revocation, validity time, replay, missing evidence, provider availability, resource exhaustion, capability, delegation, and authority outcomes. |
+| Verification receipts needed a nonrecursive signature domain. | Expanded `v0.41.0 - Receipt Model Split` with a distinct receipt-signature domain and direct receipt verification path that does not recursively require another verification receipt. |
+| Missing-parent quotas could be bypassed with unauthenticated issuer claims. | Expanded `v0.21.0 - Missing Parent Reconciliation` with unauthenticated global/source quotas and authenticated per-issuer quotas only after issuer authentication. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -849,6 +854,20 @@ Deliverables:
 - rule that invalid outcomes may be cached only when the cache key includes
   every relevant statement, policy, trust, revocation, conflict, checkpoint,
   suite, and profile root,
+- cacheability matrix by outcome class:
+  canonical decoding failures are permanently cacheable by object bytes,
+  cryptographic failures are cacheable by statement, signature, key, suite, and
+  verifier profile,
+  policy or revocation failures are cacheable only with the exact policy,
+  trust, and root snapshot,
+  not-yet-valid results include evaluation time or expire at the validity
+  boundary,
+  expired results are cacheable only under the applicable clock or
+  evaluation-point policy,
+  replay or sequence results require replay-store generation or state binding,
+  missing evidence, provider unavailable, and resource exhausted outcomes are
+  never cached as invalid, and capability or delegation failures include
+  capability, delegation, and authority-state roots,
 - rule that retrying with a larger locally permitted budget may complete
   verification without changing the underlying statement validity,
 - unsigned local verification receipts are diagnostics only,
@@ -872,6 +891,8 @@ Verification:
 - outcome classification tests,
 - cache-behavior tests proving resource exhaustion is not stored as invalid,
 - complete invalid-result cache-key tests,
+- per-outcome cacheability matrix tests,
+- stale contextual cache fixtures,
 - retry-with-larger-budget tests,
 - verification receipt fixtures,
 - unsigned receipt diagnostic-only fixtures,
@@ -1039,7 +1060,11 @@ Deliverables:
 - deterministic reconciliation ordering,
 - recheck of cycles when missing parents arrive,
 - unresolved-parent table size bound,
-- per-issuer orphan count bound,
+- unauthenticated global orphan count bound,
+- unauthenticated transport-peer or source orphan count bound,
+- per-issuer orphan count bound only after issuer authentication,
+- rule that unauthenticated issuer claims cannot consume authenticated issuer
+  quota,
 - orphan lifetime and retention policy,
 - fetch attempt and referenced-byte budgets,
 - garbage collection rules that preserve checkpointed evidence,
@@ -1052,6 +1077,7 @@ Verification:
 - late-parent cycle rejection tests,
 - property tests for orphan promotion ordering,
 - orphan table saturation tests,
+- unauthenticated orphan-quota bypass tests,
 - explanation bundle tests for incomplete graphs.
 
 Exit criteria:
@@ -1060,7 +1086,9 @@ Exit criteria:
   become available,
 - unresolved objects are staged and not causally usable until deterministic
   promotion succeeds,
-- validly shaped missing-parent references cannot fill storage without bounds.
+- validly shaped missing-parent references cannot fill storage without bounds,
+- unauthenticated missing-parent submissions cannot block authenticated issuer
+  capacity.
 
 ### v0.22.0 - Relationship Semantics And Edge Roles
 
@@ -1108,6 +1136,19 @@ Deliverables:
 - offline checkpoint-relative freshness,
 - nonce scope over realm, issuer, audience, operation class, and nonce,
 - atomic `check_and_record` replay store trait,
+- ordering rule: verify signature, key, audience, and basic authority before
+  permanent replay-state commit,
+- optional reservation model only with reserve, verify, commit, and abort
+  states, opaque reservation tokens, TTLs, crash recovery, and strict
+  reservation bounds,
+- rule that failed authentication never permanently consumes nonce or sequence
+  replay state,
+- rule that two concurrent valid requests using the same nonce may both perform
+  cryptographic work, but only one can atomically commit,
+- rule that early duplicate lookup is advisory only and authoritative replay
+  rejection happens during atomic commit,
+- rule that reservations from unauthenticated sources cannot block
+  authenticated traffic,
 - crash persistence and rollback behavior,
 - issuer sequence policy,
 - sequence-gap and concurrent-request policy,
@@ -1120,12 +1161,16 @@ Verification:
 - expired statement tests,
 - duplicate nonce and sequence tests,
 - atomic replay race fixtures,
+- invalid-signature replay poisoning fixtures,
+- crash-during-reservation fixtures,
+- advisory early duplicate lookup fixtures,
 - cache saturation tests.
 
 Exit criteria:
 
 - consequential statements cannot be accepted without atomic replay and
-  freshness policy.
+  freshness policy,
+- failed authentication cannot permanently consume replay state.
 
 ### v0.24.0 - Capability Verification
 
@@ -1330,6 +1375,18 @@ Deliverables:
 - rule that documented variable-time behavior does not qualify for
   high-assurance consequential signing,
 - verifier-provider adversary model for malicious or compromised providers,
+- admitted primitive providers are part of the trusted computing base through
+  `v1.0.0`,
+- defended provider failures: format errors, crashes, resource abuse, and
+  capability misreporting,
+- trusted-boundary failure: an admitted compromised provider that returns
+  arbitrary false cryptographic success,
+- rule that provider assurance classes are assigned by local policy or
+  admission records, never trusted directly from provider self-reported
+  metadata,
+- multi-provider runtime agreement is not required through `v1.0.0` and is
+  reserved for `v1.1.0 - Multi-Provider Verification Agreement` if BCX admits
+  that model after `v1.0.0`,
 - resource-amplification input handling requirements for provider dispatch.
 
 Verification:
@@ -1338,12 +1395,16 @@ Verification:
 - high-assurance rejection tests for side-channel-unassessed providers,
 - test-only provider feature-guard tests,
 - malicious verifier provider fixtures,
+- provider self-reported metadata rejection fixtures,
+- trusted-boundary failure documentation check,
 - resource-amplification fixtures.
 
 Exit criteria:
 
 - provider admission distinguishes documentation from assurance, and
-  high-assurance profiles cannot accidentally admit variable-time signing.
+  high-assurance profiles cannot accidentally admit variable-time signing,
+- BCX's `v1.0.0` security claim does not tolerate arbitrary Byzantine false
+  success from an admitted primitive provider.
 
 ### v0.29.0 - Signing Provider Boundary
 
@@ -1861,20 +1922,27 @@ Deliverables:
 - verification receipt vocabulary from `v0.17.1`,
 - distinction between unsigned local diagnostic receipts and attestable
   verification receipts,
+- distinct verification-receipt signature domain,
+- direct receipt verification path that does not recursively require another
+  verification receipt,
 - trusted verifier role requirements for receipt acceptance,
 - policy rule that consumers re-execute verification unless they accept a
   receipt under an explicit trusted verifier role,
 - transparency receipt vocabulary for inclusion, consistency, disclosure, and
   non-inclusion,
 - receipt-to-statement commitment rules,
-- receipt binding to statement ID, verification context, roots, policy epoch,
-  `CostScheduleId`, outcome, and completion state where applicable,
+- receipt preimage binding to statement ID, receipt signer identity,
+  verification context, verification profile and version, authenticated
+  evaluation point, roots, policy epoch, `CostScheduleId`, outcome, and
+  completion state where applicable,
 - receipt assurance classification.
 
 Verification:
 
 - receipt validation fixtures,
 - forged verification receipt fixtures,
+- recursive receipt-verification rejection fixtures,
+- wrong receipt-signature domain fixtures,
 - sender-provided receipt cannot suppress local verification fixtures,
 - cross-root, cross-policy, and cross-checkpoint receipt replay fixtures,
 - wrong receipt class fixtures,
@@ -2945,6 +3013,8 @@ Verification:
 - `cargo test -p bcx-proof-threshold`,
 - signer-set epoch and rotation fixtures,
 - exact quorum-formula fixtures,
+- boundary fixtures for `q = 0`, `q > n`, `f >= n`, and arithmetic at integer
+  maxima,
 - overflow-safe arithmetic fixtures,
 - impossible-configuration rejection tests,
 - quorum-intersection fixtures,

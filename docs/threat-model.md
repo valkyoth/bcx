@@ -24,10 +24,15 @@ internal motive.
   evidence.
 - Settlement finality overclaims.
 - Cross-profile downgrade or replay.
-- Malicious or compromised verifier providers.
+- Provider format errors, crashes, resource abuse, and capability
+  misreporting.
+- Compromised admitted providers as trusted-boundary failures.
 - Resource-amplification inputs that force expensive verification paths.
 - Threshold witness equivocation or disjoint-quorum finality claims.
 - Forged or replayed verification receipts.
+- Replay-store poisoning before authentication.
+- Stale contextual verification-cache reuse.
+- Unauthenticated orphan-quota bypass.
 
 ## Out Of Scope
 
@@ -41,6 +46,8 @@ internal motive.
   underlying systems.
 - Proving that an underlying chain or service is honest beyond its configured
   finality and evidence model.
+- Tolerating arbitrary false cryptographic success from a compromised admitted
+  primitive provider through `v1.0.0`.
 
 ## Security Claims
 
@@ -64,7 +71,7 @@ BCX must not claim:
   offchain business purpose was honest,
 - a missing parent does not exist,
 - a redacted explanation is complete,
-- an HTTP wrapper or blockchain transaction is proof by itself.
+- an HTTP wrapper or blockchain transaction is proof by itself,
 - a sender-provided verification receipt suppresses required local verification
   unless local policy explicitly trusts that verifier role.
 
@@ -96,4 +103,7 @@ Every WHY query must be authenticated and bounded by:
 - verification budget and cost-schedule rules,
 - provider assurance policy,
 - receipt replay boundaries,
+- replay-store authentication-before-commit policy,
+- cacheability-by-outcome policy,
+- unauthenticated source quota policy,
 - threshold quorum-intersection policy.
