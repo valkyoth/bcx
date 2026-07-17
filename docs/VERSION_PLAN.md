@@ -187,7 +187,7 @@ continues past the relevant dependency point.
 | The wire version must remain draft/experimental until canonical BCX/1 is frozen. | Added `v0.52.0 - Draft Wire Version And Registry Gate`. |
 | Parser fuzzing must precede untrusted network endpoints. | Added core parser tests to `v0.13.0`, core object and bundle fuzzing to `v0.47.3`, and carrier parser fuzzing in `v0.54.0 - Carrier Parser Fuzzing Program` before HTTP implementation starts. |
 | Cryptographic conformance must precede reliance on COSE and hybrid provider surfaces. | Added `v0.37.0 - Cryptographic Conformance Program` before statement and attestation verification are used by profiles. |
-| Normative security specifications should grow alongside implementation rather than appear only at the end. | Added `v0.50.0 - Core And Codec Specification Draft` and kept `v0.95.0 - Security Specification Freeze`. |
+| Normative security specifications should grow alongside implementation rather than appear only at the end. | Added living specification work from `v0.11.0` onward, renamed `v0.50.0` to `Core And Codec Specification Consolidation`, and kept `v0.95.0 - Security Specification Freeze`. |
 | Digest is an unnamed 32-byte value and commitments need domain separation, algorithm codes, empty-root rules, and migration policy. | Added `v0.11.0 - Commitment Suite And Registry Scaffold`. |
 | Statement IDs must exclude themselves from their own hash preimage and exclude attestations, bindings, local availability, and transport metadata. | Added explicit preimage rules to `v0.15.0 - Canonical Statement Encoding And Sealed Identity`. |
 | The plan did not resolve whether causal graph nodes are `EventId`, `StatementId`, or an authenticated mapping. | Added `v0.19.0` requirements for the graph-node identity decision and authenticated mapping behavior. |
@@ -230,6 +230,12 @@ continues past the relevant dependency point.
 | Multi-attestation duplicate handling could reject valid key rollover or inflate thresholds. | Updated `v0.35.0` to reject exact duplicate proofs, count stable trust principals once per role, retain rollover evidence without threshold inflation, and define key-rotation overlap behavior. |
 | Pruned graph proofs needed enough ancestry data to reject cycles. | Expanded `v0.19.0` and `v0.20.0` with authenticated reachability summaries, unsafe finalized-epoch edge rejection, retained transitive metadata, and cycle-through-pruned-ancestor tests. |
 | Conformance and testkit crates were too late for shared vectors and adversarial fixtures. | Added `v0.16.1 - Conformance Vector Scaffold` and `v0.16.2 - Testkit Fixture Scaffold`; `v0.87.0` and `v0.88.0` now complete those crates. |
+| Resource exhaustion must not be cached or reported as semantic invalidity. | Added `v0.17.1 - Verification Outcome And Receipt Model` with valid, invalid, and indeterminate outcomes, receipt completion state, cost schedule recording, and conformance vectors. |
+| Threshold witness finality needs Byzantine quorum safety, not only `t-of-n` counting. | Expanded `v0.79.0 - Threshold Proof Crate` with fault assumptions, quorum-intersection rules, equivocation evidence, joint-consensus signer-set transitions, and conflict-finalization tests. |
+| Composite key lifecycle needed atomic component validity rules. | Expanded `v0.31.0 - Composite Key Record` with component epoch binding, partial rotation semantics, checkpoint-relative historical verification, cross-suite reuse rejection, and fail-closed downgrade recovery. |
+| Production signing providers needed side-channel and entropy admission rules. | Expanded `v0.29.0`, `v0.36.1`, and `v0.36.2` with provider side-channel declarations, zeroization, entropy health, hedged-signing fallback policy, fault-injection behavior, platform capability declarations, and external-provider guarantee boundaries. |
+| Graph semantics needed an early executable reference model before profile and persistent adapter work. | Added `v0.20.1 - Minimal Graph Reference Model` for atomic insertion, competing inserts, missing-parent promotion, pruning/finalization boundaries, duplicate delivery, and cycles through pruned ancestors. |
+| Security controls needed to mirror the new outcome, budget, commitment, hybrid, and quorum rules. | Updated `docs/security-controls.md` and attached ongoing security-control traceability to `v0.17.1`, `v0.31.0`, `v0.47.0`, and `v0.79.0`. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -646,6 +652,8 @@ Deliverables:
 - adjacent duplicate-parent rejection by parent ID, including the same parent
   ID under different relationship kinds,
 - canonical role-set encoding for a parent that carries several semantic roles,
+- sorted and duplicate-free role-set encoding,
+- relationship and role compatibility validation,
 - statement ID derivation from canonical statement bytes,
 - sealed `CanonicalStatementBytes` or `StatementCommitment` producer,
 - rule that `StatementId` is excluded from its own hash preimage,
@@ -710,6 +718,8 @@ Deliverables:
 - vector provenance fields,
 - expected version and digest fields,
 - canonical statement, attestation, binding, and checkpoint vector directories,
+- verification outcome vector directories,
+- cost-schedule and resource-exhaustion vector directories,
 - fixture regeneration guard,
 - pass/fail report format.
 
@@ -733,6 +743,9 @@ Deliverables:
 
 - `bcx-testkit` crate skeleton,
 - deterministic test-only key material,
+- conspicuous test-only key and signer types,
+- compile-time guards preventing deterministic test keys from being enabled
+  through production facade features,
 - statement and attestation fixture builders,
 - malformed byte fixture helpers,
 - graph edge fixture helpers,
@@ -748,7 +761,8 @@ Verification:
 Exit criteria:
 
 - graph, crypto, parser, and bundle tests can depend on one shared fixture
-  vocabulary.
+  vocabulary,
+- deterministic test keys cannot enter production facade builds.
 
 ## Phase 3: Limits, Graph Admission, Replay, And Authority
 
@@ -803,6 +817,44 @@ Exit criteria:
   transport-named crate for non-wire budgets,
 - verification cost accounting is deterministic from registry, profile, and
   local policy data before any provider-specific code runs.
+
+### v0.17.1 - Verification Outcome And Receipt Model
+
+Goal: separate local resource exhaustion and missing evidence from
+cryptographic or semantic invalidity.
+
+Deliverables:
+
+- `VerificationOutcome` model with `Valid`, `Invalid`, and indeterminate
+  states,
+- `Indeterminate(ResourceExhausted)` outcome,
+- `Indeterminate(MissingEvidence)` outcome,
+- `Indeterminate(UnsupportedSuite)` outcome,
+- rule that budget exhaustion cannot be cached as an invalid result,
+- rule that retrying with a larger locally permitted budget may complete
+  verification without changing the underlying statement validity,
+- verification receipt recording `CostScheduleId`, consumed units, and
+  completion state,
+- offline-bundle field identifying the cost schedule used when claiming
+  completed verification,
+- documentation that local resource policies affect completion, not the
+  statement's validity,
+- security-controls update for indeterminate resource exhaustion.
+
+Verification:
+
+- outcome classification tests,
+- cache-behavior tests proving resource exhaustion is not stored as invalid,
+- retry-with-larger-budget tests,
+- verification receipt fixtures,
+- offline-bundle cost-schedule fixtures,
+- conformance vectors for valid, invalid, resource-exhausted,
+  missing-evidence, and unsupported-suite outcomes.
+
+Exit criteria:
+
+- two implementations with different local budgets can disagree about
+  completion without disagreeing about semantic validity.
 
 ### v0.18.0 - Public Identifier Storage Policy
 
@@ -909,6 +961,34 @@ Exit criteria:
 
 - every accepted insertion leaves the bounded in-memory graph acyclic.
 
+### v0.20.1 - Minimal Graph Reference Model
+
+Goal: add executable graph semantics evidence before profile crates or
+persistent adapters build on graph behavior.
+
+Deliverables:
+
+- minimal executable graph reference model,
+- atomic insertion model,
+- concurrent competing-insert model,
+- missing-parent promotion model,
+- pruning and finalization boundary model,
+- duplicate-delivery model,
+- cycle-through-pruned-ancestor model,
+- trace fixtures shared with `bcx-testkit`.
+
+Verification:
+
+- reference-model property test run,
+- model-to-implementation fixture replay,
+- competing insert and missing-parent promotion tests,
+- pruning/finalization cycle tests.
+
+Exit criteria:
+
+- profile and persistent adapter work depend on graph semantics with executable
+  model evidence, not only example fixtures.
+
 ### v0.21.0 - Missing Parent Reconciliation
 
 Goal: make missing-parent staging preserve graph integrity and resist orphan
@@ -956,6 +1036,8 @@ Deliverables:
 - relationship cardinality rules,
 - canonical dependency roles such as required authorization, required input,
   and observational context,
+- role-set sorting and duplicate-free validation reused from `v0.15.0`,
+- relationship and role compatibility matrix,
 - target-kind checks for delegation, retry, scheduling, derivation, and joins,
 - profile hook for domain-specific relationship constraints,
 - rule that profile hooks may only narrow or supplement core edge invariants,
@@ -967,7 +1049,9 @@ Verification:
 - one-parent `JoinedFrom` rejection where policy requires several parents,
 - multiple `RetryOf` rejection where policy requires one retry source,
 - wrong-target-kind fixtures,
-- required versus observational dependency fixtures.
+- required versus observational dependency fixtures,
+- duplicate role fixtures,
+- incompatible relationship and role fixtures.
 
 Exit criteria:
 
@@ -1197,8 +1281,16 @@ Deliverables:
 - signer capability metadata,
 - injected RNG or entropy interface for no-std,
 - ML-DSA and SLH-DSA deterministic versus hedged mode policy,
+- rule that providers cannot fall back from hedged to deterministic signing
+  unless local policy explicitly permits it,
 - algorithm context selection,
 - secret scratch zeroization,
+- secret-key and seed zeroization requirements,
+- entropy-source health checks and failure propagation,
+- fault-injection behavior for malformed internal state,
+- platform capability declaration for embedded and hardware-backed signing,
+- distinction between BCX-enforced guarantees and external-provider asserted
+  guarantees,
 - atomic hybrid signing,
 - no partial hybrid signature release when one component fails,
 - key generation and import boundaries,
@@ -1208,6 +1300,8 @@ Verification:
 
 - fake signer tests,
 - entropy failure tests,
+- hedged-signing fallback rejection tests,
+- malformed internal-state rejection tests,
 - partial hybrid failure tests,
 - scratch zeroization tests where observable.
 
@@ -1259,11 +1353,24 @@ Deliverables:
 - realm and profile binding,
 - validity interval,
 - revocation state reference,
+- component key epoch binding,
+- rule that revocation or expiry of either mandatory component invalidates the
+  composite key for new acceptance,
+- rule that components from different key epochs cannot be mixed,
+- partial component rotation creates a new composite commitment,
+- historical verification uses the checkpoint-relative composite record valid
+  at signing time,
+- rule that one component cannot be silently reused in incompatible composite
+  suites,
+- compromise recovery and emergency downgrade behavior is policy-bound and
+  fail-closed,
 - domain-separated composite key commitment.
 
 Verification:
 
 - component substitution tests,
+- old-Ed25519/new-ML-DSA component mixing tests,
+- expired-component and revoked-component tests,
 - component order mutation tests,
 - cross-suite key reuse rejection tests.
 
@@ -1427,6 +1534,16 @@ Deliverables:
 
 - optional Ed25519 provider crate or integration,
 - feature-gated provider selection,
+- constant-time or documented side-channel properties for signing and key
+  operations,
+- secret-key and seed zeroization guarantees,
+- entropy-source health and failure propagation,
+- hedged-signing fallback policy where the provider supports hedged signing,
+- fault-injection behavior and malformed internal-state rejection,
+- platform capability declaration for embedded and hardware-backed
+  implementations,
+- clear distinction between guarantees enforced by BCX and guarantees asserted
+  by the external provider,
 - signing known-answer tests,
 - verification known-answer tests,
 - malformed key and signature vectors,
@@ -1436,6 +1553,9 @@ Verification:
 
 - `cargo test -p <ed25519-provider-crate>`,
 - RFC 8032 vector smoke tests,
+- side-channel declaration review,
+- entropy failure tests,
+- malformed internal-state tests,
 - no root dependency regression.
 
 Exit criteria:
@@ -1452,6 +1572,18 @@ Deliverables:
 
 - optional ML-DSA-65 provider crate or integration,
 - feature-gated provider selection,
+- constant-time or documented side-channel properties for signing and key
+  operations,
+- secret-key and seed zeroization guarantees,
+- entropy-source health and failure propagation,
+- hedged-versus-deterministic signing mode declaration,
+- rule that hedged signing cannot silently fall back to deterministic signing
+  unless local policy explicitly permits it,
+- fault-injection behavior and malformed internal-state rejection,
+- platform capability declaration for embedded and hardware-backed
+  implementations,
+- clear distinction between guarantees enforced by BCX and guarantees asserted
+  by the external provider,
 - signing known-answer tests,
 - verification known-answer tests,
 - malformed key and signature vectors,
@@ -1461,6 +1593,10 @@ Verification:
 
 - `cargo test -p <ml-dsa-provider-crate>`,
 - NIST KAT or ACVP-vector smoke tests where available,
+- side-channel declaration review,
+- entropy failure tests,
+- malformed internal-state tests,
+- hedged fallback policy tests,
 - no root dependency regression.
 
 Exit criteria:
@@ -1993,10 +2129,10 @@ Exit criteria:
 
 ## Phase 6: Specifications, Wire Parser, Fuzzing, HTTP, And Fluxheim
 
-### v0.50.0 - Core And Codec Specification Draft
+### v0.50.0 - Core And Codec Specification Consolidation
 
-Goal: start normative security specifications alongside implementation, not at
-the end.
+Goal: consolidate the living normative security specifications that began in
+`v0.11.0` through `v0.17.1` before carrier profiles start.
 
 Deliverables:
 
@@ -2014,8 +2150,8 @@ Verification:
 
 Exit criteria:
 
-- implementation behavior is traceable to written protocol requirements before
-  carrier profiles start.
+- implementation behavior is traceable to consolidated written protocol
+  requirements before carrier profiles start.
 
 ### v0.51.0 - Profile Normative Specification Pack
 
@@ -2680,8 +2816,15 @@ Deliverables:
 - threshold policy vocabulary,
 - signer-set epoch binding,
 - signer membership commitment,
+- fault assumption and maximum tolerated faulty witnesses,
+- quorum-intersection requirement for finality claims,
+- rules preventing two disjoint quorums from finalizing conflicting roots,
+- double-signing and equivocation evidence,
 - membership rotation rules,
 - threshold change binding,
+- behavior when the threshold or signer set changes,
+- joint-consensus or overlapping-epoch transition rules,
+- proof-of-possession for witness keys where required by the admitted suite,
 - signer set commitment,
 - threshold count validation,
 - witness signature bundle model,
@@ -2691,12 +2834,20 @@ Verification:
 
 - `cargo test -p bcx-proof-threshold`,
 - signer-set epoch and rotation fixtures,
+- quorum-intersection fixtures,
+- insufficient-intersection conflicting checkpoint tests,
+- sufficient-intersection conflict rejection tests,
+- equivocation evidence fixtures,
+- joint-consensus transition tests,
+- proof-of-possession fixtures,
 - threshold mutation tests.
 
 Exit criteria:
 
 - a checkpoint can be witnessed by a private or federated group without using a
-  public blockchain.
+  public blockchain,
+- threshold finality cannot be claimed by two disjoint quorums under the
+  configured fault assumption.
 
 ### v0.80.0 - ZK Proof Provider Contract
 
@@ -2864,6 +3015,8 @@ Deliverables:
 
 - canonical encoding vectors,
 - signature vectors,
+- verification outcome classification vectors,
+- cost-schedule and resource-exhaustion vectors,
 - replay cases,
 - unknown extension cases,
 - binding mutation cases,
@@ -2889,15 +3042,20 @@ Deliverables:
 - attestation builders,
 - binding builders,
 - tamper helpers,
-- deterministic keys for tests only.
+- deterministic keys for tests only,
+- compile-time guards blocking deterministic keys from production facade
+  features,
+- conspicuous test-only key and signer type names.
 
 Verification:
 
-- `cargo test -p bcx-testkit`.
+- `cargo test -p bcx-testkit`,
+- production facade feature-guard check.
 
 Exit criteria:
 
-- future releases can add tests faster without weakening production crates.
+- releases from `v0.89.0` through `v1.0.0` can add tests faster without
+  weakening production crates.
 
 ### v0.89.0 - Graph And State Modeling
 
@@ -2906,6 +3064,7 @@ duplication, missing parents, and concurrent insertion.
 
 Deliverables:
 
+- expansion of the minimal graph reference model from `v0.20.1`,
 - property tests for arbitrary graph insertion orders,
 - missing-parent resolution model,
 - revocation and contradiction state model,
