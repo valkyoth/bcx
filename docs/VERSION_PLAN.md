@@ -248,6 +248,7 @@ continues past the relevant dependency point.
 | Verification receipts needed a nonrecursive signature domain. | Expanded `v0.41.0 - Receipt Model Split` with a distinct receipt-signature domain and direct receipt verification path that does not recursively require another verification receipt. |
 | Missing-parent quotas could be bypassed with unauthenticated issuer claims. | Expanded `v0.21.0 - Missing Parent Reconciliation` with unauthenticated global/source quotas and authenticated per-issuer quotas only after issuer authentication. |
 | Repeated replay/provider/cache/receipt/orphan/quorum gap review needed one traceable closure line. | Confirmed the closure remains versioned in `v0.17.1`, `v0.21.0`, `v0.23.0`, `v0.28.1`, `v0.41.0`, and `v0.79.0`; no extra milestone is introduced for the duplicate review. |
+| Replay protection alone did not close the crash window between replay commit and consequential side effects. | Added `v0.23.1 - Operation Execution Lifecycle` with lifecycle states, profile-selected recovery models, duplicate/nonce conflict semantics, distinct replay/admission/effect receipts, and crash-after-every-transition fixtures. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -1172,6 +1173,48 @@ Exit criteria:
 - consequential statements cannot be accepted without atomic replay and
   freshness policy,
 - failed authentication cannot permanently consume replay state.
+
+### v0.23.1 - Operation Execution Lifecycle
+
+Goal: define operation progress and crash recovery boundaries after replay
+protection and before capability, profile, or carrier work depends on
+consequential effects.
+
+Deliverables:
+
+- operation lifecycle states: `Reserved`, `Authenticated`, `Admitted`,
+  `EffectPending`, `EffectObserved`, `EffectReceipted`, `Failed`, and
+  `Indeterminate`,
+- rule that BCX does not claim generic exactly-once execution across HTTP
+  services, databases, blockchains, or other native carriers,
+- required profile recovery model selection:
+  one atomic local transaction containing replay state and state transition,
+  durable operation journal/outbox with idempotent effect execution, native
+  carrier idempotency key bound to `StatementId`, or external effect
+  reconciliation using native binding and effect receipts,
+- exact duplicate statement and nonce returns stored operation status or
+  receipt rather than re-executing,
+- same nonce with a different statement commitment is a conflict rather than an
+  idempotent retry,
+- distinct evidence rules for replay commitment, admission receipt, and effect
+  receipt,
+- missing effect evidence after admission produces `Indeterminate`, not a claim
+  that the effect failed or succeeded,
+- profile vocabulary for at-most-once admission, idempotent execution, and
+  externally reconciled execution.
+
+Verification:
+
+- crash-after-every-lifecycle-transition fixtures,
+- retry same-statement fixtures,
+- retry mutated-statement same-nonce conflict fixtures,
+- stored status and prior receipt return fixtures,
+- missing-effect-evidence indeterminate fixtures.
+
+Exit criteria:
+
+- consequential profiles can state their operation recovery model without
+  making a generic exactly-once claim.
 
 ### v0.24.0 - Capability Verification
 
@@ -2286,11 +2329,13 @@ Deliverables:
 - `bcx verify`,
 - `bcx why`,
 - `bcx inspect`,
+- lifecycle state and prior receipt display,
 - fixture-driven command tests.
 
 Verification:
 
 - CLI smoke tests,
+- lifecycle inspection fixture tests,
 - no root dependency regression.
 
 Exit criteria:
@@ -2336,13 +2381,18 @@ Deliverables:
 - profile security contract template,
 - downgrade rules,
 - finality rules,
+- operation lifecycle and recovery-model requirements from `v0.23.1`,
+- replay/effect atomicity or reconciliation requirements,
+- rule that profiles document whether they provide at-most-once admission,
+  idempotent execution, or externally reconciled execution,
 - conformance vector requirements.
 
 Verification:
 
 - docs checks,
 - profile template validation against HTTP, offline, witness, and Ethereum
-  examples.
+  examples,
+- operation lifecycle section validation.
 
 Exit criteria:
 
@@ -3277,6 +3327,9 @@ Deliverables:
 - same-statement fixtures for offline, HTTP, database/witness, and Ethereum or
   Cardano paths,
 - identical `StatementId` assertion,
+- cross-profile lifecycle fixtures showing HTTP, local state, and blockchain
+  profiles preserve the same statement identity while reporting different
+  effect-completion states,
 - native-binding-only difference assertions,
 - reorder, duplicate, loss, partition, rollback, reorg, stale checkpoint, and
   replay simulations,
@@ -3524,6 +3577,7 @@ Required scope:
 - graph-store insertion that preserves acyclicity under late parents and
   duplicate delivery,
 - capability verification, trusted time, and atomic replay checks,
+- operation lifecycle and profile-selected replay/effect recovery models,
 - canonical policy records and signed policy-evaluation evidence,
 - key resolution, signing provider, verifier provider, exact suite policy, and
   concrete admitted Ed25519 and ML-DSA-65 providers,

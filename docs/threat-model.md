@@ -31,6 +31,8 @@ internal motive.
 - Threshold witness equivocation or disjoint-quorum finality claims.
 - Forged or replayed verification receipts.
 - Replay-store poisoning before authentication.
+- Crash windows between replay commitment, admission, native side effects, and
+  effect receipts.
 - Stale contextual verification-cache reuse.
 - Unauthenticated orphan-quota bypass.
 
@@ -48,6 +50,8 @@ internal motive.
   finality and evidence model.
 - Tolerating arbitrary false cryptographic success from a compromised admitted
   primitive provider through `v1.0.0`.
+- Guaranteeing generic exactly-once execution across HTTP services, databases,
+  blockchains, or other native carriers.
 
 ## Security Claims
 
@@ -73,7 +77,9 @@ BCX must not claim:
 - a redacted explanation is complete,
 - an HTTP wrapper or blockchain transaction is proof by itself,
 - a sender-provided verification receipt suppresses required local verification
-  unless local policy explicitly trusts that verifier role.
+  unless local policy explicitly trusts that verifier role,
+- missing effect evidence after admission proves that the effect failed or
+  succeeded.
 
 ## Privacy Risks
 
@@ -104,6 +110,7 @@ Every WHY query must be authenticated and bounded by:
 - provider assurance policy,
 - receipt replay boundaries,
 - replay-store authentication-before-commit policy,
+- operation lifecycle and recovery-model policy,
 - cacheability-by-outcome policy,
 - unauthenticated source quota policy,
 - threshold quorum-intersection policy.

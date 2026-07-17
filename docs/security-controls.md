@@ -12,6 +12,16 @@ Required controls from the first production profile:
   signature, key, audience, and basic authority verification, or bounded
   reserve/verify/commit/abort semantics,
 - failed authentication never permanently consumes replay state,
+- operation lifecycle tracking for reserved, authenticated, admitted,
+  effect-pending, effect-observed, effect-receipted, failed, and indeterminate
+  states,
+- profile-selected recovery model for replay/effect crash windows: atomic local
+  transaction, durable journal/outbox, native carrier idempotency key, or
+  external effect reconciliation,
+- duplicate statement and nonce returning stored operation status or receipt
+  without re-execution,
+- same nonce with different statement commitment treated as conflict,
+- no generic exactly-once execution claim across native carriers,
 - proof-of-possession capabilities,
 - canonical policy records and signed policy-evaluation evidence,
 - immutable trust snapshots for key, policy, and revocation resolution,
