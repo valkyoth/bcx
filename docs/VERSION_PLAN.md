@@ -265,7 +265,7 @@ Status: published.
 
 Goal: initialize the serious Rust workspace and policy baseline.
 
-Delivered:
+Deliverables:
 
 - root `bcx` crate,
 - focused no-std subcrates,
@@ -274,6 +274,17 @@ Delivered:
 - dependency policy,
 - security policy,
 - implementation, version, threat-model, toolchain, and modularity docs.
+
+Verification:
+
+- initial workspace checks,
+- CI baseline,
+- release metadata review.
+
+Exit criteria:
+
+- repository foundation is published as `v0.1.0`,
+- follow-up releases can use the standard release gate and pentest flow.
 
 ### v0.2.0 - Protocol Family Pivot
 
@@ -304,6 +315,8 @@ Exit criteria:
   native bindings,
 - no future-profile crate is added before it has a written security contract,
 - `v0.2.0` can be tagged as the architectural pivot.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 1: Core Statement Foundation
 
@@ -332,6 +345,8 @@ Verification:
 Exit criteria:
 
 - every public identifier constructor rejects invalid zero or malformed values.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.4.0 - Statement Body Skeleton
 
@@ -357,6 +372,8 @@ Verification:
 Exit criteria:
 
 - BCX can name the lifecycle without relying on HTTP or blockchain types.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.5.0 - Causal Edge Model
 
@@ -378,6 +395,8 @@ Verification:
 Exit criteria:
 
 - a statement can point to bounded parents with explicit edge meaning.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.5.1 - ML-DSA-65 Constant Correction
 
@@ -404,6 +423,8 @@ Exit criteria:
 
 - conformant ML-DSA-65 and hybrid signatures are not rejected because of an
   internal length constant.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.6.0 - Evidence Facets And Assurance Lattice
 
@@ -432,6 +453,8 @@ Exit criteria:
 
 - public APIs cannot collapse declared, observed, verified, enforced, and
   finalized claims into one truth state or a false total order.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.7.0 - Statement Envelope
 
@@ -459,6 +482,8 @@ Exit criteria:
 
 - one statement shape is ready for sealed canonical encoding in `v0.15.0` and native
   binding in `v0.9.0`.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.8.0 - Attestation Envelope
 
@@ -482,6 +507,8 @@ Exit criteria:
 
 - multiple issuers can attest to the same statement without changing its
   logical identity.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.9.0 - Native Binding Envelope
 
@@ -506,6 +533,8 @@ Exit criteria:
 
 - HTTP, Ethereum, Cardano, Bitcoin, XRP, and offline profiles can all share
   the same binding concept.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.10.0 - Checkpoint Vocabulary
 
@@ -529,6 +558,8 @@ Verification:
 Exit criteria:
 
 - one checkpoint is ready for settlement and receipt verification in `v0.43.0`.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 2: Commitment, Registry, And Canonical Codec
 
@@ -564,6 +595,8 @@ Exit criteria:
   suite context,
 - canonical commitments and draft wire/version labels have a living spec home
   before codec implementation continues.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.12.0 - Canonical CBOR Codec Contract
 
@@ -596,6 +629,8 @@ Exit criteria:
 
 - no signed or hashed object can use ad hoc JSON, Rust memory layout, or vague
   deterministic-CBOR shorthand.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.13.0 - Codec Crate Skeleton And Decode Cursor
 
@@ -636,6 +671,8 @@ Exit criteria:
 
 - decoder bounds and prefix validation exist before full decoding, offline
   bundles, CLI parsing, or carrier endpoints exist.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.14.0 - Canonical Identifier Encoding
 
@@ -658,6 +695,8 @@ Verification:
 Exit criteria:
 
 - all supported platforms produce the same bytes for identifier fixtures.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.15.0 - Canonical Statement Encoding And Sealed Identity
 
@@ -698,6 +737,8 @@ Exit criteria:
 - the same logical statement produces the same `StatementId` everywhere,
 - caller-supplied statement IDs cannot bypass canonical identity checks,
 - one canonical statement cannot contain two edges to the same parent ID.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.16.0 - Canonical Attestation, Binding, And Checkpoint Encoding
 
@@ -725,6 +766,8 @@ Exit criteria:
 
 - attestation, binding, and checkpoint commitments are stable and
   mutation-sensitive.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.16.1 - Conformance Vector Scaffold
 
@@ -755,6 +798,8 @@ Exit criteria:
 
 - every new canonical object vector has one shared home before profile-specific
   vector formats appear.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.16.2 - Testkit Fixture Scaffold
 
@@ -785,6 +830,8 @@ Exit criteria:
 - graph, crypto, parser, and bundle tests can depend on one shared fixture
   vocabulary,
 - deterministic test keys cannot enter production facade builds.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 3: Limits, Graph Admission, Replay, And Authority
 
@@ -839,6 +886,8 @@ Exit criteria:
   transport-named crate for non-wire budgets,
 - verification cost accounting is deterministic from registry, profile, and
   local policy data before any provider-specific code runs.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.17.1 - Verification Outcome And Receipt Model
 
@@ -919,6 +968,8 @@ Exit criteria:
 - two implementations with different local budgets can disagree about
   completion without disagreeing about semantic validity,
 - verification receipts are trusted only through local policy or re-execution.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.18.0 - Public Identifier Storage Policy
 
@@ -942,6 +993,8 @@ Exit criteria:
 
 - identifier ergonomics and memory clearing behavior are documented as a
   security and performance tradeoff, not an accident.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.19.0 - Graph Store Contract
 
@@ -986,6 +1039,8 @@ Exit criteria:
 
 - graph acceptance is specified as validation plus insertion in one operation,
   not as a boolean pre-check against a stale snapshot.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.20.0 - Atomic Graph Store Skeleton
 
@@ -1024,6 +1079,8 @@ Verification:
 Exit criteria:
 
 - every accepted insertion leaves the bounded in-memory graph acyclic.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.20.1 - Minimal Graph Reference Model
 
@@ -1056,6 +1113,8 @@ Exit criteria:
 
 - profile and persistent adapter work depend on graph semantics with executable
   model evidence, not only example fixtures.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.21.0 - Missing Parent Reconciliation
 
@@ -1100,6 +1159,8 @@ Exit criteria:
 - validly shaped missing-parent references cannot fill storage without bounds,
 - unauthenticated missing-parent submissions cannot block authenticated issuer
   capacity.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.22.0 - Relationship Semantics And Edge Roles
 
@@ -1132,6 +1193,8 @@ Exit criteria:
 
 - relationship kinds and dependency roles have protocol meaning once the
   verifier has enough parent context.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.23.0 - Validity And Atomic Replay Policy
 
@@ -1182,6 +1245,8 @@ Exit criteria:
 - consequential statements cannot be accepted without atomic replay and
   freshness policy,
 - failed authentication cannot permanently consume replay state.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.23.1 - Operation Execution Lifecycle
 
@@ -1410,6 +1475,8 @@ Exit criteria:
 
 - consequential profiles can state their operation recovery model without
   making a generic exactly-once claim.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.24.0 - Capability Verification
 
@@ -1437,6 +1504,8 @@ Exit criteria:
 
 - admission can establish actual authority from capability evidence rather than
   an opaque digest alone.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.25.0 - Delegation Narrowing
 
@@ -1459,6 +1528,8 @@ Verification:
 Exit criteria:
 
 - a child delegation cannot remove parent restrictions.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.26.0 - Disclosure Policy
 
@@ -1502,6 +1573,8 @@ Verification:
 Exit criteria:
 
 - explanations can preserve privacy without pretending to be complete.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.26.1 - Policy Record And Evaluation Contract
 
@@ -1536,6 +1609,8 @@ Exit criteria:
 
 - admission can prove which policy artifact was evaluated, with which inputs
   and trust snapshot, before semantic validity consumes the decision.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 4: Keys, Signing, Verification, And Proof Envelopes
 
@@ -1574,6 +1649,8 @@ Exit criteria:
 
 - primitive verifiers receive resolved key records and cannot resolve trust on
   their own.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.28.0 - Verifier Provider Boundary
 
@@ -1597,6 +1674,8 @@ Exit criteria:
 
 - primitive verification providers cannot resolve keys, perform network I/O, or
   choose policy inside the core verification operation.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.28.1 - Provider Assurance Classes
 
@@ -1644,6 +1723,8 @@ Exit criteria:
   high-assurance profiles cannot accidentally admit variable-time signing,
 - BCX's `v1.0.0` security claim does not tolerate arbitrary Byzantine false
   success from an admitted primitive provider.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.29.0 - Signing Provider Boundary
 
@@ -1686,6 +1767,8 @@ Exit criteria:
 
 - signing has an explicit provider boundary and failure model before production
   proof suites create attestations.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.30.0 - Hybrid Verification Coordinator
 
@@ -1718,6 +1801,8 @@ Verification:
 Exit criteria:
 
 - hybrid acceptance cannot be redefined by one provider implementation.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.31.0 - Composite Key Record
 
@@ -1759,6 +1844,8 @@ Verification:
 Exit criteria:
 
 - a hybrid signature verifies against one exact composite key commitment.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.32.0 - Signed Message Representative
 
@@ -1785,6 +1872,8 @@ Exit criteria:
 
 - signatures are bound to BCX context and cannot be replayed as a different
   object class or audience.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.33.0 - Exact Suite Policy Enforcement
 
@@ -1807,6 +1896,8 @@ Exit criteria:
 
 - high-assurance acceptance depends on the required suite, not the sender's
   weakest admitted option.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.34.0 - Provider Scratch And Side-Effect Contract
 
@@ -1837,6 +1928,8 @@ Exit criteria:
 
 - provider integration has a security contract before production providers are
   admitted.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.35.0 - Attestation Verification And Multi-Attestation Policy
 
@@ -1876,6 +1969,8 @@ Exit criteria:
 
 - attestations are verifiable and aggregatable without native profile
   dependencies.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.36.0 - COSE Proof Envelope Crate
 
@@ -1906,6 +2001,8 @@ Exit criteria:
 
 - BCX has a canonical COSE proof envelope and verification profile before
   `1.0.0`.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.36.1 - Ed25519 Provider Crate
 
@@ -1948,6 +2045,8 @@ Exit criteria:
 
 - BCX has one admitted classical provider for signing and verification before
   crypto conformance is claimed.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.36.2 - ML-DSA-65 Provider Crate
 
@@ -1993,6 +2092,8 @@ Exit criteria:
 
 - BCX has one admitted post-quantum provider for signing and verification
   before hybrid and COSE conformance are claimed.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.36.3 - Provider Oracle And SLH-DSA Scope Decision
 
@@ -2019,6 +2120,8 @@ Exit criteria:
 
 - the `v0.37.0` conformance program can compare against independent evidence
   instead of trusting one implementation per algorithm.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.37.0 - Cryptographic Conformance Program
 
@@ -2054,6 +2157,8 @@ Exit criteria:
 
 - cryptographic acceptance is measured against standards vectors and
   adversarial suite mutations through executable, reproducible harnesses.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 5: Semantic Validity, Receipts, Explanation, And Offline Use
 
@@ -2080,6 +2185,8 @@ Verification:
 Exit criteria:
 
 - changing any security-relevant statement field invalidates verification.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.39.0 - Semantic Validity Engine
 
@@ -2106,6 +2213,8 @@ Verification:
 Exit criteria:
 
 - BCX can distinguish authentic history from usable authority.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.40.0 - Revocation, Conflict, And Checkpoint Roots
 
@@ -2148,6 +2257,8 @@ Exit criteria:
 
 - verification results cannot outlive the revocation, conflict, and checkpoint
   roots they were evaluated against.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.41.0 - Receipt Model Split
 
@@ -2191,6 +2302,8 @@ Exit criteria:
 
 - BCX does not treat a component observation as an append-only transparency
   proof, or the reverse.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.42.0 - Transparency Receipt Integration
 
@@ -2215,6 +2328,8 @@ Exit criteria:
 
 - WHY bundles can carry transparency evidence without inventing a separate
   incompatible receipt envelope.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.43.0 - Settlement And Checkpoint Verification
 
@@ -2247,6 +2362,8 @@ Exit criteria:
 
 - a checkpoint can express and verify several settlement or witness receipts
   without requiring a blockchain.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.44.0 - Explain Crate Skeleton
 
@@ -2273,6 +2390,8 @@ Verification:
 Exit criteria:
 
 - no WHY query can request unbounded work.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.45.0 - Explanation Bundle Skeleton
 
@@ -2304,6 +2423,8 @@ Exit criteria:
 - an offline verifier can see what is proven, missing, redacted, stale,
   withheld, truncated, or unknown without claiming final contradiction or
   privacy semantics.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.46.0 - Contradiction Handling
 
@@ -2334,6 +2455,8 @@ Exit criteria:
 
 - BCX can represent `A says sent` and `B says not received` at the same time
   without erasing either authentic claim.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.47.0 - Privacy And Disclosure Hardening
 
@@ -2375,6 +2498,8 @@ Exit criteria:
 
 - privacy-sensitive deployments have protocol hooks for minimizing linkability
   and over-disclosure.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.47.1 - Final Explanation Bundle Closure
 
@@ -2410,6 +2535,8 @@ Exit criteria:
 - an offline verifier can verify bundle closure deterministically and can see
   exactly what is proven, missing, redacted, stale, contradicted, withheld,
   truncated, or externally trusted.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.47.2 - Pre-Offline Profile Specification Gate
 
@@ -2435,6 +2562,8 @@ Exit criteria:
 
 - `bcx-offline` can start with the same normative template every subsequent
   profile must follow.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.47.3 - Core Object And Bundle Parser Fuzzing
 
@@ -2463,6 +2592,8 @@ Exit criteria:
 
 - offline profile parsing depends on already-fuzzed core object and bundle
   parser boundaries.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.47.4 - Pre-Offline no_std And Zero-Copy Evidence
 
@@ -2490,6 +2621,8 @@ Exit criteria:
 
 - offline profile work can start knowing which BCX APIs are core-only,
   alloc-enabled, or std-adapter APIs.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.48.0 - Offline Profile
 
@@ -2514,6 +2647,8 @@ Verification:
 Exit criteria:
 
 - BCX can work without HTTP, Fluxheim, or any blockchain.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.49.0 - CLI Skeleton
 
@@ -2536,6 +2671,8 @@ Verification:
 Exit criteria:
 
 - developers can inspect offline BCX objects locally.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 6: Specifications, Wire Parser, Fuzzing, HTTP, And Fluxheim
 
@@ -2562,6 +2699,8 @@ Exit criteria:
 
 - implementation behavior is traceable to consolidated written protocol
   requirements before carrier profiles start.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.51.0 - Profile Normative Specification Pack
 
@@ -2599,6 +2738,8 @@ Exit criteria:
 
 - Rust traits are supported by normative profile specifications, not treated as
   the whole protocol.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.52.0 - Draft Wire Version And Registry Gate
 
@@ -2622,6 +2763,8 @@ Exit criteria:
 
 - BCX uses draft/experimental wire labels until the normative BCX/1
   representation is frozen.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.53.0 - Carrier Framing Parser
 
@@ -2650,6 +2793,8 @@ Verification:
 Exit criteria:
 
 - carrier inputs reuse the fail-fast parser boundary before high-cost work.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.54.0 - Carrier Parser Fuzzing Program
 
@@ -2678,6 +2823,8 @@ Exit criteria:
 
 - every parser has a reproducible malformed-input corpus and a fuzz entry
   point before HTTP implementation starts.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.54.1 - Pre-Carrier no_std Feature Tiers And Zero-Copy Evidence
 
@@ -2705,6 +2852,8 @@ Exit criteria:
 
 - carrier profile implementation can start with refreshed evidence for
   core-only, alloc-enabled, and std-adapter API boundaries.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.55.0 - HTTP Profile Security Contract
 
@@ -2728,6 +2877,8 @@ Verification:
 Exit criteria:
 
 - implementation cannot start without a precise HTTP security contract.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.56.0 - HTTP Profile Crate
 
@@ -2748,6 +2899,8 @@ Verification:
 Exit criteria:
 
 - HTTP commitments can be verified without Hyper or Axum dependencies.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.57.0 - HTTP Hyper Integration
 
@@ -2768,6 +2921,8 @@ Verification:
 Exit criteria:
 
 - one real Rust HTTP stack can carry BCX objects.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.58.0 - Fluxheim Profile Contract
 
@@ -2789,6 +2944,8 @@ Verification:
 Exit criteria:
 
 - Fluxheim integration cannot overclaim application effects.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.59.0 - Fluxheim Integration Skeleton
 
@@ -2809,6 +2966,8 @@ Verification:
 Exit criteria:
 
 - Fluxheim can emit local BCX causal receipts.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.60.0 - Two-Fluxheim Demonstration
 
@@ -2830,6 +2989,8 @@ Verification:
 Exit criteria:
 
 - BCX proves useful over HTTP before any blockchain integration exists.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 7: Settlement Profiles And Additional Bindings
 
@@ -2857,6 +3018,8 @@ Verification:
 Exit criteria:
 
 - Ethereum implementation cannot start without a precise security contract.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.62.0 - Ethereum Profile Crate
 
@@ -2877,6 +3040,8 @@ Verification:
 Exit criteria:
 
 - Ethereum can bind and settle checkpoints conceptually without Alloy yet.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.63.0 - Ethereum Alloy Integration
 
@@ -2897,6 +3062,8 @@ Verification:
 Exit criteria:
 
 - Ethereum integration is useful without entering rollup scope.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.64.0 - Cardano Profile Security Contract
 
@@ -2918,6 +3085,8 @@ Verification:
 Exit criteria:
 
 - Cardano is modeled natively rather than imitating Ethereum.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.65.0 - Cardano Profile Crate
 
@@ -2938,6 +3107,8 @@ Verification:
 Exit criteria:
 
 - a BCX checkpoint can have both Ethereum and Cardano receipt models.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.66.0 - Cardano Pallas Integration
 
@@ -2958,6 +3129,8 @@ Verification:
 Exit criteria:
 
 - a second deep settlement family proves BCX is not Ethereum-specific.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.67.0 - SCITT Profile Contract
 
@@ -2977,6 +3150,8 @@ Verification:
 Exit criteria:
 
 - BCX can use transparency infrastructure without becoming SCITT.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.68.0 - OpenTelemetry Profile Contract
 
@@ -2995,6 +3170,8 @@ Verification:
 Exit criteria:
 
 - telemetry remains operational context, not cryptographic evidence.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.69.0 - Bitcoin Anchoring Profile Contract
 
@@ -3018,6 +3195,8 @@ Exit criteria:
 
 - Bitcoin has a concrete BCX profile contract before any Bitcoin crate is
   implemented.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.70.0 - XRP Payment Evidence Profile Contract
 
@@ -3040,6 +3219,8 @@ Verification:
 Exit criteria:
 
 - XRP has a concrete BCX profile contract before any XRP crate is implemented.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.71.0 - Banking Domain Contract
 
@@ -3061,6 +3242,8 @@ Verification:
 Exit criteria:
 
 - banking meaning is not hard-coded into core BCX.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.72.0 - AI Agent Domain Contract
 
@@ -3082,6 +3265,8 @@ Verification:
 Exit criteria:
 
 - agent workflows can use BCX without weakening the core.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 8: Tokenless Local Execution, Proofs, And Witnessing
 
@@ -3107,6 +3292,8 @@ Exit criteria:
 
 - BCX clearly states that it does not run validators, mint a token, or require
   a blockchain for local proof-carrying operation.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.74.0 - Deterministic State Contract And Resource Model
 
@@ -3139,6 +3326,8 @@ Exit criteria:
 
 - local state execution has a written security and resource contract before any
   state crate exists.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.75.0 - State Crate Skeleton
 
@@ -3161,6 +3350,8 @@ Exit criteria:
 
 - BCX can model local state transitions without pulling in a runtime, database,
   VM, or blockchain dependency.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.76.0 - Local State Transition Verification
 
@@ -3182,6 +3373,8 @@ Exit criteria:
 
 - a local transition can produce a verifiable `Effect` without global
   execution.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.77.0 - Program Identity And Admission
 
@@ -3204,6 +3397,8 @@ Exit criteria:
 
 - a state transition is admitted for one exact program identity and cannot be
   silently reinterpreted as another program.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.78.0 - Effect Proof Inputs
 
@@ -3226,6 +3421,8 @@ Verification:
 Exit criteria:
 
 - every proof provider can consume the same BCX effect-proof input shape.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.79.0 - Threshold Proof Crate
 
@@ -3284,6 +3481,8 @@ Exit criteria:
   public blockchain,
 - threshold finality cannot be claimed by two disjoint quorums under the
   configured fault assumption.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.80.0 - ZK Proof Provider Contract
 
@@ -3306,6 +3505,8 @@ Exit criteria:
 
 - ZK providers can plug into BCX without changing statement, effect, or
   checkpoint semantics.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.81.0 - SP1 Proof Provider Crate
 
@@ -3328,6 +3529,8 @@ Exit criteria:
 
 - BCX can verify SP1-produced effect proofs through an optional provider
   boundary.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.82.0 - RISC Zero Proof Provider Crate
 
@@ -3350,6 +3553,8 @@ Exit criteria:
 
 - BCX can verify RISC Zero-produced effect proofs through an optional provider
   boundary.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.83.0 - Witness Service Contract
 
@@ -3371,6 +3576,8 @@ Verification:
 Exit criteria:
 
 - non-chain ordering and double-spend prevention have a written BCX contract.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.84.0 - Witness Service Skeleton
 
@@ -3393,6 +3600,8 @@ Exit criteria:
 
 - BCX has a local/federated witness path that does not depend on Ethereum,
   Cardano, Bitcoin, or XRP.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.85.0 - Local Contract Workflow Fixture
 
@@ -3416,6 +3625,8 @@ Exit criteria:
 
 - BCX can show `Intent -> Admission -> Effect` for deterministic local logic
   with verifiable proof evidence and no global VM.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.86.0 - Tokenless Offline Institution Demo
 
@@ -3439,6 +3650,8 @@ Exit criteria:
 
 - BCX demonstrates a free, tokenless, blockchain-independent workflow before
   relying on public-chain settlement profiles.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## Phase 9: Conformance, Modeling, Platform Evidence, And Release Candidates
 
@@ -3466,6 +3679,8 @@ Exit criteria:
 
 - independent implementations can validate compatibility using the full
   mandatory vector suite.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.88.0 - Testkit Crate Expansion
 
@@ -3491,6 +3706,8 @@ Exit criteria:
 
 - releases from `v0.89.0` through `v1.0.0` can add tests faster without
   weakening production crates.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.89.0 - Graph And State Modeling
 
@@ -3517,6 +3734,8 @@ Exit criteria:
 
 - the roadmap has executable evidence for acyclicity and semantic-state
   invariants beyond example tests.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.90.0 - Cross-System Consistency Program
 
@@ -3545,6 +3764,8 @@ Exit criteria:
 
 - carriers and settlement backends change evidence and assurance, not the
   underlying statement identity.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.91.0 - Platform Evidence Program
 
@@ -3568,6 +3789,8 @@ Exit criteria:
 
 - release evidence covers memory, stack, allocation, and mutation-resistance
   concerns where the Rust/toolchain support exists.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.92.0 - Mandatory Target Gate
 
@@ -3590,6 +3813,8 @@ Exit criteria:
 
 - a green release gate proves required advertised targets compile, instead of
   silently skipping them.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.93.0 - MSRV Matrix Evidence
 
@@ -3608,6 +3833,8 @@ Verification:
 Exit criteria:
 
 - MSRV support is evidence-based, not aspirational.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.94.0 - no_std And Dependency Audit
 
@@ -3630,6 +3857,8 @@ Exit criteria:
 
 - root/core crates do not accidentally pull transport, runtime, database, VM,
   proof-provider, or blockchain dependencies.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.95.0 - Security Specification Freeze
 
@@ -3654,6 +3883,8 @@ Exit criteria:
 
 - crate behavior is traceable to written protocol requirements and no major
   unstated protocol rule remains.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.96.0 - Interop Demonstration
 
@@ -3677,6 +3908,8 @@ Exit criteria:
 
 - BCX is visibly one causal protocol with local, witness, carrier, and
   settlement bindings.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.97.0 - API Freeze Candidate
 
@@ -3697,6 +3930,8 @@ Verification:
 Exit criteria:
 
 - no unstable experimental API is accidentally presented as stable.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.98.0 - Release Evidence Freeze
 
@@ -3720,6 +3955,8 @@ Exit criteria:
 
 - release candidates start from a complete evidence package instead of
   discovering missing evidence during tagging.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.99.0 - Release Candidate 1
 
@@ -3740,6 +3977,8 @@ Verification:
 Exit criteria:
 
 - only release-candidate fixes remain before `1.0.0`.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ### v0.100.0 - Release Candidate 2
 
@@ -3760,12 +3999,14 @@ Verification:
 Exit criteria:
 
 - no known blocker remains for `1.0.0`.
+- release implementation stop is reached and the maintainer is asked to run the
+  release pentest before tagging.
 
 ## v1.0.0 - Production-Ready Foundation
 
 Goal: publish the first serious production-ready BCX protocol foundation.
 
-Required scope:
+Deliverables:
 
 - stable root `bcx` facade,
 - stable core statement, attestation, binding, checkpoint, and explanation
@@ -3806,6 +4047,22 @@ Required scope:
 - complete threat model, security controls, release notes, and supply-chain
   documentation,
 - final pentest PASS for the exact reviewed commit.
+
+Verification:
+
+- full release evidence package from `v0.98.0`,
+- release-candidate evidence from `v0.99.0` and `v0.100.0`,
+- full local and CI gates,
+- final conformance run,
+- final security and supply-chain audit,
+- final pentest after implementation stop.
+
+Exit criteria:
+
+- production-ready foundation scope is complete,
+- no known blocker remains,
+- final pentest report records `Status: PASS` for the exact reviewed commit,
+- `v1.0.0` can be tagged without changing the reviewed source state.
 
 Non-goals for `1.0.0`:
 
