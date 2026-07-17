@@ -249,6 +249,7 @@ continues past the relevant dependency point.
 | Missing-parent quotas could be bypassed with unauthenticated issuer claims. | Expanded `v0.21.0 - Missing Parent Reconciliation` with unauthenticated global/source quotas and authenticated per-issuer quotas only after issuer authentication. |
 | Repeated replay/provider/cache/receipt/orphan/quorum gap review needed one traceable closure line. | Confirmed the closure remains versioned in `v0.17.1`, `v0.21.0`, `v0.23.0`, `v0.28.1`, `v0.41.0`, and `v0.79.0`; no extra milestone is introduced for the duplicate review. |
 | Replay protection alone did not close the crash window between replay commit and consequential side effects. | Added `v0.23.1 - Operation Execution Lifecycle` with lifecycle states, profile-selected recovery models, duplicate/nonce conflict semantics, distinct replay/admission/effect receipts, and crash-after-every-transition fixtures. |
+| Operation lifecycle needed deterministic transitions and evidence history rather than a mutable status flag. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `OperationKey`, one-statement binding, effect-attempt identifiers, transition authority, CAS or transaction requirements, append-only lifecycle journal semantics, duplicate responses for every state, and transition/concurrency/reorg fixtures. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -1182,9 +1183,31 @@ consequential effects.
 
 Deliverables:
 
+- canonical `OperationKey` definition scoped by realm, issuer, audience,
+  operation class, and nonce,
+- stored binding from each `OperationKey` to exactly one `StatementId`,
+- effect-attempt identifier for retryable execution and externally reconciled
+  carrier effects,
 - operation lifecycle states: `Reserved`, `Authenticated`, `Admitted`,
   `EffectPending`, `EffectObserved`, `EffectReceipted`, `Failed`, and
   `Indeterminate`,
+- deterministic transition table:
+  `Reserved` to `Authenticated`,
+  `Authenticated` to `Admitted`,
+  `Admitted` to `EffectPending`,
+  `EffectPending` to `EffectObserved`, `Failed`, or `Indeterminate`,
+  `EffectObserved` to `EffectReceipted`,
+  and `Indeterminate` to `EffectObserved`, `EffectReceipted`, or `Failed`,
+- rejection of backward transitions and skipped transitions unless the
+  transition table explicitly permits them,
+- transition authority rules naming which local component, profile adapter, or
+  carrier evidence verifier may record each transition,
+- compare-and-swap revision or atomic transaction requirement for concurrent
+  transition recording,
+- terminal and retryable state classification:
+  `EffectReceipted` terminal for the recorded attempt, `Failed` terminal only
+  for the recorded attempt and evidence scope, and `Indeterminate` retryable
+  only through profile-defined reconciliation,
 - rule that BCX does not claim generic exactly-once execution across HTTP
   services, databases, blockchains, or other native carriers,
 - required profile recovery model selection:
@@ -1194,10 +1217,22 @@ Deliverables:
   reconciliation using native binding and effect receipts,
 - exact duplicate statement and nonce returns stored operation status or
   receipt rather than re-executing,
+- deterministic duplicate response for every lifecycle state, including
+  pending, observed, receipted, failed, and indeterminate operations,
 - same nonce with a different statement commitment is a conflict rather than an
   idempotent retry,
 - distinct evidence rules for replay commitment, admission receipt, and effect
   receipt,
+- append-only operation transition journal or authenticated transition log;
+  current operation status is derived from that history and checkpoint or
+  profile finality policy rather than by overwriting evidence,
+- effect evidence remains preserved when later reorg, rollback, compensation,
+  contradiction, or receipt invalidation evidence changes derived usability or
+  finality,
+- `Failed` cannot imply that no effect occurred when the effect may have
+  happened but evidence is incomplete,
+- multiple effect attempts remain separately identifiable and cannot inflate
+  assurance,
 - missing effect evidence after admission produces `Indeterminate`, not a claim
   that the effect failed or succeeded,
 - profile vocabulary for at-most-once admission, idempotent execution, and
@@ -1205,6 +1240,11 @@ Deliverables:
 
 Verification:
 
+- transition-table mutation tests,
+- concurrent compare-and-swap or transaction conflict tests,
+- duplicate delivery fixtures for every lifecycle state,
+- effect-attempt substitution tests,
+- observed-then-reorganized evidence fixtures,
 - crash-after-every-lifecycle-transition fixtures,
 - retry same-statement fixtures,
 - retry mutated-statement same-nonce conflict fixtures,

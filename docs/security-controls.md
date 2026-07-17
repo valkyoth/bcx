@@ -15,11 +15,19 @@ Required controls from the first production profile:
 - operation lifecycle tracking for reserved, authenticated, admitted,
   effect-pending, effect-observed, effect-receipted, failed, and indeterminate
   states,
+- canonical operation key, one-statement binding, effect-attempt identifiers,
+  deterministic transition table, transition authority, and atomic revision or
+  transaction checks for lifecycle updates,
+- append-only operation transition journal or authenticated transition log with
+  derived current status,
+- preserved effect evidence when later reorg, rollback, compensation,
+  contradiction, or receipt invalidation evidence changes derived finality,
 - profile-selected recovery model for replay/effect crash windows: atomic local
   transaction, durable journal/outbox, native carrier idempotency key, or
   external effect reconciliation,
 - duplicate statement and nonce returning stored operation status or receipt
   without re-execution,
+- deterministic duplicate response for every lifecycle state,
 - same nonce with different statement commitment treated as conflict,
 - no generic exactly-once execution claim across native carriers,
 - proof-of-possession capabilities,

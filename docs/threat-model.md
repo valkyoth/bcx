@@ -33,6 +33,9 @@ internal motive.
 - Replay-store poisoning before authentication.
 - Crash windows between replay commitment, admission, native side effects, and
   effect receipts.
+- Concurrent, skipped, backward, or unauthorized lifecycle transitions.
+- Lost lifecycle history after effect evidence is reorged, contradicted,
+  compensated, rolled back, or invalidated.
 - Stale contextual verification-cache reuse.
 - Unauthenticated orphan-quota bypass.
 
@@ -52,6 +55,7 @@ internal motive.
   primitive provider through `v1.0.0`.
 - Guaranteeing generic exactly-once execution across HTTP services, databases,
   blockchains, or other native carriers.
+- Treating a mutable operation status alone as complete evidence history.
 
 ## Security Claims
 
@@ -80,6 +84,8 @@ BCX must not claim:
   unless local policy explicitly trusts that verifier role,
 - missing effect evidence after admission proves that the effect failed or
   succeeded.
+- later reorg, rollback, compensation, contradiction, or receipt invalidation
+  evidence erases the earlier observation.
 
 ## Privacy Risks
 
@@ -111,6 +117,7 @@ Every WHY query must be authenticated and bounded by:
 - receipt replay boundaries,
 - replay-store authentication-before-commit policy,
 - operation lifecycle and recovery-model policy,
+- append-only lifecycle journal and transition-authority policy,
 - cacheability-by-outcome policy,
 - unauthenticated source quota policy,
 - threshold quorum-intersection policy.
