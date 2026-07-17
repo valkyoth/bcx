@@ -115,7 +115,7 @@ BCX must not claim:
 - subsequent reorg, rollback, compensation, contradiction, or receipt invalidation
   evidence erases the earlier observation,
 - a failed latest attempt means an earlier observed or receipted attempt did
-  not occur.
+  not occur,
 - a previously admitted operation authorizes new effect attempts after
   time-varying authority has expired or changed.
 

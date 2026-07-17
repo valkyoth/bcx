@@ -255,6 +255,7 @@ continues past the relevant dependency point.
 | Operation-level transitions had dead ends and completion needed profile-bound meaning. | Expanded `v0.23.1 - Operation Execution Lifecycle` with `Active` resolution transitions, phase-specific indeterminate resolution, admission-gated `start_attempt`, policy/root rechecks before retry, profile-bound `CompletionRule`, and completion/reorg/revocation fixtures; attached profile completion-rule requirements to `v0.51.0 - Profile Normative Specification Pack`. |
 | Completion rules needed canonical identity, and retries needed complete time-varying authority re-evaluation. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `CompletionRuleRecord`, domain-separated `CompletionRuleId`, policy epoch binding, rule substitution/downgrade handling, retry-time evaluation of validity windows, keys, capabilities, delegations, policy/trust/revocation/conflict roots, scope, budgets, recovery rules, and completion-rule epochs; attached completion-rule identity requirements to `v0.51.0 - Profile Normative Specification Pack`. |
 | Completion-rule committed fields and vector coverage needed final consistency tightening. | Expanded `v0.23.1 - Operation Execution Lifecycle` so `CompletionRuleRecord` commits receipt-invalidation behavior, adds canonical completion-rule vectors for mutation/default/critical-field/receipt-invalidation/re-encoding behavior, and proves completion-relevant receipt binding is determined by canonical rule/profile semantics. |
+| Final gap review found no remaining architectural, cryptographic, protocol, state-machine, no_std, parsing, graph-safety, or carrier-integration milestone gaps. | Recorded the closure and moved the completion-relevant receipt rule into `v0.23.1 - Operation Execution Lifecycle` deliverables while fixing the threat-model list punctuation. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -1298,6 +1299,9 @@ Deliverables:
 - `CompletionRuleId` is bound into admission evidence, completion transition
   events, effect receipts when completion-relevant, journal-head evidence, and
   verification cache keys,
+- canonical profile and `CompletionRuleRecord` semantics exclusively determine
+  whether an effect receipt is completion-relevant; completion transitions
+  cannot choose receipt relevance to avoid required `CompletionRuleId` binding,
 - completion-rule changes create a new policy epoch and cannot silently
   reinterpret historical completion evidence,
 - unknown or unavailable completion rules produce `Indeterminate`, while
