@@ -250,6 +250,7 @@ continues past the relevant dependency point.
 | Repeated replay/provider/cache/receipt/orphan/quorum gap review needed one traceable closure line. | Confirmed the closure remains versioned in `v0.17.1`, `v0.21.0`, `v0.23.0`, `v0.28.1`, `v0.41.0`, and `v0.79.0`; no extra milestone is introduced for the duplicate review. |
 | Replay protection alone did not close the crash window between replay commit and consequential side effects. | Added `v0.23.1 - Operation Execution Lifecycle` with lifecycle states, profile-selected recovery models, duplicate/nonce conflict semantics, distinct replay/admission/effect receipts, and crash-after-every-transition fixtures. |
 | Operation lifecycle needed deterministic transitions and evidence history rather than a mutable status flag. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `OperationKey`, one-statement binding, effect-attempt identifiers, transition authority, CAS or transaction requirements, append-only lifecycle journal semantics, duplicate responses for every state, and transition/concurrency/reorg fixtures. |
+| Operation lifecycle still needed optional reservation paths, admission rejection, explicit retry attempt creation, and portable transition evidence. | Expanded `v0.23.1 - Operation Execution Lifecycle` with initial `Absent` transitions, `ReservationExpired`, `Aborted`, `Rejected`, authorized `start_attempt`, attempt limits and cumulative effect-work budgets, canonical transition-event commitments, and matching conformance/vector fixtures through the `v0.16.1` scaffold. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -734,6 +735,8 @@ Deliverables:
 - canonical statement, attestation, binding, and checkpoint vector directories,
 - verification outcome vector directories,
 - cost-schedule and resource-exhaustion vector directories,
+- operation lifecycle transition vector directory reserved for `v0.23.1`
+  state-machine vectors,
 - fixture regeneration guard,
 - pass/fail report format.
 
@@ -1189,13 +1192,22 @@ Deliverables:
 - effect-attempt identifier for retryable execution and externally reconciled
   carrier effects,
 - operation lifecycle states: `Reserved`, `Authenticated`, `Admitted`,
-  `EffectPending`, `EffectObserved`, `EffectReceipted`, `Failed`, and
-  `Indeterminate`,
+  `ReservationExpired`, `Aborted`, `Rejected`, `EffectPending`,
+  `EffectObserved`, `EffectReceipted`, `Failed`, and `Indeterminate`,
+- explicit state meanings:
+  `Rejected` means authentication succeeded but capability, policy, or
+  admission denied the operation;
+  `Failed` means an admitted effect attempt failed within its evidence scope;
+  `Indeterminate` means evidence is insufficient to decide;
+  and `ReservationExpired` or `Aborted` implies no admission or effect,
 - deterministic transition table:
+  `Absent` to `Reserved` or `Authenticated`,
   `Reserved` to `Authenticated`,
-  `Authenticated` to `Admitted`,
-  `Admitted` to `EffectPending`,
-  `EffectPending` to `EffectObserved`, `Failed`, or `Indeterminate`,
+  `Reserved` to `ReservationExpired` or `Aborted`,
+  `Authenticated` to `Admitted`, `Rejected`, or `Indeterminate`,
+  `Admitted` to `EffectPending`, `Failed`, or `Indeterminate`,
+  `EffectPending` to `EffectObserved`, `EffectReceipted`, `Failed`, or
+  `Indeterminate`,
   `EffectObserved` to `EffectReceipted`,
   and `Indeterminate` to `EffectObserved`, `EffectReceipted`, or `Failed`,
 - rejection of backward transitions and skipped transitions unless the
@@ -1205,6 +1217,7 @@ Deliverables:
 - compare-and-swap revision or atomic transaction requirement for concurrent
   transition recording,
 - terminal and retryable state classification:
+  `ReservationExpired`, `Aborted`, and `Rejected` terminal before admission,
   `EffectReceipted` terminal for the recorded attempt, `Failed` terminal only
   for the recorded attempt and evidence scope, and `Indeterminate` retryable
   only through profile-defined reconciliation,
@@ -1218,7 +1231,21 @@ Deliverables:
 - exact duplicate statement and nonce returns stored operation status or
   receipt rather than re-executing,
 - deterministic duplicate response for every lifecycle state, including
-  pending, observed, receipted, failed, and indeterminate operations,
+  reserved, authenticated, admitted, rejected, pending, observed, receipted,
+  failed, expired, aborted, and indeterminate operations,
+- duplicate delivery never starts a new effect attempt,
+- new effect attempts require an explicit authorized `start_attempt` lifecycle
+  operation,
+- recovery policy defines which prior states permit `start_attempt`,
+- each attempt receives a new `EffectAttemptId` while retaining the same
+  `OperationKey` and `StatementId`,
+- attempt creation uses compare-and-swap revision or atomic transaction
+  semantics,
+- maximum attempt count and cumulative effect-work budget prevent retry
+  amplification,
+- effect receipts and native bindings identify the exact `EffectAttemptId`,
+- assurance counts operation and principal evidence, not the number of
+  attempts,
 - same nonce with a different statement commitment is a conflict rather than an
   idempotent retry,
 - distinct evidence rules for replay commitment, admission receipt, and effect
@@ -1226,13 +1253,21 @@ Deliverables:
 - append-only operation transition journal or authenticated transition log;
   current operation status is derived from that history and checkpoint or
   profile finality policy rather than by overwriting evidence,
-- effect evidence remains preserved when later reorg, rollback, compensation,
+- effect evidence remains preserved when subsequent reorg, rollback, compensation,
   contradiction, or receipt invalidation evidence changes derived usability or
   finality,
 - `Failed` cannot imply that no effect occurred when the effect may have
   happened but evidence is incomplete,
 - multiple effect attempts remain separately identifiable and cannot inflate
   assurance,
+- exported lifecycle evidence uses a canonical transition-event commitment with
+  operation-key commitment, `StatementId`, optional `EffectAttemptId`, event or
+  transition kind, revision or sequence, authorized transition recorder,
+  authenticated evaluation point, and native-binding or receipt commitment when
+  applicable,
+- local journal entries remain operational data and cannot be presented as
+  portable proof unless committed or attested under the canonical
+  transition-event format,
 - missing effect evidence after admission produces `Indeterminate`, not a claim
   that the effect failed or succeeded,
 - profile vocabulary for at-most-once admission, idempotent execution, and
@@ -1244,6 +1279,12 @@ Verification:
 - concurrent compare-and-swap or transaction conflict tests,
 - duplicate delivery fixtures for every lifecycle state,
 - effect-attempt substitution tests,
+- reservation expiry fixtures,
+- admission rejection fixtures,
+- explicit retry and concurrent attempt creation fixtures,
+- attempt-limit and cumulative effect-work budget exhaustion fixtures,
+- canonical transition-event conformance vectors through the `v0.16.1`
+  scaffold,
 - observed-then-reorganized evidence fixtures,
 - crash-after-every-lifecycle-transition fixtures,
 - retry same-statement fixtures,
@@ -2278,8 +2319,8 @@ Verification:
 
 Exit criteria:
 
-- `bcx-offline` can start with the same normative template every later profile
-  must follow.
+- `bcx-offline` can start with the same normative template every subsequent
+  profile must follow.
 
 ### v0.47.3 - Core Object And Bundle Parser Fuzzing
 

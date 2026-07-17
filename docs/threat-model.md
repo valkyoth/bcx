@@ -34,6 +34,10 @@ internal motive.
 - Crash windows between replay commitment, admission, native side effects, and
   effect receipts.
 - Concurrent, skipped, backward, or unauthorized lifecycle transitions.
+- Admission rejection mislabeled as effect failure.
+- Duplicate delivery creating a new effect attempt.
+- Retry amplification through unlimited effect attempts.
+- Portable lifecycle proof claims made from unauthenticated local journal data.
 - Lost lifecycle history after effect evidence is reorged, contradicted,
   compensated, rolled back, or invalidated.
 - Stale contextual verification-cache reuse.
@@ -83,8 +87,8 @@ BCX must not claim:
 - a sender-provided verification receipt suppresses required local verification
   unless local policy explicitly trusts that verifier role,
 - missing effect evidence after admission proves that the effect failed or
-  succeeded.
-- later reorg, rollback, compensation, contradiction, or receipt invalidation
+  succeeded,
+- subsequent reorg, rollback, compensation, contradiction, or receipt invalidation
   evidence erases the earlier observation.
 
 ## Privacy Risks
@@ -118,6 +122,8 @@ Every WHY query must be authenticated and bounded by:
 - replay-store authentication-before-commit policy,
 - operation lifecycle and recovery-model policy,
 - append-only lifecycle journal and transition-authority policy,
+- explicit attempt-creation, attempt-limit, and transition-event commitment
+  policy,
 - cacheability-by-outcome policy,
 - unauthenticated source quota policy,
 - threshold quorum-intersection policy.
