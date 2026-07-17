@@ -210,12 +210,13 @@ include:
 - counterparty acknowledged,
 - independently witnessed,
 - settlement finalized,
-- contradicted,
-- unknown.
+- contradicted.
 
-`Unknown` means absence of evidence in the evaluated context. Contradiction and
-revocation can coexist with authentic historical evidence; they affect derived
-usability and assurance rather than rewriting history.
+Unknown or incomplete knowledge is represented as absence of evidence or an
+explicit completeness marker in the evaluated context, not as an evidence
+facet. Contradiction and revocation can coexist with authentic historical
+evidence; they affect derived usability and assurance rather than rewriting
+history.
 
 Adapters may attest only to effects they can actually observe. For example, an
 HTTP gateway can attest that it received a response; it cannot claim a database

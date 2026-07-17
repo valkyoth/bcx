@@ -185,7 +185,7 @@ continues past the relevant dependency point.
 | Privacy requirements for pseudonymous keys, selective disclosure, and anonymous proof suites need to shape explanation bundles before profiles. | Added `v0.47.0 - Privacy And Disclosure Hardening` before offline, HTTP, blockchain, witness, and ZK work. |
 | Carrier profiles need normative schemas, registries, critical-extension behavior, downgrade rules, and finality contracts. | Added `v0.51.0 - Profile Normative Specification Pack` before the first HTTP profile. |
 | The wire version must remain draft/experimental until canonical BCX/1 is frozen. | Added `v0.52.0 - Draft Wire Version And Registry Gate`. |
-| Parser fuzzing must precede untrusted network endpoints. | Added core parser tests to `v0.13.0` and carrier parser fuzzing in `v0.54.0 - Carrier Parser Fuzzing Program` before HTTP implementation starts. |
+| Parser fuzzing must precede untrusted network endpoints. | Added core parser tests to `v0.13.0`, core object and bundle fuzzing to `v0.47.3`, and carrier parser fuzzing in `v0.54.0 - Carrier Parser Fuzzing Program` before HTTP implementation starts. |
 | Cryptographic conformance must precede reliance on COSE and hybrid provider surfaces. | Added `v0.37.0 - Cryptographic Conformance Program` before statement and attestation verification are used by profiles. |
 | Normative security specifications should grow alongside implementation rather than appear only at the end. | Added `v0.50.0 - Core And Codec Specification Draft` and kept `v0.95.0 - Security Specification Freeze`. |
 | Digest is an unnamed 32-byte value and commitments need domain separation, algorithm codes, empty-root rules, and migration policy. | Added `v0.11.0 - Commitment Suite And Registry Scaffold`. |
@@ -208,23 +208,28 @@ continues past the relevant dependency point.
 | Policy references did not prove that policy was actually evaluated. | Added `v0.26.1 - Policy Record And Evaluation Contract` before key resolution and semantic validity. |
 | Revocation and contradiction semantics needed typed targets, authorized revokers, scope, effective point, adjudication, and historical visibility rules. | Expanded `v0.40.0` and `v0.46.0` with concrete revocation and contradiction semantics. |
 | Private disclosure cryptography needed more than raw hashes for low-entropy values. | Expanded `v0.26.0` and `v0.47.0` with salted/blinded commitments, AEAD suite IDs, nonce uniqueness, recipient/audience binding, ciphertext domain separation, length-leakage policy, and key rotation. |
-| Offline and CLI parsing depended on core parser safety that was scheduled too late. | Added core prefix and streaming parser safety to `v0.13.0`, made `v0.53.0` carrier framing-specific, and made `v0.54.0` carrier parser fuzzing. |
+| Offline and CLI parsing depended on core parser safety that was scheduled too late. | Added core prefix and streaming parser safety to `v0.13.0`, core object and bundle fuzzing to `v0.47.3`, made `v0.53.0` carrier framing-specific, and made `v0.54.0` carrier parser fuzzing. |
 | Basic graph and parser assurance was too late for persistent graph and carrier work. | Added early property, acyclicity, concurrent insertion, streaming chunk-boundary, prefix-before-allocation, and budget monotonicity requirements to `v0.13.0`, `v0.17.0`, `v0.20.0`, and `v0.21.0`. |
 | Security controls documentation needs to mirror atomic replay, orphan DoS, signer entropy, policy evaluation, trust snapshots, and checkpoint equivocation. | Added security-controls update requirements to the responsible milestones: `v0.23.0`, `v0.26.1`, `v0.27.0`, `v0.29.0`, and `v0.40.0`. |
 | Explanation bundle schema still referenced contradiction and privacy work scheduled after it. | Split the bundle work: `v0.45.0` is a skeleton bundle and `v0.47.1 - Final Explanation Bundle Closure` finalizes the schema after `v0.46.0` contradiction and `v0.47.0` privacy hardening. |
 | Root completion referenced non-inclusion fixtures before the concrete transparency proof model. | Limited `v0.40.0` to the non-inclusion interface and moved concrete non-inclusion fixtures to `v0.42.0`. |
-| Graph-store atomicity and pruning safety were underspecified. | Expanded `v0.19.0` and `v0.20.0` with linearization, failure atomicity, isolation, conflict/retry, crash recovery, transaction/CAS equivalence, pruning boundaries, and ancestry summaries or tombstones. |
-| Parent duplicate rejection could be read as rejecting only identical `(parent, relationship)` pairs. | Updated `v0.15.0` and `v0.19.0` to reject the same parent ID under different relationship kinds unless a profile rule scheduled from `v0.51.0` onward explicitly permits and narrows that shape. |
-| Verification work needed a concrete budget matching `DecodeBudget`. | Expanded `v0.17.0` with checked `VerificationBudget` debits for key resolution, classical/PQ verification, hybrid components, optional attestations, proofs, graph traversal, policy evaluation, receipts, and disclosure checks. |
+| Graph-store atomicity and pruning safety were underspecified. | Expanded `v0.19.0` and `v0.20.0` with linearization, failure atomicity, isolation, conflict/retry, crash recovery, transaction/CAS equivalence, pruning boundaries, authenticated ancestry summaries, tombstones as existence markers only, and cycle-through-pruned-ancestor tests. |
+| Parent duplicate rejection could be read as rejecting only identical `(parent, relationship)` pairs. | Updated `v0.15.0` and `v0.19.0` so parent-ID uniqueness is an absolute core invariant; several semantic roles for one parent must be represented as one canonical edge with a role set. |
+| Verification work needed a concrete budget matching `DecodeBudget`. | Expanded `v0.17.0` with checked `VerificationBudget`, versioned `VerificationCostSchedule`, `CostScheduleId`, registry-defined suite/profile costs, and identical debit tests across providers for the same suite. |
 | Signed policy decisions needed assurance modes that distinguish attestation from reproducibility and proof. | Expanded `v0.26.1` with attested, reproducible, and proven policy-decision modes plus executable-policy metering and sandbox requirements. |
 | Self-contained WHY bundles needed a formal closure algorithm and trust-anchor boundary. | Added those requirements to `v0.47.1 - Final Explanation Bundle Closure`. |
 | Provider conformance required two independent implementations but only one provider per mandatory algorithm was scheduled. | Added `v0.36.3 - Provider Oracle And SLH-DSA Scope Decision` before cryptographic conformance. |
 | Provider scratch handling needed panic, abort, internal-copy, and HSM limitations. | Expanded `v0.34.0 - Provider Scratch And Side-Effect Contract`. |
 | Implementation-plan language still used claim-status wording. | Updated `docs/IMPLEMENTATION_PLAN.md` to use evidence facets and checkpoint-relative assurance language. |
-| Hiding commitments and AEAD nonces needed exact construction rules. | Tightened `v0.26.0` and `v0.47.0` to require non-public blinding for low-entropy values and crash-safe nonce derivation by key epoch. |
+| Hiding commitments and AEAD nonces needed exact construction rules. | Tightened `v0.26.0` and `v0.47.0` to require suite IDs, domain-separated preimages, minimum blinding entropy, no blinding reuse, canonical openings, context and audience binding, explicit assumptions, and non-circular AEAD nonce derivation. |
 | Differential CBOR fuzzing must compare canonical acceptance and original-byte preservation, not only decoded values. | Added that requirement to `v0.54.0 - Carrier Parser Fuzzing Program`. |
-| no-std feature tiers and zero-copy benchmarks were missing before profile work. | Added `v0.54.1 - no_std Feature Tiers And Zero-Copy Evidence` before HTTP/profile implementation, and kept `v0.94.0` as the final no-std audit. |
+| Offline profile prerequisites were scheduled after the offline profile itself. | Added `v0.47.2 - Pre-Offline Profile Specification Gate`, `v0.47.3 - Core Object And Bundle Parser Fuzzing`, and `v0.47.4 - Pre-Offline no_std And Zero-Copy Evidence` before `v0.48.0`. |
+| no-std feature tiers and zero-copy benchmarks need evidence before profile work and a refresh before carriers. | Added `v0.47.4` before the offline profile, kept `v0.54.1 - Pre-Carrier no_std Feature Tiers And Zero-Copy Evidence` before HTTP/profile implementation, and kept `v0.94.0` as the final no-std audit. |
 | Threshold witness signer-set rotation and epoch binding were underspecified. | Expanded `v0.79.0 - Threshold Proof Crate` with signer-set epoch, membership, rotation, and threshold-change binding. |
+| Cryptographic conformance was described as planning rather than executable proof. | Updated `v0.37.0` to require executable imported-vector harnesses, pinned vector provenance and hashes, complete KAT execution, provider/oracle differential tests, cross-product signing and verification tests, negative-vector execution, and reproducible reports. |
+| Multi-attestation duplicate handling could reject valid key rollover or inflate thresholds. | Updated `v0.35.0` to reject exact duplicate proofs, count stable trust principals once per role, retain rollover evidence without threshold inflation, and define key-rotation overlap behavior. |
+| Pruned graph proofs needed enough ancestry data to reject cycles. | Expanded `v0.19.0` and `v0.20.0` with authenticated reachability summaries, unsafe finalized-epoch edge rejection, retained transitive metadata, and cycle-through-pruned-ancestor tests. |
+| Conformance and testkit crates were too late for shared vectors and adversarial fixtures. | Added `v0.16.1 - Conformance Vector Scaffold` and `v0.16.2 - Testkit Fixture Scaffold`; `v0.87.0` and `v0.88.0` now complete those crates. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -389,7 +394,7 @@ Deliverables:
 - partial order definition where mathematically justified,
 - no blanket `Ord` or `PartialOrd` on assurance values unless the lattice
   rules justify it,
-- unknown and redacted evidence markers,
+- explicit absence/completeness and redacted evidence markers,
 - tests showing declared purpose is not verified truth.
 
 Verification:
@@ -639,8 +644,8 @@ Deliverables:
 - statement decoder,
 - canonical parent ordering rules,
 - adjacent duplicate-parent rejection by parent ID, including the same parent
-  ID under different relationship kinds unless a profile rule scheduled from
-  `v0.51.0` onward explicitly permits and narrows that shape,
+  ID under different relationship kinds,
+- canonical role-set encoding for a parent that carries several semantic roles,
 - statement ID derivation from canonical statement bytes,
 - sealed `CanonicalStatementBytes` or `StatementCommitment` producer,
 - rule that `StatementId` is excluded from its own hash preimage,
@@ -648,7 +653,9 @@ Deliverables:
 - exclusion of attestations, native bindings, local availability, and transport
   metadata from the statement preimage,
 - inclusion of schema version and security-relevant extensions,
-- canonical edge semantics limited to parent ID plus relationship,
+- canonical edge semantics limited to parent ID, relationship, and optional
+  role set; profile hooks may narrow this but cannot weaken parent-ID
+  uniqueness,
 - mutation fixtures.
 
 Verification:
@@ -661,7 +668,8 @@ Verification:
 Exit criteria:
 
 - the same logical statement produces the same `StatementId` everywhere,
-- caller-supplied statement IDs cannot bypass canonical identity checks.
+- caller-supplied statement IDs cannot bypass canonical identity checks,
+- one canonical statement cannot contain two edges to the same parent ID.
 
 ### v0.16.0 - Canonical Attestation, Binding, And Checkpoint Encoding
 
@@ -690,6 +698,58 @@ Exit criteria:
 - attestation, binding, and checkpoint commitments are stable and
   mutation-sensitive.
 
+### v0.16.1 - Conformance Vector Scaffold
+
+Goal: establish shared interoperability vector formats immediately after the
+first canonical encoding milestones.
+
+Deliverables:
+
+- `bcx-conformance` crate skeleton,
+- vector manifest schema,
+- vector provenance fields,
+- expected version and digest fields,
+- canonical statement, attestation, binding, and checkpoint vector directories,
+- fixture regeneration guard,
+- pass/fail report format.
+
+Verification:
+
+- `cargo test -p bcx-conformance`,
+- manifest digest mismatch tests,
+- fixture regeneration check.
+
+Exit criteria:
+
+- every new canonical object vector has one shared home before profile-specific
+  vector formats appear.
+
+### v0.16.2 - Testkit Fixture Scaffold
+
+Goal: provide shared adversarial fixtures before graph, parser, crypto, and
+bundle milestones each create local copies.
+
+Deliverables:
+
+- `bcx-testkit` crate skeleton,
+- deterministic test-only key material,
+- statement and attestation fixture builders,
+- malformed byte fixture helpers,
+- graph edge fixture helpers,
+- parser corpus seed helpers,
+- bundle dependency fixture helpers.
+
+Verification:
+
+- `cargo test -p bcx-testkit`,
+- no root dependency regression,
+- deterministic fixture repeatability tests.
+
+Exit criteria:
+
+- graph, crypto, parser, and bundle tests can depend on one shared fixture
+  vocabulary.
+
 ## Phase 3: Limits, Graph Admission, Replay, And Authority
 
 ### v0.17.0 - Core Limit And Budget Split
@@ -702,6 +762,12 @@ Deliverables:
 - general graph limits in core or policy,
 - verification budgets in core or policy,
 - checked `VerificationBudget` type,
+- versioned `VerificationCostSchedule` type,
+- `CostScheduleId` in the verification context,
+- suite-specific and profile-specific worst-case debit values,
+- registry-defined costs charged before proof-suite or provider dispatch,
+- policy-controlled verification limits that untrusted statements cannot
+  increase,
 - key-resolution debits,
 - classical and post-quantum verification debits,
 - hybrid component debits,
@@ -727,12 +793,16 @@ Verification:
 - tests that budgeted parser failures happen before allocation or crypto work,
 - tests that verification-budget exhaustion happens before the next key
   resolution, signature verification, graph traversal, policy evaluation, or
-  proof check.
+  proof check,
+- tests that different providers for the same suite debit identically,
+- tests that untrusted statements cannot increase policy-controlled limits.
 
 Exit criteria:
 
 - semantic model and cryptographic verification do not depend on a
-  transport-named crate for non-wire budgets.
+  transport-named crate for non-wire budgets,
+- verification cost accounting is deterministic from registry, profile, and
+  local policy data before any provider-specific code runs.
 
 ### v0.18.0 - Public Identifier Storage Policy
 
@@ -780,16 +850,21 @@ Deliverables:
 - compact `CauseCapsule` normalization into causal edges or explicit
   deprecation behavior,
 - adjacent duplicate checks over canonical parent order,
-- rejection of the same parent ID under two relationship kinds unless an
-  explicit profile rule scheduled from `v0.51.0` onward narrows that behavior,
-- pruning safety rules using authenticated ancestry summaries, tombstones, or
-  checkpoint-finalization boundaries,
+- rejection of the same parent ID under two relationship kinds; multiple roles
+  for one parent use one canonical edge with a role set,
+- rule that profile hooks cannot weaken parent-ID uniqueness,
+- pruning safety rules using authenticated reachability or ancestry summaries,
+  tombstones only as existence markers, and checkpoint-finalization boundaries,
+- prohibition of unsafe edges from newer graph epochs into finalized ancestry
+  where the ancestry summary cannot prove acyclicity,
+- transitive metadata retention requirements for pruned ancestors,
 - public identifier indexing policy hooks.
 
 Verification:
 
 - contract tests with deterministic in-memory graph fixtures,
-- duplicate, self-parent, and two-node cycle fixtures.
+- duplicate, self-parent, and two-node cycle fixtures,
+- cycle-through-pruned-ancestor fixtures.
 
 Exit criteria:
 
@@ -814,7 +889,9 @@ Deliverables:
 - no recursion in traversal,
 - explicit node, edge, and depth limits,
 - pruning boundary representation,
-- authenticated ancestry summary or tombstone test fixture.
+- authenticated reachability or ancestry summary fixture,
+- tombstone test fixture proving existence only,
+- retained transitive metadata fixture for pruned ancestors.
 
 Verification:
 
@@ -824,6 +901,7 @@ Verification:
 - concurrent insertion tests for check-then-insert races,
 - crash and partial-failure recovery tests,
 - pruning safety tests,
+- cycle-through-pruned-ancestor tests,
 - cycle and duplicate-delivery tests,
 - no-default-features workspace pass.
 
@@ -989,15 +1067,25 @@ Deliverables:
 - private evidence commitment,
 - hiding commitment construction for private values using non-public blinding
   material; public salts alone are not sufficient for low-entropy values,
+- commitment suite identifier,
+- domain-separated commitment preimage format,
+- minimum blinding entropy requirement,
+- prohibition on blinding reuse across fields or statements,
+- canonical opening format and verification operation,
+- binding of field path, statement context, and disclosure audience where
+  applicable,
+- explicit computational-hiding and binding assumptions,
 - public evidence marker,
 - encrypted field disclosure contract,
 - AEAD suite identifier,
 - crash-safe AEAD nonce generation or derivation rules across key epochs,
+- rule that AEAD nonce derivation cannot depend on a statement ID when the
+  ciphertext contributes to that statement ID,
 - recipient and audience binding,
 - ciphertext domain separation,
 - padding or explicit length-leakage policy,
 - disclosure key distribution and rotation behavior,
-- unknown evidence marker.
+- explicit missing-evidence or completeness marker.
 
 Verification:
 
@@ -1270,7 +1358,13 @@ Deliverables:
 
 - proof-suite dispatch,
 - issuer and key checks,
-- duplicate key and issuer rejection,
+- exact duplicate-proof rejection,
+- duplicate key rejection for threshold counting,
+- stable trust-principal identity for unique signer counting,
+- retention of multiple keys from one principal as evidence while counting
+  that principal once per applicable role,
+- key-rotation overlap behavior,
+- role-specific unique-signer counting rules,
 - canonical signer ordering,
 - unique signer counting,
 - signer roles and trust domains,
@@ -1282,7 +1376,10 @@ Deliverables:
 Verification:
 
 - valid and invalid proof fixtures,
-- duplicate signer fixtures,
+- exact duplicate proof fixtures,
+- duplicate key threshold-counting fixtures,
+- key-rotation overlap fixtures,
+- stable-principal multi-key fixtures,
 - threshold and role policy fixtures,
 - unknown-suite tests.
 
@@ -1404,23 +1501,33 @@ adversarial suite mutations before profiles depend on these surfaces.
 
 Deliverables:
 
-- RFC 8032 Ed25519 vectors,
-- NIST ACVP or KAT plan for ML-DSA and SLH-DSA,
-- RFC 9964 JOSE/COSE vector plan,
-- two-provider or independent-oracle differential verification plan,
+- executable imported-vector harnesses,
+- pinned vector provenance with expected version and digest for every corpus,
+- complete RFC 8032 Ed25519 KAT execution,
+- complete NIST ACVP or KAT execution for mandatory ML-DSA parameter sets,
+- RFC 9964 JOSE/COSE vector execution where applicable to admitted suites,
+- automated provider-oracle differential tests,
+- signing and verification cross-product tests across admitted providers,
+- negative-vector execution for malformed keys, signatures, headers, and
+  suite metadata,
+- reproducible pass/fail report generation,
 - SLH-DSA mandatory-or-reserved result from `v0.36.3`,
 - hybrid component swap and strip corpus,
 - downgrade and cross-suite reuse corpus.
 
 Verification:
 
-- conformance smoke tests,
-- hybrid negative corpus.
+- complete imported-vector harness run,
+- provider-oracle differential test run,
+- cross-product signing and verification run,
+- negative corpus run,
+- generated conformance report check,
+- hybrid negative corpus run.
 
 Exit criteria:
 
 - cryptographic acceptance is measured against standards vectors and
-  adversarial suite mutations.
+  adversarial suite mutations through executable, reproducible harnesses.
 
 ## Phase 5: Semantic Validity, Receipts, Explanation, And Offline Use
 
@@ -1695,10 +1802,17 @@ Deliverables:
 - stable global key ID avoidance policy,
 - hiding commitment guidance for low-entropy values using non-public blinding
   material; public salts alone are not sufficient,
+- commitment suite identifier and domain-separated preimage rules,
+- minimum blinding entropy and no-reuse rules across fields and statements,
+- canonical opening format and verification operation,
+- field path, statement context, and disclosure audience binding rules,
+- explicit computational-hiding and binding assumptions,
 - selective disclosure binding,
 - encrypted field disclosure contract,
 - AEAD suite identification,
 - crash-safe AEAD nonce generation or derivation rules across key epochs,
+- AEAD nonce derivation rule that avoids circular dependence on statement IDs
+  when ciphertext contributes to those IDs,
 - recipient and audience binding,
 - ciphertext domain separation,
 - padding or explicit length-leakage policy,
@@ -1753,10 +1867,91 @@ Exit criteria:
   exactly what is proven, missing, redacted, stale, contradicted, withheld,
   truncated, or externally trusted.
 
+### v0.47.2 - Pre-Offline Profile Specification Gate
+
+Goal: define the minimum normative profile contract before the first profile
+crate is implemented.
+
+Deliverables:
+
+- profile normative specification template,
+- required profile security-contract sections,
+- object and bundle schema requirements,
+- registry and critical-extension requirements,
+- downgrade behavior requirements,
+- finality and trust-anchor requirements,
+- completeness and unresolved-reference requirements.
+
+Verification:
+
+- documentation lint for required profile sections,
+- offline-profile spec stub review.
+
+Exit criteria:
+
+- `bcx-offline` can start with the same normative template every later profile
+  must follow.
+
+### v0.47.3 - Core Object And Bundle Parser Fuzzing
+
+Goal: fuzz core object and WHY bundle parsers before offline bundles parse
+untrusted files.
+
+Deliverables:
+
+- cargo-fuzz targets for statements, attestations, bindings, checkpoints, and
+  WHY bundles,
+- malformed seed corpus for canonical CBOR objects,
+- truncation, nonminimal integer, duplicate key, trailing byte, deep nesting,
+  unknown critical field, and oversized proof seeds,
+- accepted-object re-encode identity assertion,
+- differential CBOR checks for canonical acceptance and original-byte
+  preservation,
+- corpus regression tests.
+
+Verification:
+
+- local core parser fuzz smoke,
+- malformed corpus regression tests,
+- no-default-features parser tests.
+
+Exit criteria:
+
+- offline profile parsing depends on already-fuzzed core object and bundle
+  parser boundaries.
+
+### v0.47.4 - Pre-Offline no_std And Zero-Copy Evidence
+
+Goal: define feature tiers and prove zero-copy behavior before offline profile
+implementation depends on core APIs.
+
+Deliverables:
+
+- no-std feature tier policy,
+- core-only tier without allocation,
+- alloc-enabled borrowed/owned conversion tier,
+- optional std adapter tier,
+- end-to-end zero-copy allocation benchmarks for canonical parse, verify, and
+  bundle-read paths,
+- feature-leakage guard for offline dependencies.
+
+Verification:
+
+- `cargo test --workspace --no-default-features`,
+- feature matrix checks,
+- allocation benchmark run,
+- zero-copy evidence report.
+
+Exit criteria:
+
+- offline profile work can start knowing which BCX APIs are core-only,
+  alloc-enabled, or std-adapter APIs.
+
 ### v0.48.0 - Offline Profile
 
 Goal: add `bcx-offline` for air-gapped bundles after final explanation,
-contradiction, and privacy rules exist.
+contradiction, privacy, profile-specification, parser-fuzzing, and no-std
+evidence gates exist.
 
 Deliverables:
 
@@ -1927,17 +2122,17 @@ Exit criteria:
 - every parser has a reproducible malformed-input corpus and a fuzz entry
   point before HTTP implementation starts.
 
-### v0.54.1 - no_std Feature Tiers And Zero-Copy Evidence
+### v0.54.1 - Pre-Carrier no_std Feature Tiers And Zero-Copy Evidence
 
-Goal: define feature tiers and prove zero-copy behavior before profile
+Goal: refresh feature-tier and zero-copy evidence before network carrier
 implementations depend on core APIs.
 
 Deliverables:
 
-- no-std feature tier policy,
-- core-only tier without allocation,
-- alloc-enabled borrowed/owned conversion tier,
-- optional std adapter tier,
+- no-std feature tier policy refresh from `v0.47.4`,
+- core-only tier without allocation refresh,
+- alloc-enabled borrowed/owned conversion tier refresh,
+- optional std adapter tier refresh,
 - end-to-end zero-copy allocation benchmarks,
 - throughput benchmarks for canonical parse, verify, and bundle-read paths,
 - feature-leakage guard for profile dependencies.
@@ -1951,8 +2146,8 @@ Verification:
 
 Exit criteria:
 
-- profile implementation can start knowing which BCX APIs are core-only,
-  alloc-enabled, or std-adapter APIs, and with baseline zero-copy evidence.
+- carrier profile implementation can start with refreshed evidence for
+  core-only, alloc-enabled, and std-adapter API boundaries.
 
 ### v0.55.0 - HTTP Profile Security Contract
 
@@ -2660,9 +2855,10 @@ Exit criteria:
 
 ## Phase 9: Conformance, Modeling, Platform Evidence, And Release Candidates
 
-### v0.87.0 - Conformance Crate
+### v0.87.0 - Conformance Crate Completion
 
-Goal: add `bcx-conformance` for mandatory interoperability vectors.
+Goal: complete the `bcx-conformance` crate scaffold from `v0.16.1` with all
+mandatory interoperability vectors.
 
 Deliverables:
 
@@ -2679,11 +2875,13 @@ Verification:
 
 Exit criteria:
 
-- independent implementations can validate compatibility.
+- independent implementations can validate compatibility using the full
+  mandatory vector suite.
 
-### v0.88.0 - Testkit Crate
+### v0.88.0 - Testkit Crate Expansion
 
-Goal: add `bcx-testkit` for deterministic builders and adversarial fixtures.
+Goal: expand the `bcx-testkit` crate scaffold from `v0.16.2` for the complete
+release-candidate fixture set.
 
 Deliverables:
 

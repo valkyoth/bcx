@@ -44,7 +44,10 @@ BCX may claim:
 
 - this participant signed this declaration,
 - this receiver observed this invocation,
-- this policy digest governed this decision,
+- an authorized evaluator attested that this policy digest governed this
+  decision,
+- a reproducible or proven policy-decision mode demonstrates stronger
+  evaluation evidence,
 - this effect receipt was signed by this executor,
 - this checkpoint was witnessed or settled under a named profile policy,
 - this edge has a named assurance level.
@@ -66,7 +69,7 @@ support:
 
 - no universal identity,
 - pairwise event identifiers,
-- hash commitments,
+- hiding commitments for low-entropy private values,
 - selective disclosure,
 - encrypted evidence,
 - predicate proofs,
