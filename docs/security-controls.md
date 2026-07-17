@@ -12,18 +12,27 @@ Required controls from the first production profile:
   signature, key, audience, and basic authority verification, or bounded
   reserve/verify/commit/abort semantics,
 - failed authentication never permanently consumes replay state,
-- operation lifecycle tracking for reserved, authenticated, admitted,
-  reservation-expired, aborted, rejected, effect-pending, effect-observed,
-  effect-receipted, failed, and indeterminate states,
+- separate operation and effect-attempt lifecycle tracking for reserved,
+  authenticated, admitted, active, completed, reservation-expired, aborted,
+  rejected, pending, observed, receipted, failed, and indeterminate states,
 - canonical operation key, one-statement binding, effect-attempt identifiers,
   deterministic transition table, transition authority, and atomic revision or
   transaction checks for lifecycle updates,
+- unique, non-reusable, overflow-safe `EffectAttemptId` allocation or
+  derivation bound into every native binding and effect receipt,
 - append-only operation transition journal or authenticated transition log with
   derived current status,
 - authorized `start_attempt`, attempt-limit, and cumulative effect-work budget
   controls for retryable effect execution,
+- distinct retry and reconciliation semantics for indeterminate attempts,
 - canonical transition-event commitments before lifecycle history is exported
   as portable evidence,
+- transition-chain commitments with previous-transition links, strict
+  no-gap/no-duplicate sequences, journal-head commitments or Merkle roots, and
+  checkpoint, trusted-receipt, or witness binding for exported lifecycle
+  history,
+- stale or incomplete lifecycle-history markers when the latest journal head
+  cannot be established,
 - preserved effect evidence when subsequent reorg, rollback, compensation,
   contradiction, or receipt invalidation evidence changes derived finality,
 - profile-selected recovery model for replay/effect crash windows: atomic local

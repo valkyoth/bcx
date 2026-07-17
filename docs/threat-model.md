@@ -37,7 +37,13 @@ internal motive.
 - Admission rejection mislabeled as effect failure.
 - Duplicate delivery creating a new effect attempt.
 - Retry amplification through unlimited effect attempts.
+- Retry and reconciliation of an indeterminate attempt treated as the same
+  operation.
+- Effect-attempt state hiding operation-level evidence from another attempt.
+- Reused, overflowed, or unbound effect-attempt identifiers.
 - Portable lifecycle proof claims made from unauthenticated local journal data.
+- Omitted, reordered, truncated, forked, or stale transition-history evidence
+  presented as current lifecycle finality.
 - Lost lifecycle history after effect evidence is reorged, contradicted,
   compensated, rolled back, or invalidated.
 - Stale contextual verification-cache reuse.
@@ -60,6 +66,8 @@ internal motive.
 - Guaranteeing generic exactly-once execution across HTTP services, databases,
   blockchains, or other native carriers.
 - Treating a mutable operation status alone as complete evidence history.
+- Treating a portable transition event as the current lifecycle head without
+  checkpoint, trusted receipt, witness, or equivalent profile head evidence.
 
 ## Security Claims
 
@@ -90,6 +98,8 @@ BCX must not claim:
   succeeded,
 - subsequent reorg, rollback, compensation, contradiction, or receipt invalidation
   evidence erases the earlier observation.
+- a failed latest attempt means an earlier observed or receipted attempt did
+  not occur.
 
 ## Privacy Risks
 
@@ -124,6 +134,7 @@ Every WHY query must be authenticated and bounded by:
 - append-only lifecycle journal and transition-authority policy,
 - explicit attempt-creation, attempt-limit, and transition-event commitment
   policy,
+- journal-head freshness and transition-chain completeness policy,
 - cacheability-by-outcome policy,
 - unauthenticated source quota policy,
 - threshold quorum-intersection policy.

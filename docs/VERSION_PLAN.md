@@ -251,6 +251,7 @@ continues past the relevant dependency point.
 | Replay protection alone did not close the crash window between replay commit and consequential side effects. | Added `v0.23.1 - Operation Execution Lifecycle` with lifecycle states, profile-selected recovery models, duplicate/nonce conflict semantics, distinct replay/admission/effect receipts, and crash-after-every-transition fixtures. |
 | Operation lifecycle needed deterministic transitions and evidence history rather than a mutable status flag. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `OperationKey`, one-statement binding, effect-attempt identifiers, transition authority, CAS or transaction requirements, append-only lifecycle journal semantics, duplicate responses for every state, and transition/concurrency/reorg fixtures. |
 | Operation lifecycle still needed optional reservation paths, admission rejection, explicit retry attempt creation, and portable transition evidence. | Expanded `v0.23.1 - Operation Execution Lifecycle` with initial `Absent` transitions, `ReservationExpired`, `Aborted`, `Rejected`, authorized `start_attempt`, attempt limits and cumulative effect-work budgets, canonical transition-event commitments, and matching conformance/vector fixtures through the `v0.16.1` scaffold. |
+| Operation and effect-attempt state needed separate state machines, and portable transition histories needed omission resistance. | Expanded `v0.23.1 - Operation Execution Lifecycle` with operation-derived status over all attempts, attempt-number and `EffectAttemptId` allocation rules, distinct retry versus reconciliation semantics, indeterminate phase reasons, transition-chain commitments, journal-head evidence, stale/incomplete markers, and truncation/reorder/fork/substitution fixtures. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -736,7 +737,7 @@ Deliverables:
 - verification outcome vector directories,
 - cost-schedule and resource-exhaustion vector directories,
 - operation lifecycle transition vector directory reserved for `v0.23.1`
-  state-machine vectors,
+  operation, effect-attempt, and transition-journal vectors,
 - fixture regeneration guard,
 - pass/fail report format.
 
@@ -1191,25 +1192,30 @@ Deliverables:
 - stored binding from each `OperationKey` to exactly one `StatementId`,
 - effect-attempt identifier for retryable execution and externally reconciled
   carrier effects,
+- separate operation-level and effect-attempt-level state machines,
 - operation lifecycle states: `Reserved`, `Authenticated`, `Admitted`,
-  `ReservationExpired`, `Aborted`, `Rejected`, `EffectPending`,
-  `EffectObserved`, `EffectReceipted`, `Failed`, and `Indeterminate`,
+  `Active`, `Completed`, `ReservationExpired`, `Aborted`, `Rejected`, and
+  `Indeterminate`,
+- effect-attempt lifecycle states: `Pending`, `Observed`, `Receipted`,
+  `Failed`, and `Indeterminate`,
 - explicit state meanings:
   `Rejected` means authentication succeeded but capability, policy, or
   admission denied the operation;
   `Failed` means an admitted effect attempt failed within its evidence scope;
   `Indeterminate` means evidence is insufficient to decide;
-  and `ReservationExpired` or `Aborted` implies no admission or effect,
-- deterministic transition table:
+- indeterminate records carry a phase and reason, including admission evidence,
+  effect execution, receipt availability, or finality,
+- deterministic operation transition table:
   `Absent` to `Reserved` or `Authenticated`,
   `Reserved` to `Authenticated`,
   `Reserved` to `ReservationExpired` or `Aborted`,
   `Authenticated` to `Admitted`, `Rejected`, or `Indeterminate`,
-  `Admitted` to `EffectPending`, `Failed`, or `Indeterminate`,
-  `EffectPending` to `EffectObserved`, `EffectReceipted`, `Failed`, or
-  `Indeterminate`,
-  `EffectObserved` to `EffectReceipted`,
-  and `Indeterminate` to `EffectObserved`, `EffectReceipted`, or `Failed`,
+  and `Admitted` to `Active`, `Completed`, or `Indeterminate`,
+- deterministic effect-attempt transition table:
+  `Absent` to `Pending`,
+  `Pending` to `Observed`, `Receipted`, `Failed`, or `Indeterminate`,
+  `Observed` to `Receipted` or `Indeterminate`,
+  and `Indeterminate` to `Observed`, `Receipted`, or `Failed`,
 - rejection of backward transitions and skipped transitions unless the
   transition table explicitly permits them,
 - transition authority rules naming which local component, profile adapter, or
@@ -1218,8 +1224,9 @@ Deliverables:
   transition recording,
 - terminal and retryable state classification:
   `ReservationExpired`, `Aborted`, and `Rejected` terminal before admission,
-  `EffectReceipted` terminal for the recorded attempt, `Failed` terminal only
-  for the recorded attempt and evidence scope, and `Indeterminate` retryable
+  `Completed` terminal for operation-derived completion, `Receipted` terminal
+  for the recorded attempt, `Failed` terminal only for the recorded attempt and
+  evidence scope, and `Indeterminate` retryable
   only through profile-defined reconciliation,
 - rule that BCX does not claim generic exactly-once execution across HTTP
   services, databases, blockchains, or other native carriers,
@@ -1236,9 +1243,17 @@ Deliverables:
 - duplicate delivery never starts a new effect attempt,
 - new effect attempts require an explicit authorized `start_attempt` lifecycle
   operation,
-- recovery policy defines which prior states permit `start_attempt`,
-- each attempt receives a new `EffectAttemptId` while retaining the same
-  `OperationKey` and `StatementId`,
+- `start_attempt` appends a new attempt under an already admitted operation,
+- recovery policy defines which prior attempt states permit `start_attempt`,
+- retry from a failed or indeterminate attempt requires explicit recovery-policy
+  authorization,
+- reconciliation of an existing indeterminate attempt is distinct from starting
+  a new attempt,
+- each attempt receives a monotonic attempt number and a new `EffectAttemptId`
+  while retaining the same `OperationKey` and `StatementId`,
+- `EffectAttemptId` derivation or allocation is unique within an
+  `OperationKey`, non-reusable, overflow-safe, and bound into every native
+  binding and effect receipt,
 - attempt creation uses compare-and-swap revision or atomic transaction
   semantics,
 - maximum attempt count and cumulative effect-work budget prevent retry
@@ -1246,6 +1261,8 @@ Deliverables:
 - effect receipts and native bindings identify the exact `EffectAttemptId`,
 - assurance counts operation and principal evidence, not the number of
   attempts,
+- operation-derived status considers every attempt; a failed latest attempt
+  cannot hide an earlier observed or receipted effect,
 - same nonce with a different statement commitment is a conflict rather than an
   idempotent retry,
 - distinct evidence rules for replay commitment, admission receipt, and effect
@@ -1261,10 +1278,18 @@ Deliverables:
 - multiple effect attempts remain separately identifiable and cannot inflate
   assurance,
 - exported lifecycle evidence uses a canonical transition-event commitment with
-  operation-key commitment, `StatementId`, optional `EffectAttemptId`, event or
-  transition kind, revision or sequence, authorized transition recorder,
-  authenticated evaluation point, and native-binding or receipt commitment when
-  applicable,
+  transition ID, domain, schema version, commitment suite, operation-key
+  commitment, `StatementId`, optional `EffectAttemptId`, event or transition
+  kind, strict sequence, previous-transition commitment, operation journal
+  epoch, authorized transition recorder, authenticated evaluation point, and
+  native-binding or receipt commitment when applicable,
+- portable lifecycle histories enforce strict sequence starting point,
+  no-gap/no-duplicate rules, and operation/attempt binding,
+- exported lifecycle history includes current journal-head commitment or
+  Merkle root plus checkpoint, trusted receipt, or witness binding for that
+  head,
+- verifiers record an explicit stale or incomplete marker when they cannot
+  establish the latest journal head,
 - local journal entries remain operational data and cannot be presented as
   portable proof unless committed or attested under the canonical
   transition-event format,
@@ -1279,12 +1304,24 @@ Verification:
 - concurrent compare-and-swap or transaction conflict tests,
 - duplicate delivery fixtures for every lifecycle state,
 - effect-attempt substitution tests,
+- operation-derived-status fixtures where a failed latest attempt cannot hide
+  an earlier observed effect,
 - reservation expiry fixtures,
 - admission rejection fixtures,
 - explicit retry and concurrent attempt creation fixtures,
 - attempt-limit and cumulative effect-work budget exhaustion fixtures,
+- indeterminate phase and reason fixtures,
 - canonical transition-event conformance vectors through the `v0.16.1`
   scaffold,
+- removed-middle-transition fixtures,
+- truncated-suffix fixtures,
+- reordered-transition fixtures,
+- duplicate-revision fixtures,
+- forked-journal-head fixtures,
+- operation or attempt substitution fixtures,
+- old pre-reorg-head-presented-as-current fixtures,
+- missing checkpoint or journal-head evidence fixtures that produce
+  `Indeterminate`, not current finality,
 - observed-then-reorganized evidence fixtures,
 - crash-after-every-lifecycle-transition fixtures,
 - retry same-statement fixtures,
