@@ -211,6 +211,20 @@ continues past the relevant dependency point.
 | Offline and CLI parsing depended on core parser safety that was scheduled too late. | Added core prefix and streaming parser safety to `v0.13.0`, made `v0.53.0` carrier framing-specific, and made `v0.54.0` carrier parser fuzzing. |
 | Basic graph and parser assurance was too late for persistent graph and carrier work. | Added early property, acyclicity, concurrent insertion, streaming chunk-boundary, prefix-before-allocation, and budget monotonicity requirements to `v0.13.0`, `v0.17.0`, `v0.20.0`, and `v0.21.0`. |
 | Security controls documentation needs to mirror atomic replay, orphan DoS, signer entropy, policy evaluation, trust snapshots, and checkpoint equivocation. | Added security-controls update requirements to the responsible milestones: `v0.23.0`, `v0.26.1`, `v0.27.0`, `v0.29.0`, and `v0.40.0`. |
+| Explanation bundle schema still referenced contradiction and privacy work scheduled after it. | Split the bundle work: `v0.45.0` is a skeleton bundle and `v0.47.1 - Final Explanation Bundle Closure` finalizes the schema after `v0.46.0` contradiction and `v0.47.0` privacy hardening. |
+| Root completion referenced non-inclusion fixtures before the concrete transparency proof model. | Limited `v0.40.0` to the non-inclusion interface and moved concrete non-inclusion fixtures to `v0.42.0`. |
+| Graph-store atomicity and pruning safety were underspecified. | Expanded `v0.19.0` and `v0.20.0` with linearization, failure atomicity, isolation, conflict/retry, crash recovery, transaction/CAS equivalence, pruning boundaries, and ancestry summaries or tombstones. |
+| Parent duplicate rejection could be read as rejecting only identical `(parent, relationship)` pairs. | Updated `v0.15.0` and `v0.19.0` to reject the same parent ID under different relationship kinds unless a profile rule scheduled from `v0.51.0` onward explicitly permits and narrows that shape. |
+| Verification work needed a concrete budget matching `DecodeBudget`. | Expanded `v0.17.0` with checked `VerificationBudget` debits for key resolution, classical/PQ verification, hybrid components, optional attestations, proofs, graph traversal, policy evaluation, receipts, and disclosure checks. |
+| Signed policy decisions needed assurance modes that distinguish attestation from reproducibility and proof. | Expanded `v0.26.1` with attested, reproducible, and proven policy-decision modes plus executable-policy metering and sandbox requirements. |
+| Self-contained WHY bundles needed a formal closure algorithm and trust-anchor boundary. | Added those requirements to `v0.47.1 - Final Explanation Bundle Closure`. |
+| Provider conformance required two independent implementations but only one provider per mandatory algorithm was scheduled. | Added `v0.36.3 - Provider Oracle And SLH-DSA Scope Decision` before cryptographic conformance. |
+| Provider scratch handling needed panic, abort, internal-copy, and HSM limitations. | Expanded `v0.34.0 - Provider Scratch And Side-Effect Contract`. |
+| Implementation-plan language still used claim-status wording. | Updated `docs/IMPLEMENTATION_PLAN.md` to use evidence facets and checkpoint-relative assurance language. |
+| Hiding commitments and AEAD nonces needed exact construction rules. | Tightened `v0.26.0` and `v0.47.0` to require non-public blinding for low-entropy values and crash-safe nonce derivation by key epoch. |
+| Differential CBOR fuzzing must compare canonical acceptance and original-byte preservation, not only decoded values. | Added that requirement to `v0.54.0 - Carrier Parser Fuzzing Program`. |
+| no-std feature tiers and zero-copy benchmarks were missing before profile work. | Added `v0.54.1 - no_std Feature Tiers And Zero-Copy Evidence` before HTTP/profile implementation, and kept `v0.94.0` as the final no-std audit. |
+| Threshold witness signer-set rotation and epoch binding were underspecified. | Expanded `v0.79.0 - Threshold Proof Crate` with signer-set epoch, membership, rotation, and threshold-change binding. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -624,7 +638,9 @@ Deliverables:
 - statement encoder,
 - statement decoder,
 - canonical parent ordering rules,
-- adjacent duplicate-parent rejection,
+- adjacent duplicate-parent rejection by parent ID, including the same parent
+  ID under different relationship kinds unless a profile rule scheduled from
+  `v0.51.0` onward explicitly permits and narrows that shape,
 - statement ID derivation from canonical statement bytes,
 - sealed `CanonicalStatementBytes` or `StatementCommitment` producer,
 - rule that `StatementId` is excluded from its own hash preimage,
@@ -685,6 +701,17 @@ Deliverables:
 
 - general graph limits in core or policy,
 - verification budgets in core or policy,
+- checked `VerificationBudget` type,
+- key-resolution debits,
+- classical and post-quantum verification debits,
+- hybrid component debits,
+- optional-attestation debits,
+- transparency, membership, and non-inclusion proof debits,
+- graph node and edge visit debits,
+- policy evaluation debits,
+- receipt and disclosure proof-check debits,
+- rule that exhaustion is detected before starting the next expensive
+  operation,
 - byte-decoding limits kept in wire or codec,
 - migration of model validation from `bcx-wire::WireLimits`,
 - migration of crypto verification limits from `bcx-wire::WireLimits`,
@@ -697,7 +724,10 @@ Verification:
 - `cargo tree -p bcx-model`,
 - `cargo tree -p bcx-crypto`,
 - workspace tests and no-default-features tests,
-- tests that budgeted parser failures happen before allocation or crypto work.
+- tests that budgeted parser failures happen before allocation or crypto work,
+- tests that verification-budget exhaustion happens before the next key
+  resolution, signature verification, graph traversal, policy evaluation, or
+  proof check.
 
 Exit criteria:
 
@@ -738,10 +768,22 @@ Deliverables:
 - graph-node identity decision: canonical `StatementId`, derived `EventId`, or
   authenticated mapping,
 - `insert_checked(event, parents)` semantics,
+- linearization or serialization point for validation plus insertion,
+- failure atomicity: no partial edges, indexes, or reachability cache changes
+  remain after failure,
+- isolation expectations for database adapters,
+- conflict and retry behavior,
+- crash recovery requirements,
+- transaction, compare-and-swap, or equivalent atomicity mechanism
+  requirements,
 - reachability check requirements,
 - compact `CauseCapsule` normalization into causal edges or explicit
   deprecation behavior,
 - adjacent duplicate checks over canonical parent order,
+- rejection of the same parent ID under two relationship kinds unless an
+  explicit profile rule scheduled from `v0.51.0` onward narrows that behavior,
+- pruning safety rules using authenticated ancestry summaries, tombstones, or
+  checkpoint-finalization boundaries,
 - public identifier indexing policy hooks.
 
 Verification:
@@ -766,9 +808,13 @@ Deliverables:
 - no unexpectedly large stack allocations,
 - in-memory bounded graph store,
 - atomic insert API,
+- transaction or compare-and-swap equivalent for the in-memory implementation,
+- failure-injection tests for partial insert rollback,
 - iterative reachability implementation,
 - no recursion in traversal,
-- explicit node, edge, and depth limits.
+- explicit node, edge, and depth limits,
+- pruning boundary representation,
+- authenticated ancestry summary or tombstone test fixture.
 
 Verification:
 
@@ -776,6 +822,8 @@ Verification:
 - property tests for atomic admission,
 - bounded acyclicity checks,
 - concurrent insertion tests for check-then-insert races,
+- crash and partial-failure recovery tests,
+- pruning safety tests,
 - cycle and duplicate-delivery tests,
 - no-default-features workspace pass.
 
@@ -814,7 +862,7 @@ Verification:
 
 Exit criteria:
 
-- two objects accepted while unresolved cannot form an accepted cycle when both
+- two objects staged while unresolved cannot form an accepted cycle when both
   become available,
 - unresolved objects are staged and not causally usable until deterministic
   promotion succeeds,
@@ -939,11 +987,12 @@ Deliverables:
 - disclosure policy vocabulary,
 - redaction marker,
 - private evidence commitment,
-- salted or blinded private commitments for low-entropy values,
+- hiding commitment construction for private values using non-public blinding
+  material; public salts alone are not sufficient for low-entropy values,
 - public evidence marker,
 - encrypted field disclosure contract,
 - AEAD suite identifier,
-- nonce uniqueness rules,
+- crash-safe AEAD nonce generation or derivation rules across key epochs,
 - recipient and audience binding,
 - ciphertext domain separation,
 - padding or explicit length-leakage policy,
@@ -974,6 +1023,12 @@ Deliverables:
 - resolver or trust snapshot used during evaluation,
 - deterministic decision result,
 - signed admission-decision evidence,
+- attested decision mode: trust an authorized evaluator signature,
+- reproducible decision mode: policy artifact and inputs are available for
+  deterministic re-execution,
+- proven decision mode: an admitted proof demonstrates correct evaluation,
+- executable-policy metering, sandboxing, host-function, determinism, and
+  evaluator resource-limit rules,
 - distinction between `references policy X` and `verified as evaluated under
   policy X`,
 - security-controls update for policy evaluation evidence.
@@ -983,6 +1038,7 @@ Verification:
 - policy commitment fixtures,
 - wrong evaluator, version, input, and resolver fixtures,
 - admission evidence mutation tests.
+- fixtures for attested, reproducible, and proven decision modes.
 
 Exit criteria:
 
@@ -1186,6 +1242,10 @@ Deliverables:
 - scratch length declaration,
 - caller-owned sensitive scratch buffer,
 - wipe-on-normal and wipe-on-error rule,
+- panic and unwind wipe behavior where the platform supports unwinding,
+- explicit abort limitation,
+- provider-owned internal memory and secret-copy responsibility,
+- hardware keystore, HSM, DMA, and external-provider limitation notes,
 - no network, storage, or key-resolution side effects in primitive
   verification,
 - redacted diagnostic policy.
@@ -1311,6 +1371,32 @@ Exit criteria:
 - BCX has one admitted post-quantum provider for signing and verification
   before hybrid and COSE conformance are claimed.
 
+### v0.36.3 - Provider Oracle And SLH-DSA Scope Decision
+
+Goal: make conformance possible with independent verification evidence and
+settle whether SLH-DSA is mandatory for the `1.0.0` suite.
+
+Deliverables:
+
+- second dev/test-only provider or independent reference oracle for Ed25519,
+- second dev/test-only provider or independent reference oracle for ML-DSA-65,
+- cross-provider or oracle-backed signature generation and verification
+  fixtures,
+- SLH-DSA decision: admitted mandatory provider milestone or explicitly
+  reserved outside the initial mandatory `1.0.0` suite,
+- malformed key and signature corpus shared across providers and oracles.
+
+Verification:
+
+- provider/oracle differential smoke tests,
+- SLH-DSA scope documentation check,
+- no root dependency regression.
+
+Exit criteria:
+
+- the `v0.37.0` conformance program can compare against independent evidence
+  instead of trusting one implementation per algorithm.
+
 ### v0.37.0 - Cryptographic Conformance Program
 
 Goal: prove primitive and hybrid verification against external vectors and
@@ -1321,7 +1407,8 @@ Deliverables:
 - RFC 8032 Ed25519 vectors,
 - NIST ACVP or KAT plan for ML-DSA and SLH-DSA,
 - RFC 9964 JOSE/COSE vector plan,
-- two-provider differential verification plan,
+- two-provider or independent-oracle differential verification plan,
+- SLH-DSA mandatory-or-reserved result from `v0.36.3`,
 - hybrid component swap and strip corpus,
 - downgrade and cross-suite reuse corpus.
 
@@ -1420,7 +1507,7 @@ Deliverables:
 Verification:
 
 - stale cache fixtures,
-- non-inclusion proof fixtures,
+- non-inclusion interface fixtures,
 - root-change invalidation tests,
 - fork and rollback fixtures.
 
@@ -1536,11 +1623,10 @@ Exit criteria:
 
 - no WHY query can request unbounded work.
 
-### v0.45.0 - Explanation Bundle
+### v0.45.0 - Explanation Bundle Skeleton
 
-Goal: return bounded proof bundles for local/offline verification using the
-receipt, privacy, and contradiction semantics scheduled in `v0.41.0`,
-`v0.42.0`, `v0.46.0`, and `v0.47.0`.
+Goal: define the internal bounded proof-bundle structure before final
+contradiction and privacy fields are frozen.
 
 Deliverables:
 
@@ -1554,22 +1640,19 @@ Deliverables:
 - operational receipt references,
 - transparency receipt references,
 - missing, withheld, redacted, truncated, and stale markers,
-- contradiction marker slots populated by the `v0.46.0` semantics,
-- disclosure map binding fields to plaintext, ciphertext, commitments, or
-  predicate proofs,
-- final bundle commitment or signature.
+- placeholder extension points for contradiction and disclosure data scheduled
+  in `v0.46.0`, `v0.47.0`, and `v0.47.1`.
 
 Verification:
 
 - bundle validation tests,
-- missing-parent fixture tests,
-- disclosure map fixtures.
+- missing-parent fixture tests.
 
 Exit criteria:
 
 - an offline verifier can see what is proven, missing, redacted, stale,
-  withheld, truncated, or unknown, and can carry contradiction data once
-  `v0.46.0` completes.
+  withheld, truncated, or unknown without claiming final contradiction or
+  privacy semantics.
 
 ### v0.46.0 - Contradiction Handling
 
@@ -1610,11 +1693,12 @@ Deliverables:
 
 - audience-specific pseudonymous key guidance,
 - stable global key ID avoidance policy,
-- salted or blinded private commitment guidance for low-entropy values,
+- hiding commitment guidance for low-entropy values using non-public blinding
+  material; public salts alone are not sufficient,
 - selective disclosure binding,
 - encrypted field disclosure contract,
 - AEAD suite identification,
-- nonce uniqueness rules,
+- crash-safe AEAD nonce generation or derivation rules across key epochs,
 - recipient and audience binding,
 - ciphertext domain separation,
 - padding or explicit length-leakage policy,
@@ -1634,10 +1718,45 @@ Exit criteria:
 - privacy-sensitive deployments have protocol hooks for minimizing linkability
   and over-disclosure.
 
+### v0.47.1 - Final Explanation Bundle Closure
+
+Goal: finalize the offline WHY bundle schema after contradiction semantics and
+privacy/disclosure cryptography are defined.
+
+Deliverables:
+
+- final contradiction fields using `v0.46.0` semantics,
+- disclosure map binding fields to plaintext, ciphertext, commitments, or
+  predicate proofs,
+- self-contained and thin/referenced bundle modes,
+- deterministic dependency-closure and deduplication algorithm,
+- inclusion of all required key records, policy records, checkpoints, registry
+  entries, attestations, and proofs in self-contained mode,
+- explicit incompleteness marker for every unresolved reference,
+- clear separation between included untrusted material and externally supplied
+  trust anchors,
+- rule that a bundle cannot manufacture its own trust root by embedding it,
+- verification rule that self-contained mode performs no network lookup,
+- final bundle commitment or signature.
+
+Verification:
+
+- self-contained closure fixtures,
+- thin/referenced bundle fixtures,
+- missing dependency marker tests,
+- no-network-lookup tests for self-contained mode,
+- trust-anchor substitution tests.
+
+Exit criteria:
+
+- an offline verifier can verify bundle closure deterministically and can see
+  exactly what is proven, missing, redacted, stale, contradicted, withheld,
+  truncated, or externally trusted.
+
 ### v0.48.0 - Offline Profile
 
-Goal: add `bcx-offline` for air-gapped bundles after explanation and privacy
-rules exist.
+Goal: add `bcx-offline` for air-gapped bundles after final explanation,
+contradiction, and privacy rules exist.
 
 Deliverables:
 
@@ -1792,6 +1911,8 @@ Deliverables:
 - truncation, nonminimal integer, duplicate key, trailing byte, deep nesting,
   unknown critical field, and oversized PQ signature seeds,
 - accepted-object re-encode identity assertion,
+- differential CBOR checks for canonical acceptance and original-byte
+  preservation, not only decoded values,
 - differential CBOR decode plan.
 
 Verification:
@@ -1805,6 +1926,33 @@ Exit criteria:
 
 - every parser has a reproducible malformed-input corpus and a fuzz entry
   point before HTTP implementation starts.
+
+### v0.54.1 - no_std Feature Tiers And Zero-Copy Evidence
+
+Goal: define feature tiers and prove zero-copy behavior before profile
+implementations depend on core APIs.
+
+Deliverables:
+
+- no-std feature tier policy,
+- core-only tier without allocation,
+- alloc-enabled borrowed/owned conversion tier,
+- optional std adapter tier,
+- end-to-end zero-copy allocation benchmarks,
+- throughput benchmarks for canonical parse, verify, and bundle-read paths,
+- feature-leakage guard for profile dependencies.
+
+Verification:
+
+- `cargo test --workspace --no-default-features`,
+- feature matrix checks,
+- allocation benchmark run,
+- throughput benchmark run.
+
+Exit criteria:
+
+- profile implementation can start knowing which BCX APIs are core-only,
+  alloc-enabled, or std-adapter APIs, and with baseline zero-copy evidence.
 
 ### v0.55.0 - HTTP Profile Security Contract
 
@@ -2335,6 +2483,10 @@ sets.
 Deliverables:
 
 - threshold policy vocabulary,
+- signer-set epoch binding,
+- signer membership commitment,
+- membership rotation rules,
+- threshold change binding,
 - signer set commitment,
 - threshold count validation,
 - witness signature bundle model,
@@ -2343,6 +2495,7 @@ Deliverables:
 Verification:
 
 - `cargo test -p bcx-proof-threshold`,
+- signer-set epoch and rotation fixtures,
 - threshold mutation tests.
 
 Exit criteria:
@@ -2670,7 +2823,8 @@ Deliverables:
 - no-std audit,
 - dependency tree audit,
 - feature leakage tests,
-- alloc/std feature documentation.
+- alloc/std feature documentation,
+- review that the `v0.54.1` feature tier and zero-copy evidence still holds.
 
 Verification:
 

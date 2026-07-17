@@ -84,7 +84,7 @@ evolved rather than renamed casually.
 | --- | --- |
 | `bcx` | Published facade crate and stable user entry point. |
 | `bcx-core` | Identifiers, digests, nonces, sequence numbers, and common validation errors. |
-| `bcx-model` | Statement vocabulary, causal edges, claim statuses, effects, admissions, and contradictions. |
+| `bcx-model` | Statement vocabulary, causal edges, evidence facets, effects, admissions, and contradictions. |
 | `bcx-crypto` | Crypto-agile attestation envelope metadata and verifier traits. |
 | `bcx-policy` | Profiles, proof levels, disclosure levels, replay policy, and settlement policy vocabulary. |
 | `bcx-wire` | Protocol versions, wire limits, bounded message entry rules, and future canonical framing boundaries. |
@@ -199,7 +199,9 @@ BCX must never collapse a signed claim into proven reality. A signature proves
 authorship and integrity of a statement. It does not prove an internal motive or
 the truth of an offchain business claim.
 
-Claim statuses should include:
+Truth and assurance are modeled as evidence facets plus checkpoint-relative
+derived validity, not as one mutually exclusive status enum. Evidence facets
+include:
 
 - declared,
 - observed,
@@ -210,6 +212,10 @@ Claim statuses should include:
 - settlement finalized,
 - contradicted,
 - unknown.
+
+`Unknown` means absence of evidence in the evaluated context. Contradiction and
+revocation can coexist with authentic historical evidence; they affect derived
+usability and assurance rather than rewriting history.
 
 Adapters may attest only to effects they can actually observe. For example, an
 HTTP gateway can attest that it received a response; it cannot claim a database
