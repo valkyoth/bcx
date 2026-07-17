@@ -39,6 +39,11 @@ internal motive.
 - Retry amplification through unlimited effect attempts.
 - Retrying after policy or revocation roots changed without rechecking
   admission authority.
+- Retrying after trusted time, statement validity, key validity, capability,
+  delegation, audience, scope, budget, recovery-rule, or completion-rule epoch
+  changed without re-evaluating authority.
+- Completion-rule substitution, weaker-rule downgrade, wrong policy epoch, or
+  missing completion-rule evidence.
 - Retry and reconciliation of an indeterminate attempt treated as the same
   operation.
 - Admission-level indeterminate resolution jumping directly to effect
@@ -77,6 +82,8 @@ internal motive.
   checkpoint, trusted receipt, witness, or equivalent profile head evidence.
 - Treating `Completed` as irreversible rather than completion evidenced under
   a named profile policy and checkpoint or evaluation point.
+- Evaluating completion without the canonical completion-rule ID, policy epoch,
+  and committed rule preimage used by admission and completion evidence.
 
 ## Security Claims
 
@@ -109,6 +116,8 @@ BCX must not claim:
   evidence erases the earlier observation,
 - a failed latest attempt means an earlier observed or receipted attempt did
   not occur.
+- a previously admitted operation authorizes new effect attempts after
+  time-varying authority has expired or changed.
 
 ## Privacy Risks
 
@@ -144,6 +153,7 @@ Every WHY query must be authenticated and bounded by:
 - explicit attempt-creation, attempt-limit, and transition-event commitment
   policy,
 - journal-head freshness and transition-chain completeness policy,
+- completion-rule identity and retry-time authority re-evaluation policy,
 - cacheability-by-outcome policy,
 - unauthenticated source quota policy,
 - threshold quorum-intersection policy.

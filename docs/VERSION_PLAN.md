@@ -253,6 +253,7 @@ continues past the relevant dependency point.
 | Operation lifecycle still needed optional reservation paths, admission rejection, explicit retry attempt creation, and portable transition evidence. | Expanded `v0.23.1 - Operation Execution Lifecycle` with initial `Absent` transitions, `ReservationExpired`, `Aborted`, `Rejected`, authorized `start_attempt`, attempt limits and cumulative effect-work budgets, canonical transition-event commitments, and matching conformance/vector fixtures through the `v0.16.1` scaffold. |
 | Operation and effect-attempt state needed separate state machines, and portable transition histories needed omission resistance. | Expanded `v0.23.1 - Operation Execution Lifecycle` with operation-derived status over all attempts, attempt-number and `EffectAttemptId` allocation rules, distinct retry versus reconciliation semantics, indeterminate phase reasons, transition-chain commitments, journal-head evidence, stale/incomplete markers, and truncation/reorder/fork/substitution fixtures. |
 | Operation-level transitions had dead ends and completion needed profile-bound meaning. | Expanded `v0.23.1 - Operation Execution Lifecycle` with `Active` resolution transitions, phase-specific indeterminate resolution, admission-gated `start_attempt`, policy/root rechecks before retry, profile-bound `CompletionRule`, and completion/reorg/revocation fixtures; attached profile completion-rule requirements to `v0.51.0 - Profile Normative Specification Pack`. |
+| Completion rules needed canonical identity, and retries needed complete time-varying authority re-evaluation. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `CompletionRuleRecord`, domain-separated `CompletionRuleId`, policy epoch binding, rule substitution/downgrade handling, retry-time evaluation of validity windows, keys, capabilities, delegations, policy/trust/revocation/conflict roots, scope, budgets, recovery rules, and completion-rule epochs; attached completion-rule identity requirements to `v0.51.0 - Profile Normative Specification Pack`. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -1258,8 +1259,15 @@ Deliverables:
 - `start_attempt` is permitted only when admission remains valid and the
   derived operation state is `Admitted`, `Active`, or a profile-allowed
   recovery state,
-- policy and revocation roots are rechecked before retry when they changed
-  since admission,
+- every `start_attempt` re-evaluates time-varying authority before retry,
+  including trusted evaluation time, statement validity window, key validity,
+  capability validity, delegation validity, policy roots, trust roots,
+  revocation roots, conflict roots, audience, operation scope, attempt count,
+  cumulative work budget, profile recovery rule, and profile completion rule,
+- attempt-start transitions record the resulting authenticated evaluation point
+  and roots,
+- a previously admitted operation remains authentic history, but no new effect
+  attempt may start from stale authority,
 - recovery policy defines which prior attempt states permit `start_attempt`,
 - retry from a failed or indeterminate attempt requires explicit recovery-policy
   authorization,
@@ -1281,6 +1289,18 @@ Deliverables:
   cannot hide an earlier observed or receipted effect,
 - profile-bound `CompletionRule` defining when the operation-derived state is
   `Completed`,
+- canonical `CompletionRuleRecord` and domain-separated `CompletionRuleId`,
+- `CompletionRuleRecord` includes rule version, profile identifier,
+  profile/policy epoch, required effect classes, threshold, finality policy,
+  pending-attempt behavior, reorg behavior, and compensation behavior in the
+  committed preimage,
+- `CompletionRuleId` is bound into admission evidence, completion transition
+  events, effect receipts when completion-relevant, journal-head evidence, and
+  verification cache keys,
+- completion-rule changes create a new policy epoch and cannot silently
+  reinterpret historical completion evidence,
+- unknown or unavailable completion rules produce `Indeterminate`, while
+  policy-forbidden completion rules fail admission,
 - `CompletionRule` alternatives include first valid receipted attempt, required
   set of effect receipts, settlement or finality threshold, successful local
   atomic transition, or externally reconciled completion,
@@ -1341,6 +1361,15 @@ Verification:
 - finality-indeterminate resolution fixtures,
 - explicit retry and concurrent attempt creation fixtures,
 - retry-after-policy-root-change fixtures,
+- capability-expiry retry fixtures,
+- key-expiry retry fixtures,
+- statement-validity-window expiry retry fixtures,
+- unchanged-root-time-changed retry fixtures,
+- retry-after-completion-rule-epoch-change fixtures,
+- rule-substitution fixtures,
+- weaker-rule downgrade fixtures,
+- wrong-policy-epoch fixtures,
+- historical-completion-rule fixtures,
 - attempt-start-after-revocation fixtures,
 - one-successful-and-one-pending-or-failed-attempt fixtures,
 - completion-followed-by-reorg-or-receipt-invalidation fixtures,
@@ -2536,9 +2565,11 @@ Deliverables:
 - finality rules,
 - operation lifecycle and recovery-model requirements from `v0.23.1`,
 - profile-bound completion-rule requirements from `v0.23.1`, including
-  required attempt/effect classes, finality/checkpoint policy, pending-attempt
-  termination policy, compensation/reorg/receipt-invalidation behavior, and
-  exact roots plus evaluation point,
+  canonical `CompletionRuleRecord`, domain-separated `CompletionRuleId`, rule
+  version, profile/policy epoch, required attempt/effect classes,
+  finality/checkpoint policy, pending-attempt termination policy,
+  compensation/reorg/receipt-invalidation behavior, exact roots plus
+  evaluation point, and cache/admission/completion binding requirements,
 - replay/effect atomicity or reconciliation requirements,
 - rule that profiles document whether they provide at-most-once admission,
   idempotent execution, or externally reconciled execution,

@@ -33,6 +33,19 @@ Required controls from the first production profile:
 - profile-bound completion rules with exact roots, evaluation point,
   finality/checkpoint policy, pending-attempt policy, and
   compensation/reorg/receipt-invalidation behavior,
+- canonical completion-rule records and domain-separated completion-rule IDs
+  bound into admission evidence, completion transitions, completion-relevant
+  receipts, journal-head evidence, and verification cache keys,
+- completion-rule policy epochs that prevent silent reinterpretation of
+  historical completion evidence,
+- unknown or unavailable completion rules producing indeterminate results and
+  policy-forbidden completion rules failing admission,
+- complete time-varying authority re-evaluation before every `start_attempt`,
+  including trusted time, statement validity, key validity, capability and
+  delegation validity, policy/trust/revocation/conflict roots, audience,
+  operation scope, budgets, recovery rules, and completion-rule epoch,
+- attempt-start transition records containing the authenticated evaluation
+  point and roots used for retry authorization,
 - canonical transition-event commitments before lifecycle history is exported
   as portable evidence,
 - transition-chain commitments with previous-transition links, strict
