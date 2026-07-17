@@ -173,7 +173,7 @@ continues past the relevant dependency point.
 | `ParentStatus::Missing` can be caller-selected even though availability is verifier-local state. | Added canonical-edge separation in `v0.15.0` and derived local availability plus reconciliation behavior in `v0.21.0`. |
 | Relationship kinds do not yet enforce semantic cardinality, dependency roles, or target-kind constraints. | Added `v0.22.0 - Relationship Semantics And Edge Roles`. |
 | Duplicate-parent checks are quadratic and canonical parent ordering is not yet defined. | Added canonical parent ordering in `v0.15.0` and adjacent-duplicate graph checks in `v0.19.0`. |
-| `WireLimits` is a limits container, not an early parser or aggregate resource budget. | Added `v0.17.0 - Core Limit And Budget Split`, `v0.53.0 - Wire Prefix Parser`, and `v0.54.0 - Parser Fuzzing Program`. |
+| `WireLimits` is a limits container, not an early parser or aggregate resource budget. | Added `v0.13.0 - Codec Crate Skeleton And Decode Cursor`, `v0.17.0 - Core Limit And Budget Split`, `v0.53.0 - Carrier Framing Parser`, and `v0.54.0 - Carrier Parser Fuzzing Program`. |
 | Variable-length identifiers are constructor-validated but not wire-parsed or canonical-profile validated. | Added borrowed identifier parsing in `v0.14.0` and prefix/parser rejection coverage in `v0.53.0`. |
 | Semantic model crates and crypto crates depend on transport-named limits. | Added `v0.17.0 - Core Limit And Budget Split`. |
 | Public identifier storage choices need an explicit indexing and zeroization policy. | Added `v0.18.0 - Public Identifier Storage Policy`. |
@@ -185,7 +185,7 @@ continues past the relevant dependency point.
 | Privacy requirements for pseudonymous keys, selective disclosure, and anonymous proof suites need to shape explanation bundles before profiles. | Added `v0.47.0 - Privacy And Disclosure Hardening` before offline, HTTP, blockchain, witness, and ZK work. |
 | Carrier profiles need normative schemas, registries, critical-extension behavior, downgrade rules, and finality contracts. | Added `v0.51.0 - Profile Normative Specification Pack` before the first HTTP profile. |
 | The wire version must remain draft/experimental until canonical BCX/1 is frozen. | Added `v0.52.0 - Draft Wire Version And Registry Gate`. |
-| Parser fuzzing must precede untrusted network endpoints. | Added `v0.54.0 - Parser Fuzzing Program` before HTTP implementation starts. |
+| Parser fuzzing must precede untrusted network endpoints. | Added core parser tests to `v0.13.0` and carrier parser fuzzing in `v0.54.0 - Carrier Parser Fuzzing Program` before HTTP implementation starts. |
 | Cryptographic conformance must precede reliance on COSE and hybrid provider surfaces. | Added `v0.37.0 - Cryptographic Conformance Program` before statement and attestation verification are used by profiles. |
 | Normative security specifications should grow alongside implementation rather than appear only at the end. | Added `v0.50.0 - Core And Codec Specification Draft` and kept `v0.95.0 - Security Specification Freeze`. |
 | Digest is an unnamed 32-byte value and commitments need domain separation, algorithm codes, empty-root rules, and migration policy. | Added `v0.11.0 - Commitment Suite And Registry Scaffold`. |
@@ -201,6 +201,16 @@ continues past the relevant dependency point.
 | Multi-attestation support lacks acceptance semantics. | Added duplicate signer, canonical ordering, roles, threshold, and aggregation rules to `v0.35.0 - Attestation Verification And Multi-Attestation Policy`. |
 | Deterministic CBOR restrictions need explicit duplicate-key, indefinite-length, integer, tag, text, unknown-field, and extension-stripping behavior. | Added those restrictions to `v0.12.0 - Canonical CBOR Codec Contract`. |
 | Deterministic state needs metering, host-function, rollback, and cross-architecture resource rules before it is required for `1.0.0`. | Added those requirements to `v0.74.0 - Deterministic State Contract And Resource Model`. |
+| Evidence modeling still used enum wording that could imply mutually exclusive truth states or a false total order. | Reworked `v0.6.0 - Evidence Facets And Assurance Lattice` to require orthogonal facets, composition, partial order, and no blanket ordering traits unless justified. |
+| Aggregate decode budgeting was mentioned but did not define the accounting mechanism. | Expanded `v0.13.0` and `v0.17.0` with a concrete checked `DecodeBudget` covering bytes, nesting, entries, extensions, signatures, proofs, disclosures, decompressed/referenced bytes, and pre-crypto work units. |
+| Actual classical and post-quantum provider crates were not scheduled before crypto conformance. | Added `v0.36.1 - Ed25519 Provider Crate` and `v0.36.2 - ML-DSA-65 Provider Crate` before `v0.37.0 - Cryptographic Conformance Program`. |
+| Hybrid construction details were underspecified beyond verifying listed components. | Expanded `v0.30.0 - Hybrid Verification Coordinator` with BCX AND-composition versus external composite choice, component order, canonical serialization, prehash/context rules, key separation, stripping resistance, cross-protocol reuse resistance, and migration rules. |
+| Policy references did not prove that policy was actually evaluated. | Added `v0.26.1 - Policy Record And Evaluation Contract` before key resolution and semantic validity. |
+| Revocation and contradiction semantics needed typed targets, authorized revokers, scope, effective point, adjudication, and historical visibility rules. | Expanded `v0.40.0` and `v0.46.0` with concrete revocation and contradiction semantics. |
+| Private disclosure cryptography needed more than raw hashes for low-entropy values. | Expanded `v0.26.0` and `v0.47.0` with salted/blinded commitments, AEAD suite IDs, nonce uniqueness, recipient/audience binding, ciphertext domain separation, length-leakage policy, and key rotation. |
+| Offline and CLI parsing depended on core parser safety that was scheduled too late. | Added core prefix and streaming parser safety to `v0.13.0`, made `v0.53.0` carrier framing-specific, and made `v0.54.0` carrier parser fuzzing. |
+| Basic graph and parser assurance was too late for persistent graph and carrier work. | Added early property, acyclicity, concurrent insertion, streaming chunk-boundary, prefix-before-allocation, and budget monotonicity requirements to `v0.13.0`, `v0.17.0`, `v0.20.0`, and `v0.21.0`. |
+| Security controls documentation needs to mirror atomic replay, orphan DoS, signer entropy, policy evaluation, trust snapshots, and checkpoint equivocation. | Added security-controls update requirements to the responsible milestones: `v0.23.0`, `v0.26.1`, `v0.27.0`, `v0.29.0`, and `v0.40.0`. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -350,15 +360,21 @@ Exit criteria:
 - conformant ML-DSA-65 and hybrid signatures are not rejected because of an
   internal length constant.
 
-### v0.6.0 - Claim Status And Assurance
+### v0.6.0 - Evidence Facets And Assurance Lattice
 
-Goal: prevent signed claims from being treated as proven reality.
+Goal: prevent signed claims from being treated as proven reality or as one
+mutually exclusive status.
 
 Deliverables:
 
-- claim status enum,
-- assurance level enum,
-- contradiction marker,
+- independent evidence facets such as observed, signed, admitted, settled,
+  contradicted, and revoked,
+- `Unknown` modeled as absence of evidence rather than a positive proof state,
+- contradiction coexisting with historical authentic evidence,
+- assurance composition operation,
+- partial order definition where mathematically justified,
+- no blanket `Ord` or `PartialOrd` on assurance values unless the lattice
+  rules justify it,
 - unknown and redacted evidence markers,
 - tests showing declared purpose is not verified truth.
 
@@ -370,7 +386,7 @@ Verification:
 Exit criteria:
 
 - public APIs cannot collapse declared, observed, verified, enforced, and
-  finalized claims into one truth state.
+  finalized claims into one truth state or a false total order.
 
 ### v0.7.0 - Statement Envelope
 
@@ -396,7 +412,7 @@ Verification:
 
 Exit criteria:
 
-- one statement shape is ready for canonical encoding in `v0.14.0` and native
+- one statement shape is ready for sealed canonical encoding in `v0.15.0` and native
   binding in `v0.9.0`.
 
 ### v0.8.0 - Attestation Envelope
@@ -479,6 +495,8 @@ implemented.
 Deliverables:
 
 - `CommitmentSuite` vocabulary,
+- first living `BCX-CORE/1` and `BCX-CODEC-CBOR/1` draft files,
+- draft wire version marker,
 - exact hash algorithm and code point,
 - domain separation labels for statements, attestations, bindings, policies,
   keys, checkpoints, Merkle leaves, and Merkle internal nodes,
@@ -486,7 +504,8 @@ Deliverables:
 - empty-root construction,
 - algorithm migration and downgrade policy,
 - registry scaffold for type, algorithm, extension, profile, and suite IDs,
-- reserved and experimental code point ranges.
+- reserved and experimental code point ranges,
+- initial canonical conformance-vector home.
 
 Verification:
 
@@ -497,7 +516,9 @@ Verification:
 Exit criteria:
 
 - a raw 32-byte digest cannot be interpreted without its commitment domain and
-  suite context.
+  suite context,
+- canonical commitments and draft wire/version labels have a living spec home
+  before codec implementation continues.
 
 ### v0.12.0 - Canonical CBOR Codec Contract
 
@@ -541,21 +562,35 @@ Deliverables:
 - crate scaffold,
 - encode/decode error model,
 - borrowed decode cursor,
+- core prefix parser hook for draft/version/type/flags before allocation,
+- streaming decode support with chunk-boundary tests,
+- assertion that no allocation, hashing, key lookup, or cryptographic work
+  occurs before prefix validation,
+- `DecodeBudget` type,
+- total bytes consumed,
 - maximum depth,
-- maximum item counts,
+- map and array entry debits,
 - maximum byte lengths,
 - maximum map entries, array entries, extension counts, proof counts, and
   signature counts,
+- disclosed field debits,
+- decompressed size and referenced byte debits,
+- pre-crypto work-unit debits,
+- checked arithmetic with immediate exhaustion and overflow errors,
+- monotonic debiting across nested and streaming decoders,
 - malformed-input fail-fast tests.
 
 Verification:
 
 - `cargo test -p bcx-codec`,
-- `cargo test --workspace --no-default-features`.
+- `cargo test --workspace --no-default-features`,
+- streaming parser tests across every supported chunk boundary,
+- budget monotonicity and bounded-work tests.
 
 Exit criteria:
 
-- decoder bounds exist before full decoding exists.
+- decoder bounds and prefix validation exist before full decoding, offline
+  bundles, CLI parsing, or carrier endpoints exist.
 
 ### v0.14.0 - Canonical Identifier Encoding
 
@@ -653,13 +688,16 @@ Deliverables:
 - byte-decoding limits kept in wire or codec,
 - migration of model validation from `bcx-wire::WireLimits`,
 - migration of crypto verification limits from `bcx-wire::WireLimits`,
-- aggregate budget vocabulary shared by parser and verifier.
+- aggregate budget vocabulary shared by parser and verifier,
+- common checked exhaustion and overflow error model,
+- pre-crypto work budget policy.
 
 Verification:
 
 - `cargo tree -p bcx-model`,
 - `cargo tree -p bcx-crypto`,
-- workspace tests and no-default-features tests.
+- workspace tests and no-default-features tests,
+- tests that budgeted parser failures happen before allocation or crypto work.
 
 Exit criteria:
 
@@ -724,6 +762,8 @@ verification.
 Deliverables:
 
 - crate or module skeleton,
+- caller-provided or const-generic storage,
+- no unexpectedly large stack allocations,
 - in-memory bounded graph store,
 - atomic insert API,
 - iterative reachability implementation,
@@ -733,6 +773,9 @@ Deliverables:
 Verification:
 
 - arbitrary insertion-order tests,
+- property tests for atomic admission,
+- bounded acyclicity checks,
+- concurrent insertion tests for check-then-insert races,
 - cycle and duplicate-delivery tests,
 - no-default-features workspace pass.
 
@@ -742,13 +785,13 @@ Exit criteria:
 
 ### v0.21.0 - Missing Parent Reconciliation
 
-Goal: make missing-parent resolution preserve graph integrity and resist orphan
+Goal: make missing-parent staging preserve graph integrity and resist orphan
 storage abuse.
 
 Deliverables:
 
 - unresolved edge table,
-- staged, structurally accepted, promoted, rejected, and garbage-collected
+- staged, structurally checked, promoted, rejected, and garbage-collected
   object states,
 - parent arrival reconciliation operation,
 - deterministic reconciliation ordering,
@@ -765,6 +808,7 @@ Verification:
 
 - mutually missing parent fixtures,
 - late-parent cycle rejection tests,
+- property tests for orphan promotion ordering,
 - orphan table saturation tests,
 - explanation bundle tests for incomplete graphs.
 
@@ -772,6 +816,8 @@ Exit criteria:
 
 - two objects accepted while unresolved cannot form an accepted cycle when both
   become available,
+- unresolved objects are staged and not causally usable until deterministic
+  promotion succeeds,
 - validly shaped missing-parent references cannot fill storage without bounds.
 
 ### v0.22.0 - Relationship Semantics And Edge Roles
@@ -786,6 +832,8 @@ Deliverables:
   and observational context,
 - target-kind checks for delegation, retry, scheduling, derivation, and joins,
 - profile hook for domain-specific relationship constraints,
+- rule that profile hooks may only narrow or supplement core edge invariants,
+  never weaken them,
 - fail-closed behavior for missing required parent metadata.
 
 Verification:
@@ -818,7 +866,8 @@ Deliverables:
 - issuer sequence policy,
 - sequence-gap and concurrent-request policy,
 - cache saturation behavior,
-- idempotency policy.
+- idempotency policy,
+- security-controls update for atomic replay and freshness.
 
 Verification:
 
@@ -890,19 +939,55 @@ Deliverables:
 - disclosure policy vocabulary,
 - redaction marker,
 - private evidence commitment,
+- salted or blinded private commitments for low-entropy values,
 - public evidence marker,
 - encrypted field disclosure contract,
+- AEAD suite identifier,
+- nonce uniqueness rules,
+- recipient and audience binding,
+- ciphertext domain separation,
+- padding or explicit length-leakage policy,
+- disclosure key distribution and rotation behavior,
 - unknown evidence marker.
 
 Verification:
 
 - redaction validation tests,
 - missing evidence tests,
-- encrypted disclosure binding fixtures.
+- encrypted disclosure binding fixtures,
+- low-entropy private commitment fixtures,
+- nonce reuse rejection tests.
 
 Exit criteria:
 
 - explanations can preserve privacy without pretending to be complete.
+
+### v0.26.1 - Policy Record And Evaluation Contract
+
+Goal: prove that a policy was evaluated, not merely referenced by ID.
+
+Deliverables:
+
+- canonical `PolicyRecord` commitment,
+- policy language or evaluator identifier and version,
+- exact evaluation-input commitment,
+- resolver or trust snapshot used during evaluation,
+- deterministic decision result,
+- signed admission-decision evidence,
+- distinction between `references policy X` and `verified as evaluated under
+  policy X`,
+- security-controls update for policy evaluation evidence.
+
+Verification:
+
+- policy commitment fixtures,
+- wrong evaluator, version, input, and resolver fixtures,
+- admission evidence mutation tests.
+
+Exit criteria:
+
+- admission can prove which policy artifact was evaluated, with which inputs
+  and trust snapshot, before semantic validity consumes the decision.
 
 ## Phase 4: Keys, Signing, Verification, And Proof Envelopes
 
@@ -920,7 +1005,8 @@ Deliverables:
 - rotation, compromise, and revocation evidence,
 - trust-anchor selection,
 - deterministic failure for ambiguous `kid` matches,
-- no network I/O during primitive verification.
+- no network I/O during primitive verification,
+- security-controls update for trust snapshots.
 
 Verification:
 
@@ -971,7 +1057,8 @@ Deliverables:
 - secret scratch zeroization,
 - atomic hybrid signing,
 - no partial hybrid signature release when one component fails,
-- key generation and import boundaries.
+- key generation and import boundaries,
+- security-controls update for signer entropy and private-key handling.
 
 Verification:
 
@@ -992,11 +1079,19 @@ Goal: make hybrid signature acceptance non-overridable by provider traits.
 Deliverables:
 
 - BCX-owned hybrid coordinator,
+- BCX proprietary AND-composition versus standardized composite construction
+  decision,
+- component order and canonical serialization,
+- prehash and context-string rules,
 - separate primitive provider traits for Ed25519 and ML-DSA-65,
+- component key separation,
+- signature stripping resistance,
+- cross-protocol reuse resistance,
 - exact suite dispatch,
 - coordinator-owned AND-combination,
 - public-data early-failure policy,
-- invalid-input cost budget before PQ dispatch.
+- invalid-input cost budget before PQ dispatch,
+- migration rules if an external composite draft changes.
 
 Verification:
 
@@ -1166,6 +1261,56 @@ Exit criteria:
 - BCX has a canonical COSE proof envelope and verification profile before
   `1.0.0`.
 
+### v0.36.1 - Ed25519 Provider Crate
+
+Goal: add the first admitted classical signature provider without contaminating
+no-std core traits.
+
+Deliverables:
+
+- optional Ed25519 provider crate or integration,
+- feature-gated provider selection,
+- signing known-answer tests,
+- verification known-answer tests,
+- malformed key and signature vectors,
+- cross-provider-ready test interface.
+
+Verification:
+
+- `cargo test -p <ed25519-provider-crate>`,
+- RFC 8032 vector smoke tests,
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX has one admitted classical provider for signing and verification before
+  crypto conformance is claimed.
+
+### v0.36.2 - ML-DSA-65 Provider Crate
+
+Goal: add the first admitted post-quantum signature provider without
+contaminating no-std core traits.
+
+Deliverables:
+
+- optional ML-DSA-65 provider crate or integration,
+- feature-gated provider selection,
+- signing known-answer tests,
+- verification known-answer tests,
+- malformed key and signature vectors,
+- cross-provider signature generation and verification fixtures.
+
+Verification:
+
+- `cargo test -p <ml-dsa-provider-crate>`,
+- NIST KAT or ACVP-vector smoke tests where available,
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX has one admitted post-quantum provider for signing and verification
+  before hybrid and COSE conformance are claimed.
+
 ### v0.37.0 - Cryptographic Conformance Program
 
 Goal: prove primitive and hybrid verification against external vectors and
@@ -1252,6 +1397,12 @@ Deliverables:
 - signed policy epoch input,
 - revocation root input,
 - conflict root input,
+- typed revocation targets for statements, keys, capabilities, delegations, and
+  policies,
+- authorized revoker rules,
+- revocation scope and effective causal point,
+- prospective versus retroactive effect,
+- reason and supersession references,
 - checkpoint issuer and authority,
 - strictly monotonic sequence rules,
 - fork and equivocation evidence,
@@ -1262,7 +1413,9 @@ Deliverables:
 - witness or gossip expectations for high-assurance profiles,
 - verification cache key including roots,
 - cache invalidation on root change,
-- authenticated non-inclusion proof requirement before claiming not revoked.
+- non-inclusion proof interface before claiming not revoked, with the concrete
+  transparency proof model completed in `v0.42.0`,
+- security-controls update for checkpoint equivocation.
 
 Verification:
 
@@ -1385,7 +1538,9 @@ Exit criteria:
 
 ### v0.45.0 - Explanation Bundle
 
-Goal: return bounded proof bundles for local/offline verification.
+Goal: return bounded proof bundles for local/offline verification using the
+receipt, privacy, and contradiction semantics scheduled in `v0.41.0`,
+`v0.42.0`, `v0.46.0`, and `v0.47.0`.
 
 Deliverables:
 
@@ -1398,7 +1553,8 @@ Deliverables:
 - binding references,
 - operational receipt references,
 - transparency receipt references,
-- missing, withheld, redacted, truncated, stale, and contradicted markers,
+- missing, withheld, redacted, truncated, and stale markers,
+- contradiction marker slots populated by the `v0.46.0` semantics,
 - disclosure map binding fields to plaintext, ciphertext, commitments, or
   predicate proofs,
 - final bundle commitment or signature.
@@ -1412,7 +1568,8 @@ Verification:
 Exit criteria:
 
 - an offline verifier can see what is proven, missing, redacted, stale,
-  contradicted, withheld, truncated, or unknown.
+  withheld, truncated, or unknown, and can carry contradiction data once
+  `v0.46.0` completes.
 
 ### v0.46.0 - Contradiction Handling
 
@@ -1422,6 +1579,11 @@ Deliverables:
 
 - contradiction statement checks,
 - conflicting claim relation,
+- contradiction claim selectors or predicates,
+- supporting evidence links,
+- resolution or adjudication statements,
+- visibility rule that resolved contradictions remain historical evidence
+  unless an explicit policy says otherwise,
 - target-kind and authority checks,
 - checkpoint-relative conflict status,
 - non-invalidation rule for historical authentic evidence,
@@ -1448,8 +1610,15 @@ Deliverables:
 
 - audience-specific pseudonymous key guidance,
 - stable global key ID avoidance policy,
+- salted or blinded private commitment guidance for low-entropy values,
 - selective disclosure binding,
 - encrypted field disclosure contract,
+- AEAD suite identification,
+- nonce uniqueness rules,
+- recipient and audience binding,
+- ciphertext domain separation,
+- padding or explicit length-leakage policy,
+- key distribution and rotation behavior,
 - anonymous credential or ZK proof-suite admission hook,
 - privacy review for issuer, realm, profile, and key metadata.
 
@@ -1457,7 +1626,8 @@ Verification:
 
 - disclosure map tests,
 - cross-audience linkability review,
-- wrong-audience encrypted disclosure fixtures.
+- wrong-audience encrypted disclosure fixtures,
+- ciphertext metadata mutation fixtures.
 
 Exit criteria:
 
@@ -1582,10 +1752,10 @@ Exit criteria:
 - BCX uses draft/experimental wire labels until the normative BCX/1
   representation is frozen.
 
-### v0.53.0 - Wire Prefix Parser
+### v0.53.0 - Carrier Framing Parser
 
-Goal: reject invalid wire data before allocation, hashing, key lookup, or
-cryptographic verification.
+Goal: bind carrier-specific framing to the core prefix, budget, and parser
+rules established in `v0.13.0` and `v0.17.0`.
 
 Deliverables:
 
@@ -1596,7 +1766,9 @@ Deliverables:
 - flags and critical-flag behavior,
 - exact frame-length check,
 - trailing-byte rejection,
-- aggregate decode budget integration.
+- aggregate decode budget integration,
+- assertion that carrier parsers do not allocate, hash, resolve keys, or verify
+  signatures before core prefix validation.
 
 Verification:
 
@@ -1606,11 +1778,11 @@ Verification:
 
 Exit criteria:
 
-- untrusted input has a fail-fast parser boundary before high-cost work.
+- carrier inputs reuse the fail-fast parser boundary before high-cost work.
 
-### v0.54.0 - Parser Fuzzing Program
+### v0.54.0 - Carrier Parser Fuzzing Program
 
-Goal: fuzz every untrusted parser before network endpoints are exposed.
+Goal: fuzz every carrier-facing parser before network endpoints are exposed.
 
 Deliverables:
 
@@ -1625,7 +1797,9 @@ Deliverables:
 Verification:
 
 - local fuzz smoke,
-- corpus regression tests.
+- corpus regression tests,
+- per-profile fuzz target added for every profile milestone from `v0.55.0`
+  onward that introduces parser surface.
 
 Exit criteria:
 
@@ -2647,14 +2821,17 @@ Required scope:
 - stable root `bcx` facade,
 - stable core statement, attestation, binding, checkpoint, and explanation
   vocabulary,
+- evidence facets and assurance lattice without false total ordering,
 - domain-separated commitment suite and registry,
 - canonical encoding and conformance vectors,
 - sealed statement commitments and derived statement IDs,
-- early wire parser and aggregate decode budgets,
+- early wire parser and checked aggregate `DecodeBudget`,
 - graph-store insertion that preserves acyclicity under late parents and
   duplicate delivery,
 - capability verification, trusted time, and atomic replay checks,
-- key resolution, signing provider, verifier provider, and exact suite policy,
+- canonical policy records and signed policy-evaluation evidence,
+- key resolution, signing provider, verifier provider, exact suite policy, and
+  concrete admitted Ed25519 and ML-DSA-65 providers,
 - standard COSE proof-envelope boundary,
 - hybrid signature constants, coordinator, composite key records, and framed
   signed message representative,
@@ -2662,7 +2839,8 @@ Required scope:
 - checkpoint-relative semantic validity engine,
 - revocation, conflict, checkpoint, and anti-equivocation roots,
 - operational and transparency receipt models,
-- privacy and selective disclosure hardening,
+- privacy, salted or blinded private commitments, AEAD-bound disclosure, and
+  selective disclosure hardening,
 - deterministic local state transition verification with resource limits,
 - local contract workflow fixtures,
 - ZK proof provider boundaries for SP1 and RISC Zero,
