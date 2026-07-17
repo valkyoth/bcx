@@ -156,35 +156,51 @@ continues past the relevant dependency point.
 
 | Gap | Resolution |
 | --- | --- |
-| The tokenless semantic-overlay position could be read as philosophy rather than an enforceable design contract. | Added `v0.52.0 - Tokenless Operation Contract`. |
-| `bcx-state` was named as a future crate but did not have implementation milestones. | Added `v0.53.0` through `v0.57.0` for deterministic state contracts, crate skeleton, local transitions, program identity, and effect proof inputs. |
-| Smart-contract-like local execution was implied by state and proof crates but not versioned. | Added `v0.65.0 - Local Contract Workflow Fixture` and `v0.66.0 - Tokenless Offline Institution Demo`. |
-| COSE was listed as the likely proof foundation but not assigned to a crate milestone. | Added `v0.58.0 - COSE Proof Crate`. |
-| Threshold witness proofs were listed as future but not assigned to a concrete release. | Added `v0.59.0 - Threshold Proof Crate`. |
-| ZK proof integrations were named but did not have provider-boundary and implementation milestones. | Added `v0.60.0` through `v0.62.0` for the ZK proof contract, SP1 provider crate, and RISC Zero provider crate. |
-| `bcx-witness` was named as a service but did not have a profile contract or service milestone. | Added `v0.63.0 - Witness Service Contract` and `v0.64.0 - Witness Service Skeleton`. |
-| Blockchain-independent double-spend/order prevention needed an explicit non-chain path. | Added witness, threshold proof, offline demo, and settlement-policy milestones before public-chain profiles become the only examples. |
-| The `1.0.0` scope did not explicitly require local deterministic execution and tokenless proof workflows. | Updated the `1.0.0` required scope with deterministic state, COSE, threshold witness, and local contract workflow evidence. |
+| The tokenless semantic-overlay position could be read as philosophy rather than an enforceable design contract. | Added `v0.73.0 - Tokenless Operation Contract`. |
+| `bcx-state` was named as a crate but did not have implementation milestones. | Added `v0.74.0` through `v0.78.0` for deterministic state contracts, resource metering, crate skeleton, local transitions, program identity, and effect proof inputs. |
+| Smart-contract-like local execution was implied by state and proof crates but not versioned. | Added `v0.85.0 - Local Contract Workflow Fixture` and `v0.86.0 - Tokenless Offline Institution Demo`. |
+| COSE was listed as the likely proof foundation but not assigned to a dependency-ordered crate milestone. | Added `v0.36.0 - COSE Proof Envelope Crate` after key, signing, verification, and hybrid policy prerequisites. |
+| Threshold witness proofs were listed but not assigned to a concrete release. | Added `v0.79.0 - Threshold Proof Crate`. |
+| ZK proof integrations were named but did not have provider-boundary and implementation milestones. | Added `v0.80.0` through `v0.82.0` for the ZK proof contract, SP1 provider crate, and RISC Zero provider crate. |
+| `bcx-witness` was named as a service but did not have a profile contract or service milestone. | Added `v0.83.0 - Witness Service Contract` and `v0.84.0 - Witness Service Skeleton`. |
+| Blockchain-independent double-spend/order prevention needed an explicit non-chain path. | Added semantic validity roots in `v0.40.0`, threshold proofs in `v0.79.0`, witness service releases in `v0.83.0` and `v0.84.0`, and the offline institution demo in `v0.86.0`. |
+| The `1.0.0` scope did not explicitly require local deterministic execution and tokenless proof workflows. | Updated the `1.0.0` required scope with deterministic state, threshold witness, local contract workflow, and tokenless institution evidence. |
 | ML-DSA-65 signature length is wrong in the current crypto constants. | Added `v0.5.1 - ML-DSA-65 Constant Correction` as the next patch release before more protocol surface is added. |
-| Statement IDs and detached verified bytes can be supplied by callers instead of derived from canonical typed statements. | Expanded `v0.14.0` and `v0.22.0`, and added `v0.67.0 - Sealed Statement Commitment API`. |
-| Multi-node cycle prevention is optional, non-atomic, and missing-parent resolution can introduce cycles after acceptance. | Added `v0.68.0 - Graph Store Contract`, `v0.69.0 - Atomic Graph Store Skeleton`, and `v0.70.0 - Missing Parent Reconciliation`. |
-| `CauseCapsule` and `CausalEdgeSet` remain parallel causal-parent APIs with different graph hooks. | Added `v0.68.0` to normalize compact capsules through the graph-store edge model and define deprecation behavior if needed. |
-| `ParentStatus::Missing` can be caller-selected even though availability is verifier-local state. | Added `v0.67.0` and `v0.70.0` to keep canonical edges to parent ID plus relationship and derive availability in stores and explanations. |
-| Relationship kinds do not yet enforce semantic cardinality or target-kind constraints. | Added `v0.71.0 - Relationship Semantics Policy`. |
-| Duplicate-parent checks are quadratic and canonical parent ordering is not yet defined. | Added `v0.14.0` canonical parent ordering and `v0.68.0` adjacent-duplicate graph-store checks. |
-| `WireLimits` is a limits container, not an early parser or aggregate resource budget. | Expanded `v0.12.0` and added `v0.72.0 - Wire Prefix Parser` and `v0.73.0 - Aggregate Decode Budgets`. |
-| Variable-length identifiers are constructor-validated but not wire-parsed or canonical-profile validated. | Expanded `v0.13.0` and `v0.72.0` to cover borrowed wire parsing and canonical identifier fixture rejection. |
-| Semantic model crates and crypto crates depend on transport-named limits. | Added `v0.74.0 - Core Limit And Budget Split`. |
-| Public identifier storage choices need an explicit indexing and zeroization policy. | Added `v0.75.0 - Public Identifier Storage Policy`. |
-| Hybrid verification lacks a non-overridable coordinator, framed message representative, composite key binding, and exact suite policy. | Added `v0.76.0` through `v0.79.0` for the hybrid coordinator, composite key records, signed representative, and exact suite enforcement. |
-| Provider scratch lifecycle and provider side-effect boundaries are not specified. | Added `v0.80.0 - Provider Scratch And Side-Effect Contract`. |
-| COSE proof suites need protected-header, critical-metadata, and `kid` identity rules. | Expanded `v0.58.0` and added `v0.81.0 - COSE Proof Hardening`. |
-| Revocation and contradiction are vocabulary, not checkpoint-relative semantic validity. | Expanded `v0.28.0` and added `v0.82.0 - Semantic Validity Engine` and `v0.83.0 - Revocation And Conflict Roots`. |
-| WHY bundles need distinct operational receipts and transparency receipts with inclusion, consistency, and non-inclusion proofs. | Expanded `v0.27.0` and added `v0.84.0 - Receipt Model Split` and `v0.85.0 - Transparency Receipt Integration`. |
-| Privacy requirements for pseudonymous keys, selective disclosure, and anonymous proof suites need a scheduled design pass. | Added `v0.86.0 - Privacy And Disclosure Hardening`. |
-| Carrier profiles need normative schemas, registries, critical-extension behavior, downgrade rules, and finality contracts. | Added `v0.87.0 - Profile Normative Specification Pack`. |
-| The wire version must remain draft/experimental until canonical BCX/1 is frozen. | Added `v0.88.0 - Draft Wire Version And Registry Gate`. |
-| Parser fuzzing, graph modeling, crypto conformance, cross-system consistency, mandatory target evidence, and formal assurance need concrete releases. | Added `v0.89.0` through `v0.94.0` for parser fuzzing, graph/state modeling, cryptographic conformance, cross-system consistency, platform evidence, and mandatory target gates. |
+| Statement IDs and detached verified bytes can be supplied by callers instead of derived from canonical typed statements. | Folded sealed commitment work into `v0.15.0 - Canonical Statement Encoding And Sealed Identity` and verification enforcement into `v0.38.0 - Statement Verification`. |
+| Phase 12 assurance work was ordered after profiles, demos, and providers that depend on it. | Reordered the roadmap so commitments, codec, limits, graph admission, replay, capabilities, keys, signing, verification, semantic validity, receipts, privacy, specs, parser fuzzing, and crypto conformance all precede the first carrier profile. |
+| Multi-node cycle prevention is optional, non-atomic, and missing-parent resolution can introduce cycles after acceptance. | Moved graph safety to `v0.19.0 - Graph Store Contract`, `v0.20.0 - Atomic Graph Store Skeleton`, and `v0.21.0 - Missing Parent Reconciliation`. |
+| `CauseCapsule` and `CausalEdgeSet` remain parallel causal-parent APIs with different graph hooks. | Added `v0.19.0` normalization rules so compact capsules pass through the graph-store edge model or are explicitly deprecated. |
+| `ParentStatus::Missing` can be caller-selected even though availability is verifier-local state. | Added canonical-edge separation in `v0.15.0` and derived local availability plus reconciliation behavior in `v0.21.0`. |
+| Relationship kinds do not yet enforce semantic cardinality, dependency roles, or target-kind constraints. | Added `v0.22.0 - Relationship Semantics And Edge Roles`. |
+| Duplicate-parent checks are quadratic and canonical parent ordering is not yet defined. | Added canonical parent ordering in `v0.15.0` and adjacent-duplicate graph checks in `v0.19.0`. |
+| `WireLimits` is a limits container, not an early parser or aggregate resource budget. | Added `v0.17.0 - Core Limit And Budget Split`, `v0.53.0 - Wire Prefix Parser`, and `v0.54.0 - Parser Fuzzing Program`. |
+| Variable-length identifiers are constructor-validated but not wire-parsed or canonical-profile validated. | Added borrowed identifier parsing in `v0.14.0` and prefix/parser rejection coverage in `v0.53.0`. |
+| Semantic model crates and crypto crates depend on transport-named limits. | Added `v0.17.0 - Core Limit And Budget Split`. |
+| Public identifier storage choices need an explicit indexing and zeroization policy. | Added `v0.18.0 - Public Identifier Storage Policy`. |
+| Hybrid verification lacks a non-overridable coordinator, framed message representative, composite key binding, and exact suite policy. | Added `v0.30.0` through `v0.33.0` for the hybrid coordinator, composite key records, signed representative, and exact suite enforcement. |
+| Provider scratch lifecycle and provider side-effect boundaries are not specified. | Added `v0.34.0 - Provider Scratch And Side-Effect Contract`. |
+| COSE proof suites need protected-header, critical-metadata, and `kid` identity rules. | Folded COSE hardening into `v0.36.0 - COSE Proof Envelope Crate`; no incomplete COSE boundary is scheduled first. |
+| Revocation and contradiction are vocabulary, not checkpoint-relative semantic validity. | Added `v0.39.0 - Semantic Validity Engine` and `v0.40.0 - Revocation, Conflict, And Checkpoint Roots`. |
+| WHY bundles need distinct operational receipts and transparency receipts with inclusion, consistency, and non-inclusion proofs. | Added `v0.41.0 - Receipt Model Split` and `v0.42.0 - Transparency Receipt Integration` before `v0.45.0 - Explanation Bundle`. |
+| Privacy requirements for pseudonymous keys, selective disclosure, and anonymous proof suites need to shape explanation bundles before profiles. | Added `v0.47.0 - Privacy And Disclosure Hardening` before offline, HTTP, blockchain, witness, and ZK work. |
+| Carrier profiles need normative schemas, registries, critical-extension behavior, downgrade rules, and finality contracts. | Added `v0.51.0 - Profile Normative Specification Pack` before the first HTTP profile. |
+| The wire version must remain draft/experimental until canonical BCX/1 is frozen. | Added `v0.52.0 - Draft Wire Version And Registry Gate`. |
+| Parser fuzzing must precede untrusted network endpoints. | Added `v0.54.0 - Parser Fuzzing Program` before HTTP implementation starts. |
+| Cryptographic conformance must precede reliance on COSE and hybrid provider surfaces. | Added `v0.37.0 - Cryptographic Conformance Program` before statement and attestation verification are used by profiles. |
+| Normative security specifications should grow alongside implementation rather than appear only at the end. | Added `v0.50.0 - Core And Codec Specification Draft` and kept `v0.95.0 - Security Specification Freeze`. |
+| Digest is an unnamed 32-byte value and commitments need domain separation, algorithm codes, empty-root rules, and migration policy. | Added `v0.11.0 - Commitment Suite And Registry Scaffold`. |
+| Statement IDs must exclude themselves from their own hash preimage and exclude attestations, bindings, local availability, and transport metadata. | Added explicit preimage rules to `v0.15.0 - Canonical Statement Encoding And Sealed Identity`. |
+| The plan did not resolve whether causal graph nodes are `EventId`, `StatementId`, or an authenticated mapping. | Added `v0.19.0` requirements for the graph-node identity decision and authenticated mapping behavior. |
+| Key resolution and immutable trust snapshots were missing. | Added `v0.27.0 - Key Resolution And Trust Snapshots`. |
+| Signing, entropy, private-key handles, and atomic hybrid signing were missing. | Added `v0.29.0 - Signing Provider Boundary`. |
+| Capability references were opaque and capability verification was not scheduled. | Added `v0.24.0 - Capability Verification`. |
+| Trusted time and replay need atomic check-and-record semantics, clock policy, sequence policy, and cache saturation behavior. | Added those requirements to `v0.23.0 - Validity And Atomic Replay Policy`. |
+| Truth and assurance need orthogonal evidence facets or lattice behavior rather than a single mutually exclusive status enum. | Added early modeling in `v0.6.0`, dependency roles in `v0.22.0`, and semantic composition in `v0.39.0`. |
+| Missing-parent admission must distinguish staged, structurally accepted, promoted, rejected, and garbage-collected objects. | Added those storage states and abuse bounds to `v0.21.0 - Missing Parent Reconciliation`. |
+| Checkpoint continuity alone does not prevent equivocation or rollback. | Added anti-equivocation requirements to `v0.40.0 - Revocation, Conflict, And Checkpoint Roots`. |
+| Multi-attestation support lacks acceptance semantics. | Added duplicate signer, canonical ordering, roles, threshold, and aggregation rules to `v0.35.0 - Attestation Verification And Multi-Attestation Policy`. |
+| Deterministic CBOR restrictions need explicit duplicate-key, indefinite-length, integer, tag, text, unknown-field, and extension-stripping behavior. | Added those restrictions to `v0.12.0 - Canonical CBOR Codec Contract`. |
+| Deterministic state needs metering, host-function, rollback, and cross-architecture resource rules before it is required for `1.0.0`. | Added those requirements to `v0.74.0 - Deterministic State Contract And Resource Model`. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -451,12 +467,39 @@ Verification:
 
 Exit criteria:
 
-- one checkpoint is ready for settlement policy in `v0.20.0` and multiple
-  receipt models in `v0.56.0`.
+- one checkpoint is ready for settlement and receipt verification in `v0.43.0`.
 
-## Phase 2: Canonical Codec And Test Vectors
+## Phase 2: Commitment, Registry, And Canonical Codec
 
-### v0.11.0 - Canonical CBOR Codec Contract
+### v0.11.0 - Commitment Suite And Registry Scaffold
+
+Goal: define domain-separated commitments before canonical bytes or IDs are
+implemented.
+
+Deliverables:
+
+- `CommitmentSuite` vocabulary,
+- exact hash algorithm and code point,
+- domain separation labels for statements, attestations, bindings, policies,
+  keys, checkpoints, Merkle leaves, and Merkle internal nodes,
+- version and codec binding in every committed preimage,
+- empty-root construction,
+- algorithm migration and downgrade policy,
+- registry scaffold for type, algorithm, extension, profile, and suite IDs,
+- reserved and experimental code point ranges.
+
+Verification:
+
+- commitment fixture tests,
+- registry collision tests,
+- docs checks.
+
+Exit criteria:
+
+- a raw 32-byte digest cannot be interpreted without its commitment domain and
+  suite context.
+
+### v0.12.0 - Canonical CBOR Codec Contract
 
 Goal: define deterministic CBOR as the first canonical binary representation.
 
@@ -464,7 +507,15 @@ Deliverables:
 
 - deterministic CBOR security contract,
 - canonical map ordering rules,
-- integer and byte-string canonicality rules,
+- duplicate map key rejection before normalization,
+- indefinite length rejection,
+- shortest integer and length encodings only,
+- float policy,
+- tag allow-list,
+- UTF-8 text policy or invariant-core text avoidance rule,
+- unknown noncritical signed-field preservation,
+- unknown critical field rejection,
+- extension stripping resistance,
 - JSON inspection boundary,
 - no-std and alloc impact analysis,
 - dependency admission notes.
@@ -472,21 +523,24 @@ Deliverables:
 Verification:
 
 - docs checks,
-- dependency policy review for the CBOR crate admission.
+- dependency policy review for the CBOR crate admission,
+- canonicality fixture review.
 
 Exit criteria:
 
-- no signed or hashed object can use ad hoc JSON or Rust memory layout.
+- no signed or hashed object can use ad hoc JSON, Rust memory layout, or vague
+  deterministic-CBOR shorthand.
 
-### v0.12.0 - Codec Crate Skeleton
+### v0.13.0 - Codec Crate Skeleton And Decode Cursor
 
-Goal: add `bcx-codec` as a no-std crate with errors and limits only.
+Goal: add `bcx-codec` as a no-std crate with bounded borrowed decoding before
+full object decoding exists.
 
 Deliverables:
 
 - crate scaffold,
 - encode/decode error model,
-- borrowed decode cursor plan,
+- borrowed decode cursor,
 - maximum depth,
 - maximum item counts,
 - maximum byte lengths,
@@ -496,14 +550,14 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p bcx-codec`
-- `cargo test --workspace --no-default-features`
+- `cargo test -p bcx-codec`,
+- `cargo test --workspace --no-default-features`.
 
 Exit criteria:
 
 - decoder bounds exist before full decoding exists.
 
-### v0.13.0 - Canonical Identifier Encoding
+### v0.14.0 - Canonical Identifier Encoding
 
 Goal: produce stable bytes for core identifiers and digests.
 
@@ -518,1214 +572,137 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p bcx-codec`
-- fixture diff check
+- `cargo test -p bcx-codec`,
+- fixture diff check.
 
 Exit criteria:
 
 - all supported platforms produce the same bytes for identifier fixtures.
 
-### v0.14.0 - Canonical Statement Encoding
+### v0.15.0 - Canonical Statement Encoding And Sealed Identity
 
-Goal: encode the statement envelope and body skeleton deterministically.
+Goal: encode statements deterministically and derive statement IDs only from
+canonical typed statement preimages.
 
 Deliverables:
 
 - statement encoder,
 - statement decoder,
-- unknown-extension behavior,
 - canonical parent ordering rules,
-- duplicate-parent rejection using adjacent canonical order,
-- mutation fixtures,
+- adjacent duplicate-parent rejection,
 - statement ID derivation from canonical statement bytes,
-- sealed `CanonicalStatementBytes` or `StatementCommitment` producer.
+- sealed `CanonicalStatementBytes` or `StatementCommitment` producer,
+- rule that `StatementId` is excluded from its own hash preimage,
+- rule that constructors do not accept a caller-derived ID,
+- exclusion of attestations, native bindings, local availability, and transport
+  metadata from the statement preimage,
+- inclusion of schema version and security-relevant extensions,
+- canonical edge semantics limited to parent ID plus relationship,
+- mutation fixtures.
 
 Verification:
 
 - canonical test vectors,
 - malformed fixture tests,
-- no-default-features pass.
+- no-default-features pass,
+- detached-byte substitution fixtures.
 
 Exit criteria:
 
-- the same logical statement produces the same `StatementId` everywhere.
+- the same logical statement produces the same `StatementId` everywhere,
 - caller-supplied statement IDs cannot bypass canonical identity checks.
 
-### v0.15.0 - Canonical Attestation And Binding Encoding
+### v0.16.0 - Canonical Attestation, Binding, And Checkpoint Encoding
 
-Goal: encode attestations and native bindings deterministically.
+Goal: encode attestations, native bindings, and checkpoints deterministically
+after statement identity is sealed.
 
 Deliverables:
 
 - attestation encoding,
 - binding encoding,
+- checkpoint encoding,
 - proof byte limits,
 - native evidence limits,
+- root ordering rules,
+- previous-checkpoint validation,
 - mutation fixtures.
 
 Verification:
 
-- `cargo test -p bcx-codec`
-- tamper fixture tests
+- `cargo test -p bcx-codec`,
+- tamper fixture tests,
+- cross-platform checkpoint vector tests.
 
 Exit criteria:
 
-- attestation and binding hashes are stable and mutation-sensitive.
+- attestation, binding, and checkpoint commitments are stable and
+  mutation-sensitive.
 
-### v0.16.0 - Canonical Checkpoint Encoding
+## Phase 3: Limits, Graph Admission, Replay, And Authority
 
-Goal: encode checkpoints and roots deterministically.
+### v0.17.0 - Core Limit And Budget Split
+
+Goal: remove transport-named limit coupling from semantic model and crypto
+verification.
 
 Deliverables:
 
-- checkpoint encoding,
-- root ordering rules,
-- empty-root rejection where required,
-- previous-checkpoint validation.
+- general graph limits in core or policy,
+- verification budgets in core or policy,
+- byte-decoding limits kept in wire or codec,
+- migration of model validation from `bcx-wire::WireLimits`,
+- migration of crypto verification limits from `bcx-wire::WireLimits`,
+- aggregate budget vocabulary shared by parser and verifier.
 
 Verification:
 
-- checkpoint vector tests,
-- cross-platform fixture tests.
+- `cargo tree -p bcx-model`,
+- `cargo tree -p bcx-crypto`,
+- workspace tests and no-default-features tests.
 
 Exit criteria:
 
-- settlement profiles can rely on stable checkpoint IDs.
+- semantic model and cryptographic verification do not depend on a
+  transport-named crate for non-wire budgets.
 
-## Phase 3: Policy, Replay, And Delegation
+### v0.18.0 - Public Identifier Storage Policy
 
-### v0.17.0 - Validity And Replay Policy
-
-Goal: make replay resistance explicit before any carrier profile exists.
+Goal: decide which public commitments are indexable and which buffers require
+zeroization before graph storage APIs freeze.
 
 Deliverables:
 
-- validity window,
-- expiry/freshness type with overflow-safe remaining-time checks,
-- nonce policy,
-- issuer sequence policy,
-- idempotency policy,
-- replay cache trait.
+- public identifier storage policy,
+- graph-indexing impact review,
+- explicit `Hash` and `Ord` decision for public identifiers,
+- zeroization policy for public commitments versus sensitive scratch,
+- migration notes for affected APIs.
 
 Verification:
 
-- expired statement tests,
-- duplicate nonce and sequence tests.
+- API review,
+- graph indexing benchmarks or microbenchmarks where relevant.
 
 Exit criteria:
 
-- consequential statements cannot be accepted without a replay policy.
+- identifier ergonomics and memory clearing behavior are documented as a
+  security and performance tradeoff, not an accident.
 
-### v0.18.0 - Delegation Narrowing
+### v0.19.0 - Graph Store Contract
 
-Goal: permit authority delegation that narrows but never silently broadens.
-
-Deliverables:
-
-- delegation body validation,
-- child scope checks,
-- purpose narrowing,
-- time-window narrowing,
-- maximum delegation depth.
-
-Verification:
-
-- valid narrowing tests,
-- broadening rejection tests.
-
-Exit criteria:
-
-- a child delegation cannot remove parent restrictions.
-
-### v0.19.0 - Disclosure Policy
-
-Goal: encode what can be revealed, redacted, committed, or withheld.
-
-Deliverables:
-
-- disclosure policy vocabulary,
-- redaction marker,
-- private evidence commitment,
-- public evidence marker,
-- unknown evidence marker.
-
-Verification:
-
-- redaction validation tests,
-- missing evidence tests.
-
-Exit criteria:
-
-- explanations can preserve privacy without pretending to be complete.
-
-### v0.20.0 - Settlement Policy
-
-Goal: describe how checkpoints may be witnessed or settled.
-
-Deliverables:
-
-- primary backend policy,
-- primary-with-witnesses policy,
-- require-all policy,
-- threshold settlement policy,
-- normalized finality status.
-
-Verification:
-
-- threshold validation tests,
-- finality transition tests.
-
-Exit criteria:
-
-- one checkpoint can express several settlement receipts without requiring a
-  blockchain.
-
-## Phase 4: Verification Core
-
-### v0.21.0 - Verifier Provider Boundary
-
-Goal: define crypto verification without choosing production providers.
-
-Deliverables:
-
-- verifier trait,
-- proof-suite policy hook,
-- narrow primitive-verifier trait shape,
-- provider capability metadata,
-- provider error model,
-- opaque external error contract,
-- deterministic test verifier.
-
-Verification:
-
-- `cargo test -p bcx-crypto`
-- provider failure tests.
-
-Exit criteria:
-
-- provider crates scheduled from `v0.58.0` through `v0.62.0` can be added
-  without changing statement semantics.
-- primitive verification providers cannot resolve keys, perform network I/O, or
-  choose policy inside the core verification operation.
-
-### v0.22.0 - Statement Verification
-
-Goal: verify canonical statement identity and structural validity.
-
-Deliverables:
-
-- statement ID verification,
-- canonical statement commitment verification,
-- detached-byte substitution rejection,
-- required field checks,
-- audience binding checks,
-- expiry/freshness checks,
-- policy reference checks.
-
-Verification:
-
-- tamper tests,
-- wrong-audience tests.
-
-Exit criteria:
-
-- changing any security-relevant statement field invalidates verification.
-
-### v0.23.0 - Attestation Verification
-
-Goal: verify attestations over canonical statement IDs.
-
-Deliverables:
-
-- proof-suite dispatch,
-- issuer/key checks,
-- multi-attestation validation,
-- unknown proof-suite handling.
-
-Verification:
-
-- valid and invalid proof fixtures,
-- unknown-suite tests.
-
-Exit criteria:
-
-- attestations are verifiable without native profile dependencies.
-
-### v0.24.0 - Binding Verification
-
-Goal: verify that native binding evidence commits to the intended statement.
-
-Deliverables:
-
-- binding verifier trait,
-- profile ID checks,
-- native commitment checks,
-- mutated evidence tests.
-
-Verification:
-
-- `cargo test --workspace`
-- binding mutation fixtures.
-
-Exit criteria:
-
-- profiles can plug in native verification without changing core logic.
-
-### v0.25.0 - Checkpoint Verification
-
-Goal: verify checkpoint membership and continuity.
-
-Deliverables:
-
-- membership proof model,
-- previous-checkpoint check,
-- root consistency checks,
-- missing-root behavior.
-
-Verification:
-
-- checkpoint fixture tests,
-- continuity tests.
-
-Exit criteria:
-
-- a checkpoint can be verified independently of where it is settled.
-
-## Phase 5: Explanation And Offline Use
-
-### v0.26.0 - Explain Crate Skeleton
-
-Goal: add `bcx-explain` for bounded WHY semantics.
-
-Deliverables:
-
-- crate scaffold,
-- query type,
-- query direction,
-- maximum depth,
-- maximum nodes,
-- maximum response bytes,
-- iterative traversal rule with explicit work queue,
-- visited or tri-color traversal state,
-- cancellation marker.
-
-Verification:
-
-- `cargo test -p bcx-explain`
-- oversized query tests.
-
-Exit criteria:
-
-- no WHY query can request unbounded work.
-
-### v0.27.0 - Explanation Bundle
-
-Goal: return bounded proof bundles for local/offline verification.
-
-Deliverables:
-
-- explanation bundle type,
-- canonical manifest with bundle version, target claim, purpose, policy epoch,
-  trust roots, limits, and freshness,
-- deduplicated statement table addressed by commitment,
-- statement references,
-- attestation references,
-- binding references,
-- operational receipt references,
-- transparency receipt references,
-- missing, withheld, redacted, truncated, stale, and contradicted markers,
-- disclosure map binding fields to plaintext, ciphertext, commitments, or
-  predicate proofs,
-- final bundle commitment or signature.
-
-Verification:
-
-- bundle validation tests,
-- missing-parent fixture tests.
-
-Exit criteria:
-
-- an offline verifier can see what is proven, missing, redacted, or unknown.
-
-### v0.28.0 - Contradiction Handling
-
-Goal: preserve conflicting claims without overwriting them.
-
-Deliverables:
-
-- contradiction statement checks,
-- conflicting claim relation,
-- target-kind and authority checks,
-- checkpoint-relative conflict status,
-- non-invalidation rule for historical authentic evidence,
-- assurance summary,
-- explanation output for conflicts.
-
-Verification:
-
-- conflicting fixture tests,
-- no-overwrite tests.
-
-Exit criteria:
-
-- BCX can represent "A says sent" and "B says not received" at the same time.
-
-### v0.29.0 - Offline Profile
-
-Goal: add `bcx-offline` for air-gapped bundles.
-
-Deliverables:
-
-- offline bundle profile,
-- bundle manifest,
-- evidence file commitments,
-- detached private evidence references.
-
-Verification:
-
-- `cargo test -p bcx-offline`
-- tampered bundle tests.
-
-Exit criteria:
-
-- BCX can work without HTTP, Fluxheim, or any blockchain.
-
-### v0.30.0 - CLI Skeleton
-
-Goal: add `bcx-cli` for inspection without making it a root dependency.
-
-Deliverables:
-
-- `bcx verify`,
-- `bcx why`,
-- `bcx inspect`,
-- fixture-driven command tests.
-
-Verification:
-
-- CLI smoke tests,
-- no root dependency regression.
-
-Exit criteria:
-
-- developers can inspect offline BCX objects locally.
-
-## Phase 6: HTTP And Fluxheim
-
-### v0.31.0 - HTTP Profile Security Contract
-
-Goal: define `BCX-HTTP/1` before implementation.
-
-Deliverables:
-
-- attached mode contract,
-- encapsulated mode contract,
-- committed HTTP components,
-- intermediary mutation rules,
-- replay rules,
-- limits.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- implementation cannot start without a precise HTTP security contract.
-
-### v0.32.0 - HTTP Profile Crate
-
-Goal: add dependency-light `bcx-http`.
-
-Deliverables:
-
-- profile identifiers,
-- header names,
-- attached-mode commitment builder,
-- encapsulated-mode envelope model.
-
-Verification:
-
-- `cargo test -p bcx-http`
-- mutation tests for committed components.
-
-Exit criteria:
-
-- HTTP commitments can be verified without Hyper or Axum dependencies.
-
-### v0.33.0 - HTTP Hyper Integration
-
-Goal: add `bcx-http-hyper` as the first concrete HTTP integration.
-
-Deliverables:
-
-- request extraction,
-- response receipt extraction,
-- header validation,
-- body digest integration.
-
-Verification:
-
-- integration tests,
-- malformed request tests.
-
-Exit criteria:
-
-- one real Rust HTTP stack can carry BCX objects.
-
-### v0.34.0 - Fluxheim Profile Contract
-
-Goal: document exactly what Fluxheim can observe and enforce.
-
-Deliverables:
-
-- Fluxheim ingress effect scope,
-- route decision scope,
-- upstream response scope,
-- cache decision scope,
-- non-claims about upstream database commits.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- Fluxheim integration cannot overclaim application effects.
-
-### v0.35.0 - Fluxheim Integration Skeleton
-
-Goal: add `bcx-fluxheim` as an optional integration crate.
-
-Deliverables:
-
-- policy adapter traits,
-- receipt builder,
-- route decision binding,
-- local WHY fixture.
-
-Verification:
-
-- integration fixture tests,
-- no root dependency regression.
-
-Exit criteria:
-
-- Fluxheim can emit local BCX causal receipts.
-
-### v0.36.0 - Two-Fluxheim Demonstration
-
-Goal: trace one signed operation across two Fluxheim nodes.
-
-Deliverables:
-
-- local smoke script,
-- signed intent,
-- admission,
-- effect,
-- explanation bundle.
-
-Verification:
-
-- smoke test,
-- tamper test.
-
-Exit criteria:
-
-- BCX proves useful over HTTP before any blockchain integration exists.
-
-## Phase 7: First Settlement Profiles
-
-### v0.37.0 - Ethereum Profile Security Contract
-
-Goal: define what `BCX-ETHEREUM/1` commits and can prove.
-
-Deliverables:
-
-- chain ID commitment,
-- contract address commitment,
-- calldata digest commitment,
-- value commitment,
-- sender or authorization commitment,
-- expiry and nullifier rules,
-- finality policy.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- Ethereum implementation cannot start without a precise security contract.
-
-### v0.38.0 - Ethereum Profile Crate
-
-Goal: add dependency-light `bcx-ethereum`.
-
-Deliverables:
-
-- Ethereum binding vocabulary,
-- checkpoint anchoring model,
-- finality status mapping,
-- mock receipt verification.
-
-Verification:
-
-- `cargo test -p bcx-ethereum`
-- mutation tests.
-
-Exit criteria:
-
-- Ethereum can bind and settle checkpoints conceptually without Alloy yet.
-
-### v0.39.0 - Ethereum Alloy Integration
-
-Goal: add `bcx-ethereum-alloy` for concrete RPC and primitive integration.
-
-Deliverables:
-
-- RPC receipt adapter,
-- chain ID fetch adapter,
-- transaction evidence builder,
-- testnet-ready fixtures.
-
-Verification:
-
-- mocked RPC tests,
-- optional live smoke script.
-
-Exit criteria:
-
-- Ethereum integration is useful without entering rollup scope.
-
-### v0.40.0 - Cardano Profile Security Contract
-
-Goal: define `BCX-CARDANO/1` around EUTXO semantics.
-
-Deliverables:
-
-- state UTXO commitment,
-- consumed-output rule,
-- created-output rule,
-- validator version commitment,
-- finality policy.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- Cardano is modeled natively rather than imitating Ethereum.
-
-### v0.41.0 - Cardano Profile Crate
-
-Goal: add dependency-light `bcx-cardano`.
-
-Deliverables:
-
-- Cardano binding vocabulary,
-- checkpoint-in-UTXO model,
-- finality status mapping,
-- mock receipt verification.
-
-Verification:
-
-- `cargo test -p bcx-cardano`
-- mutation tests.
-
-Exit criteria:
-
-- a BCX checkpoint can have both Ethereum and Cardano receipt models.
-
-### v0.42.0 - Cardano Pallas Integration
-
-Goal: add `bcx-cardano-pallas` for offchain Rust integration.
-
-Deliverables:
-
-- transaction evidence builder,
-- UTXO evidence parser,
-- mock indexer adapter,
-- fixture tests.
-
-Verification:
-
-- mocked indexer tests,
-- optional local smoke script.
-
-Exit criteria:
-
-- a second deep settlement family proves BCX is not Ethereum-specific.
-
-## Phase 8: Additional Bindings And Standards
-
-### v0.43.0 - SCITT Profile Contract
-
-Goal: define how BCX checkpoints can use a transparency service.
-
-Deliverables:
-
-- signed statement mapping,
-- transparency receipt model,
-- witness finality status,
-- privacy notes.
-
-Verification:
-
-- docs checks.
-
-Exit criteria:
-
-- BCX can use transparency infrastructure without becoming SCITT.
-
-### v0.44.0 - OpenTelemetry Profile Contract
-
-Goal: define observability correlation without turning telemetry into proof.
-
-Deliverables:
-
-- statement ID to trace/span mapping,
-- non-proof warning,
-- export boundary.
-
-Verification:
-
-- docs checks.
-
-Exit criteria:
-
-- telemetry remains operational context, not cryptographic evidence.
-
-### v0.45.0 - Bitcoin Anchoring Profile Contract
-
-Goal: define how Bitcoin fits as anchoring and payment evidence.
-
-Deliverables:
-
-- security contract,
-- finality model,
-- transaction commitment model,
-- output and script commitment rules,
-- privacy review,
-- dependency plan.
-
-Verification:
-
-- docs checks,
-- security review notes.
-
-Exit criteria:
-
-- Bitcoin has a concrete BCX profile contract before any Bitcoin crate is
-  implemented.
-
-### v0.46.0 - XRP Payment Evidence Profile Contract
-
-Goal: define how XRP Ledger fits as payment and settlement evidence.
-
-Deliverables:
-
-- security contract,
-- ledger finality model,
-- transaction evidence model,
-- destination tag and memo commitment rules,
-- account and memo privacy review,
-- dependency plan.
-
-Verification:
-
-- docs checks,
-- security review notes.
-
-Exit criteria:
-
-- XRP has a concrete BCX profile contract before any XRP crate is implemented.
-
-## Phase 9: Conformance And Registry
-
-### v0.47.0 - Registry Crate
-
-Goal: add `bcx-registry` for profile, type, algorithm, and extension IDs.
-
-Deliverables:
-
-- registry ID model,
-- reserved ranges,
-- experimental ranges,
-- unknown-extension rules.
-
-Verification:
-
-- registry validation tests.
-
-Exit criteria:
-
-- ecosystem crates can avoid ID collisions.
-
-### v0.48.0 - Conformance Crate
-
-Goal: add `bcx-conformance` for mandatory interoperability vectors.
-
-Deliverables:
-
-- canonical encoding vectors,
-- signature vectors,
-- replay cases,
-- unknown extension cases,
-- binding mutation cases,
-- checkpoint cases.
-
-Verification:
-
-- conformance test suite.
-
-Exit criteria:
-
-- independent implementations can validate compatibility.
-
-### v0.49.0 - Testkit Crate
-
-Goal: add `bcx-testkit` for deterministic builders and adversarial fixtures.
-
-Deliverables:
-
-- statement builders,
-- attestation builders,
-- binding builders,
-- tamper helpers,
-- deterministic keys for tests only.
-
-Verification:
-
-- `cargo test -p bcx-testkit`
-
-Exit criteria:
-
-- future releases can add tests faster without weakening production crates.
-
-## Phase 10: Domain Profiles
-
-### v0.50.0 - Banking Domain Contract
-
-Goal: define banking semantics separate from transport and settlement.
-
-Deliverables:
-
-- mandate model,
-- approval model,
-- transfer intent vocabulary,
-- settlement effect vocabulary,
-- compliance evidence hooks.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- banking meaning is not hard-coded into core BCX.
-
-### v0.51.0 - AI Agent Domain Contract
-
-Goal: define delegated machine-action semantics.
-
-Deliverables:
-
-- agent identity vocabulary,
-- model/tool authority,
-- human approval markers,
-- tool-call effect markers,
-- revocation hooks.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- agent workflows can use BCX without weakening the core.
-
-## Phase 11: Tokenless Local Execution And Proofs
-
-### v0.52.0 - Tokenless Operation Contract
-
-Goal: make the no-token, no-global-validator BCX operating model normative.
-
-Deliverables:
-
-- tokenless operation contract,
-- external security-budget model,
-- local admission and rate-limit assumptions,
-- public-chain anchoring boundary,
-- private witness boundary.
-
-Verification:
-
-- docs checks,
-- threat-model update,
-- security-controls update.
-
-Exit criteria:
-
-- BCX clearly states that it does not run validators, mint a token, or require
-  a blockchain for local proof-carrying operation.
-
-### v0.53.0 - Deterministic State Contract
-
-Goal: define `bcx-state` before implementation.
-
-Deliverables:
-
-- deterministic state transition contract,
-- state root vocabulary,
-- input commitment rules,
-- output commitment rules,
-- fail-closed non-determinism rules.
-
-Verification:
-
-- docs checks,
-- adversarial determinism review.
-
-Exit criteria:
-
-- local state execution has a written security contract before any state crate
-  exists.
-
-### v0.54.0 - State Crate Skeleton
-
-Goal: add `bcx-state` as a dependency-light core crate.
-
-Deliverables:
-
-- crate scaffold,
-- state transition trait,
-- state root type,
-- transition input and output bounds,
-- deterministic test state.
-
-Verification:
-
-- `cargo test -p bcx-state`
-- `cargo test --workspace --no-default-features`
-
-Exit criteria:
-
-- BCX can model local state transitions without pulling in a runtime, database,
-  VM, or blockchain dependency.
-
-### v0.55.0 - Local State Transition Verification
-
-Goal: verify deterministic state transitions as BCX effects.
-
-Deliverables:
-
-- transition verifier,
-- pre-state and post-state commitment checks,
-- transition effect binding,
-- mutation tests.
-
-Verification:
-
-- valid transition fixture tests,
-- mutated input, output, and state-root tests.
-
-Exit criteria:
-
-- a local transition can produce a verifiable `Effect` without global
-  execution.
-
-### v0.56.0 - Program Identity And Admission
-
-Goal: bind local contract-like programs to explicit BCX admission.
-
-Deliverables:
-
-- program identifier type,
-- program version commitment,
-- admission policy link,
-- deterministic input schema commitment,
-- program downgrade rejection tests.
-
-Verification:
-
-- `cargo test -p bcx-state`
-- downgrade and wrong-program fixtures.
-
-Exit criteria:
-
-- a state transition is admitted for one exact program identity and cannot be
-  silently reinterpreted as another program.
-
-### v0.57.0 - Effect Proof Inputs
-
-Goal: define common public inputs for local and ZK effect proofs.
-
-Deliverables:
-
-- effect proof input model,
-- statement ID input,
-- program ID input,
-- pre-state and post-state inputs,
-- admission ID input,
-- canonical input ordering.
-
-Verification:
-
-- proof input fixture tests,
-- ordering mutation tests.
-
-Exit criteria:
-
-- every proof provider can consume the same BCX effect-proof input shape.
-
-### v0.58.0 - COSE Proof Crate
-
-Goal: add `bcx-proof-cose` as the first standard proof-suite crate.
-
-Deliverables:
-
-- COSE proof-suite identifiers,
-- COSE signature envelope binding,
-- detached payload verification boundary,
-- key identifier binding,
-- protected-header algorithm binding,
-- critical-header behavior,
-- duplicate-header rejection,
-- external authenticated data binding,
-- negative fixtures.
-
-Verification:
-
-- `cargo test -p bcx-proof-cose`
-- malformed COSE fixture tests.
-
-Exit criteria:
-
-- BCX has a standard, deterministic signing proof suite before `1.0.0`.
-- COSE `kid` is treated as a lookup hint bound by policy, not as a globally
-  unique security identity.
-
-### v0.59.0 - Threshold Proof Crate
-
-Goal: add `bcx-proof-threshold` for private witness and institutional notary
-sets.
-
-Deliverables:
-
-- threshold policy vocabulary,
-- signer set commitment,
-- threshold count validation,
-- witness signature bundle model,
-- duplicate signer rejection.
-
-Verification:
-
-- `cargo test -p bcx-proof-threshold`
-- threshold mutation tests.
-
-Exit criteria:
-
-- a checkpoint can be witnessed by a private or federated group without using a
-  public blockchain.
-
-### v0.60.0 - ZK Proof Provider Contract
-
-Goal: define ZK proof integration rules before provider crates exist.
-
-Deliverables:
-
-- ZK proof provider trait,
-- proof system identifier,
-- program verification key commitment,
-- public input binding,
-- privacy and side-channel notes.
-
-Verification:
-
-- docs checks,
-- provider-boundary tests with a deterministic fake provider.
-
-Exit criteria:
-
-- ZK providers can plug into BCX without changing statement, effect, or
-  checkpoint semantics.
-
-### v0.61.0 - SP1 Proof Provider Crate
-
-Goal: add `bcx-proof-sp1` as an optional SP1 integration crate.
-
-Deliverables:
-
-- SP1 proof-suite identifier,
-- verification key commitment,
-- proof byte bounds,
-- public input adapter,
-- mocked verifier tests.
-
-Verification:
-
-- `cargo test -p bcx-proof-sp1`
-- no root dependency regression.
-
-Exit criteria:
-
-- BCX can verify SP1-produced effect proofs through an optional provider
-  boundary.
-
-### v0.62.0 - RISC Zero Proof Provider Crate
-
-Goal: add `bcx-proof-risc0` as an optional RISC Zero integration crate.
-
-Deliverables:
-
-- RISC Zero proof-suite identifier,
-- image ID commitment,
-- receipt byte bounds,
-- public input adapter,
-- mocked verifier tests.
-
-Verification:
-
-- `cargo test -p bcx-proof-risc0`
-- no root dependency regression.
-
-Exit criteria:
-
-- BCX can verify RISC Zero-produced effect proofs through an optional provider
-  boundary.
-
-### v0.63.0 - Witness Service Contract
-
-Goal: define `bcx-witness` before implementation.
-
-Deliverables:
-
-- witness service security contract,
-- checkpoint admission rules,
-- timestamp and ordering policy,
-- duplicate statement policy,
-- privacy and retention policy.
-
-Verification:
-
-- docs checks,
-- threat-model update.
-
-Exit criteria:
-
-- non-chain ordering and double-spend prevention have a written BCX contract.
-
-### v0.64.0 - Witness Service Skeleton
-
-Goal: add `bcx-witness` as an optional service crate.
-
-Deliverables:
-
-- service crate scaffold,
-- in-memory witness store for tests,
-- checkpoint request model,
-- threshold proof output hook,
-- duplicate checkpoint rejection.
-
-Verification:
-
-- `cargo test -p bcx-witness`
-- no root dependency regression.
-
-Exit criteria:
-
-- BCX has a local/federated witness path that does not depend on Ethereum,
-  Cardano, Bitcoin, or XRP.
-
-### v0.65.0 - Local Contract Workflow Fixture
-
-Goal: demonstrate smart-contract-like BCX operation without a blockchain.
-
-Deliverables:
-
-- local program fixture,
-- intent fixture,
-- admission fixture,
-- state transition effect fixture,
-- proof bundle fixture,
-- explanation output.
-
-Verification:
-
-- local workflow smoke test,
-- tamper tests for program ID, admission ID, state roots, and proof inputs.
-
-Exit criteria:
-
-- BCX can show `Intent -> Admission -> Effect` for deterministic local logic
-  with verifiable proof evidence and no global VM.
-
-### v0.66.0 - Tokenless Offline Institution Demo
-
-Goal: prove a complete tokenless BCX path between known parties.
-
-Deliverables:
-
-- offline bundle,
-- local deterministic effect,
-- COSE attestation,
-- threshold witness checkpoint,
-- WHY explanation bundle,
-- replay and duplicate rejection fixture.
-
-Verification:
-
-- end-to-end offline smoke script,
-- tamper and replay tests.
-
-Exit criteria:
-
-- BCX demonstrates a free, tokenless, blockchain-independent workflow before
-  relying on public-chain settlement profiles.
-
-## Phase 12: Protocol Assurance Gap Closure
-
-### v0.67.0 - Sealed Statement Commitment API
-
-Goal: prevent callers from pairing typed statements with unrelated verified
-bytes or caller-chosen IDs.
-
-Deliverables:
-
-- sealed `CanonicalStatementBytes` or `StatementCommitment`,
-- statement ID derivation only from canonical typed statements,
-- detached signature verification that consumes sealed commitments,
-- substitution tests where object A's signature is paired with object B,
-- availability state kept outside canonical edge semantics.
-
-Verification:
-
-- `cargo test --workspace`
-- canonical identity mutation fixtures.
-
-Exit criteria:
-
-- BCX verification accepts only canonical commitments produced by the codec
-  path scheduled in `v0.14.0`.
-
-### v0.68.0 - Graph Store Contract
-
-Goal: define graph insertion as one atomic causal operation.
+Goal: define graph insertion as one atomic causal operation before explanation,
+offline bundles, or storage integrations depend on causal graph state.
 
 Deliverables:
 
 - `GraphStore` contract,
+- graph-node identity decision: canonical `StatementId`, derived `EventId`, or
+  authenticated mapping,
 - `insert_checked(event, parents)` semantics,
 - reachability check requirements,
-- compact `CauseCapsule` normalization into causal edges,
+- compact `CauseCapsule` normalization into causal edges or explicit
+  deprecation behavior,
 - adjacent duplicate checks over canonical parent order,
 - public identifier indexing policy hooks.
 
@@ -1739,7 +716,7 @@ Exit criteria:
 - graph acceptance is specified as validation plus insertion in one operation,
   not as a boolean pre-check against a stale snapshot.
 
-### v0.69.0 - Atomic Graph Store Skeleton
+### v0.20.0 - Atomic Graph Store Skeleton
 
 Goal: add the first no-std graph-store implementation for tests and core
 verification.
@@ -1763,15 +740,24 @@ Exit criteria:
 
 - every accepted insertion leaves the bounded in-memory graph acyclic.
 
-### v0.70.0 - Missing Parent Reconciliation
+### v0.21.0 - Missing Parent Reconciliation
 
-Goal: make missing-parent resolution preserve graph integrity.
+Goal: make missing-parent resolution preserve graph integrity and resist orphan
+storage abuse.
 
 Deliverables:
 
 - unresolved edge table,
+- staged, structurally accepted, promoted, rejected, and garbage-collected
+  object states,
 - parent arrival reconciliation operation,
+- deterministic reconciliation ordering,
 - recheck of cycles when missing parents arrive,
+- unresolved-parent table size bound,
+- per-issuer orphan count bound,
+- orphan lifetime and retention policy,
+- fetch attempt and referenced-byte budgets,
+- garbage collection rules that preserve checkpointed evidence,
 - deterministic missing-node explanation marker,
 - incomplete graph status.
 
@@ -1779,14 +765,16 @@ Verification:
 
 - mutually missing parent fixtures,
 - late-parent cycle rejection tests,
+- orphan table saturation tests,
 - explanation bundle tests for incomplete graphs.
 
 Exit criteria:
 
 - two objects accepted while unresolved cannot form an accepted cycle when both
-  become available.
+  become available,
+- validly shaped missing-parent references cannot fill storage without bounds.
 
-### v0.71.0 - Relationship Semantics Policy
+### v0.22.0 - Relationship Semantics And Edge Roles
 
 Goal: enforce semantic constraints that require resolved parent metadata or
 profile policy.
@@ -1794,6 +782,8 @@ profile policy.
 Deliverables:
 
 - relationship cardinality rules,
+- canonical dependency roles such as required authorization, required input,
+  and observational context,
 - target-kind checks for delegation, retry, scheduling, derivation, and joins,
 - profile hook for domain-specific relationship constraints,
 - fail-closed behavior for missing required parent metadata.
@@ -1802,109 +792,200 @@ Verification:
 
 - one-parent `JoinedFrom` rejection where policy requires several parents,
 - multiple `RetryOf` rejection where policy requires one retry source,
-- wrong-target-kind fixtures.
+- wrong-target-kind fixtures,
+- required versus observational dependency fixtures.
 
 Exit criteria:
 
-- relationship kinds mean more than labels once the verifier has enough parent
-  context.
+- relationship kinds and dependency roles have protocol meaning once the
+  verifier has enough parent context.
 
-### v0.72.0 - Wire Prefix Parser
+### v0.23.0 - Validity And Atomic Replay Policy
 
-Goal: reject invalid wire data before allocation, hashing, key lookup, or
-cryptographic verification.
+Goal: make freshness and replay resistance explicit before any consequential
+carrier profile exists.
 
 Deliverables:
 
-- fixed wire prefix,
-- magic value,
-- wire object type,
-- draft/version fields,
-- flags and critical-flag behavior,
-- exact frame-length check,
-- trailing-byte rejection.
+- validity window,
+- expiry/freshness type with overflow-safe remaining-time checks,
+- integration-supplied `Clock`,
+- allowed skew and precision policy,
+- offline checkpoint-relative freshness,
+- nonce scope over realm, issuer, audience, operation class, and nonce,
+- atomic `check_and_record` replay store trait,
+- crash persistence and rollback behavior,
+- issuer sequence policy,
+- sequence-gap and concurrent-request policy,
+- cache saturation behavior,
+- idempotency policy.
 
 Verification:
 
-- malformed prefix fixtures,
-- unsupported version, type, and critical-flag fixtures,
-- short, long, and trailing-byte fixtures.
+- expired statement tests,
+- duplicate nonce and sequence tests,
+- atomic replay race fixtures,
+- cache saturation tests.
 
 Exit criteria:
 
-- untrusted input has a fail-fast parser boundary before high-cost work.
+- consequential statements cannot be accepted without atomic replay and
+  freshness policy.
 
-### v0.73.0 - Aggregate Decode Budgets
+### v0.24.0 - Capability Verification
 
-Goal: replace independent limits with a total resource budget model.
+Goal: turn opaque `CapabilityRef` values into verifiable authority evidence.
 
 Deliverables:
 
-- `DecodeBudget`,
-- checked debiting for bytes, nesting, map entries, array entries, extensions,
-  proofs, signatures, and disclosed fields,
-- decompressed-size budget slot,
-- cumulative referenced-byte budget,
-- work-unit budget before cryptographic dispatch.
+- canonical capability commitment,
+- issuer and holder binding,
+- resource, action, scope, and audience binding,
+- validity and replay fields,
+- proof-of-possession requirement,
+- attenuation and delegation chain model,
+- maximum chain depth,
+- revocation and policy epoch binding,
+- deterministic resolution of multiple applicable capabilities.
 
 Verification:
 
-- budget exhaustion fixtures,
-- checked-arithmetic overflow tests,
-- nested and aggregate amplification tests.
+- proof-of-possession fixtures,
+- wrong holder, resource, action, audience, and epoch fixtures,
+- attenuation and chain-depth tests.
 
 Exit criteria:
 
-- an input cannot stay under every per-field maximum while exceeding total
-  parser or verifier resources.
+- admission can establish actual authority from capability evidence rather than
+  an opaque digest alone.
 
-### v0.74.0 - Core Limit And Budget Split
+### v0.25.0 - Delegation Narrowing
 
-Goal: remove transport-named limit coupling from model and crypto crates.
+Goal: permit authority delegation that narrows but never silently broadens.
 
 Deliverables:
 
-- general graph limits in core or policy,
-- verification budgets in core or policy,
-- byte-decoding limits kept in wire or codec,
-- migration of model validation from `bcx-wire::WireLimits`,
-- migration of crypto verification limits from `bcx-wire::WireLimits`.
+- delegation body validation,
+- child scope checks,
+- purpose narrowing,
+- time-window narrowing,
+- capability and policy epoch links,
+- maximum delegation depth.
 
 Verification:
 
-- `cargo tree -p bcx-model`,
-- `cargo tree -p bcx-crypto`,
-- workspace tests and no-default-features tests.
+- valid narrowing tests,
+- broadening rejection tests.
 
 Exit criteria:
 
-- semantic model and cryptographic verification do not depend on a
-  transport-named crate for non-wire budgets.
+- a child delegation cannot remove parent restrictions.
 
-### v0.75.0 - Public Identifier Storage Policy
+### v0.26.0 - Disclosure Policy
 
-Goal: decide which public commitments are indexable and which buffers require
-zeroization.
+Goal: encode what can be revealed, redacted, committed, encrypted, or withheld.
 
 Deliverables:
 
-- public identifier storage policy,
-- graph-indexing impact review,
-- explicit `Hash` and `Ord` decision for public identifiers,
-- zeroization policy for public commitments versus sensitive scratch,
-- migration notes for affected APIs.
+- disclosure policy vocabulary,
+- redaction marker,
+- private evidence commitment,
+- public evidence marker,
+- encrypted field disclosure contract,
+- unknown evidence marker.
 
 Verification:
 
-- API review,
-- graph indexing benchmarks or microbenchmarks where relevant.
+- redaction validation tests,
+- missing evidence tests,
+- encrypted disclosure binding fixtures.
 
 Exit criteria:
 
-- identifier ergonomics and memory clearing behavior are documented as a
-  security and performance tradeoff, not an accident.
+- explanations can preserve privacy without pretending to be complete.
 
-### v0.76.0 - Hybrid Verification Coordinator
+## Phase 4: Keys, Signing, Verification, And Proof Envelopes
+
+### v0.27.0 - Key Resolution And Trust Snapshots
+
+Goal: resolve verification keys from immutable, policy-qualified trust state
+before primitive verification occurs.
+
+Deliverables:
+
+- `VerificationKeyRecord`,
+- `KeyResolver` or immutable `TrustSnapshot`,
+- issuer, realm, audience, algorithm, and key-usage binding,
+- validity intervals,
+- rotation, compromise, and revocation evidence,
+- trust-anchor selection,
+- deterministic failure for ambiguous `kid` matches,
+- no network I/O during primitive verification.
+
+Verification:
+
+- ambiguous key fixtures,
+- wrong realm, audience, usage, and interval fixtures,
+- revocation and rotation fixtures.
+
+Exit criteria:
+
+- primitive verifiers receive resolved key records and cannot resolve trust on
+  their own.
+
+### v0.28.0 - Verifier Provider Boundary
+
+Goal: define crypto verification without choosing production providers.
+
+Deliverables:
+
+- narrow primitive verifier traits,
+- proof-suite policy hook,
+- provider capability metadata,
+- provider error model,
+- opaque external error contract,
+- deterministic test verifier.
+
+Verification:
+
+- `cargo test -p bcx-crypto`,
+- provider failure tests.
+
+Exit criteria:
+
+- primitive verification providers cannot resolve keys, perform network I/O, or
+  choose policy inside the core verification operation.
+
+### v0.29.0 - Signing Provider Boundary
+
+Goal: define how BCX creates attestations without exposing private key material
+or partial hybrid signatures.
+
+Deliverables:
+
+- opaque private-key handles,
+- signer capability metadata,
+- injected RNG or entropy interface for no-std,
+- ML-DSA and SLH-DSA deterministic versus hedged mode policy,
+- algorithm context selection,
+- secret scratch zeroization,
+- atomic hybrid signing,
+- no partial hybrid signature release when one component fails,
+- key generation and import boundaries.
+
+Verification:
+
+- fake signer tests,
+- entropy failure tests,
+- partial hybrid failure tests,
+- scratch zeroization tests where observable.
+
+Exit criteria:
+
+- signing has an explicit provider boundary and failure model before production
+  proof suites create attestations.
+
+### v0.30.0 - Hybrid Verification Coordinator
 
 Goal: make hybrid signature acceptance non-overridable by provider traits.
 
@@ -1928,7 +1009,7 @@ Exit criteria:
 
 - hybrid acceptance cannot be redefined by one provider implementation.
 
-### v0.77.0 - Composite Key Record
+### v0.31.0 - Composite Key Record
 
 Goal: bind hybrid keys as immutable ordered component sets.
 
@@ -1951,7 +1032,7 @@ Exit criteria:
 
 - a hybrid signature verifies against one exact composite key commitment.
 
-### v0.78.0 - Signed Message Representative
+### v0.32.0 - Signed Message Representative
 
 Goal: sign a framed BCX message representative rather than raw caller bytes.
 
@@ -1977,7 +1058,7 @@ Exit criteria:
 - signatures are bound to BCX context and cannot be replayed as a different
   object class or audience.
 
-### v0.79.0 - Exact Suite Policy Enforcement
+### v0.33.0 - Exact Suite Policy Enforcement
 
 Goal: prevent sender-selected downgrade inside high-assurance profiles.
 
@@ -1999,7 +1080,7 @@ Exit criteria:
 - high-assurance acceptance depends on the required suite, not the sender's
   weakest admitted option.
 
-### v0.80.0 - Provider Scratch And Side-Effect Contract
+### v0.34.0 - Provider Scratch And Side-Effect Contract
 
 Goal: specify provider memory, diagnostics, and side-effect boundaries.
 
@@ -2025,30 +1106,117 @@ Exit criteria:
 - provider integration has a security contract before production providers are
   admitted.
 
-### v0.81.0 - COSE Proof Hardening
+### v0.35.0 - Attestation Verification And Multi-Attestation Policy
 
-Goal: align COSE proof handling with protected metadata and critical-header
-requirements.
+Goal: verify attestations over canonical statement commitments and define how
+several attestations combine.
 
 Deliverables:
 
-- protected algorithm binding,
-- external authenticated data binding,
-- duplicate protected and unprotected header rejection,
-- critical-header registry behavior,
-- `kid` privacy and lookup-hint guidance.
+- proof-suite dispatch,
+- issuer and key checks,
+- duplicate key and issuer rejection,
+- canonical signer ordering,
+- unique signer counting,
+- signer roles and trust domains,
+- all-of, any-of, threshold, and named-role policies,
+- optional-attestation failure semantics,
+- assurance aggregation rules,
+- unknown proof-suite handling.
 
 Verification:
 
-- COSE malformed header fixtures,
-- critical-header fixtures,
+- valid and invalid proof fixtures,
+- duplicate signer fixtures,
+- threshold and role policy fixtures,
+- unknown-suite tests.
+
+Exit criteria:
+
+- attestations are verifiable and aggregatable without native profile
+  dependencies.
+
+### v0.36.0 - COSE Proof Envelope Crate
+
+Goal: add `bcx-proof-cose` as the first standard proof-envelope crate after
+key, signer, verifier, and suite policy prerequisites exist.
+
+Deliverables:
+
+- COSE proof-suite identifiers,
+- canonical COSE proof envelope and verification profile,
+- COSE signature envelope binding,
+- detached payload verification boundary over sealed commitments,
+- key identifier binding through trust snapshots,
+- protected-header algorithm binding,
+- critical-header behavior,
+- duplicate-header rejection,
+- external authenticated data binding,
+- `kid` as lookup hint rather than globally unique identity,
+- negative fixtures.
+
+Verification:
+
+- `cargo test -p bcx-proof-cose`,
+- malformed COSE fixture tests,
 - wrong external authenticated data fixtures.
 
 Exit criteria:
 
-- COSE proof verification fails closed on metadata ambiguity.
+- BCX has a canonical COSE proof envelope and verification profile before
+  `1.0.0`.
 
-### v0.82.0 - Semantic Validity Engine
+### v0.37.0 - Cryptographic Conformance Program
+
+Goal: prove primitive and hybrid verification against external vectors and
+adversarial suite mutations before profiles depend on these surfaces.
+
+Deliverables:
+
+- RFC 8032 Ed25519 vectors,
+- NIST ACVP or KAT plan for ML-DSA and SLH-DSA,
+- RFC 9964 JOSE/COSE vector plan,
+- two-provider differential verification plan,
+- hybrid component swap and strip corpus,
+- downgrade and cross-suite reuse corpus.
+
+Verification:
+
+- conformance smoke tests,
+- hybrid negative corpus.
+
+Exit criteria:
+
+- cryptographic acceptance is measured against standards vectors and
+  adversarial suite mutations.
+
+## Phase 5: Semantic Validity, Receipts, Explanation, And Offline Use
+
+### v0.38.0 - Statement Verification
+
+Goal: verify canonical statement identity and structural validity.
+
+Deliverables:
+
+- statement ID verification,
+- canonical statement commitment verification,
+- detached-byte substitution rejection,
+- required field checks,
+- audience binding checks,
+- expiry/freshness checks,
+- policy reference checks.
+
+Verification:
+
+- tamper tests,
+- wrong-audience tests,
+- detached substitution tests.
+
+Exit criteria:
+
+- changing any security-relevant statement field invalidates verification.
+
+### v0.39.0 - Semantic Validity Engine
 
 Goal: derive validity as a checkpoint-relative result instead of embedding
 absolute invalidation into immutable statements.
@@ -2056,6 +1224,7 @@ absolute invalidation into immutable statements.
 Deliverables:
 
 - semantic validity result type,
+- orthogonal evidence facets or lattice behavior,
 - dimensions for cryptographic validity, semantic support, revocation,
   conflict, completeness, and assurance,
 - required-dependency propagation,
@@ -2066,22 +1235,31 @@ Verification:
 
 - revocation and contradiction fixtures,
 - required versus observational dependency fixtures,
-- deny-overrides tests.
+- deny-overrides tests,
+- assurance composition fixtures.
 
 Exit criteria:
 
 - BCX can distinguish authentic history from usable authority.
 
-### v0.83.0 - Revocation And Conflict Roots
+### v0.40.0 - Revocation, Conflict, And Checkpoint Roots
 
-Goal: make semantic validity non-bypassable across policy and checkpoint
-changes.
+Goal: make semantic validity and checkpoint continuity non-bypassable across
+policy, revocation, conflict, and checkpoint changes.
 
 Deliverables:
 
 - signed policy epoch input,
 - revocation root input,
 - conflict root input,
+- checkpoint issuer and authority,
+- strictly monotonic sequence rules,
+- fork and equivocation evidence,
+- rollback detection,
+- signed tree size and root,
+- consistency proofs between checkpoints,
+- deterministic handling for competing roots,
+- witness or gossip expectations for high-assurance profiles,
 - verification cache key including roots,
 - cache invalidation on root change,
 - authenticated non-inclusion proof requirement before claiming not revoked.
@@ -2090,16 +1268,18 @@ Verification:
 
 - stale cache fixtures,
 - non-inclusion proof fixtures,
-- root-change invalidation tests.
+- root-change invalidation tests,
+- fork and rollback fixtures.
 
 Exit criteria:
 
-- verification results cannot outlive the revocation and conflict roots they
-  were evaluated against.
+- verification results cannot outlive the revocation, conflict, and checkpoint
+  roots they were evaluated against.
 
-### v0.84.0 - Receipt Model Split
+### v0.41.0 - Receipt Model Split
 
-Goal: separate operational receipts from transparency receipts.
+Goal: separate operational receipts from transparency receipts before WHY
+bundles depend on either concept.
 
 Deliverables:
 
@@ -2121,7 +1301,7 @@ Exit criteria:
 - BCX does not treat a component observation as an append-only transparency
   proof, or the reverse.
 
-### v0.85.0 - Transparency Receipt Integration
+### v0.42.0 - Transparency Receipt Integration
 
 Goal: integrate COSE receipt concepts for append-only proof evidence.
 
@@ -2145,9 +1325,124 @@ Exit criteria:
 - WHY bundles can carry transparency evidence without inventing a separate
   incompatible receipt envelope.
 
-### v0.86.0 - Privacy And Disclosure Hardening
+### v0.43.0 - Settlement And Checkpoint Verification
 
-Goal: schedule wire-level privacy controls beyond debug redaction.
+Goal: verify checkpoint membership, continuity, anti-equivocation evidence, and
+settlement policy.
+
+Deliverables:
+
+- primary backend policy,
+- primary-with-witnesses policy,
+- require-all policy,
+- threshold settlement policy,
+- normalized finality status,
+- membership proof model,
+- previous-checkpoint check,
+- root consistency checks,
+- issuer and sequence checks,
+- fork/equivocation evidence handling,
+- missing-root behavior.
+
+Verification:
+
+- threshold validation tests,
+- finality transition tests,
+- checkpoint fixture tests,
+- continuity tests,
+- equivocation fixtures.
+
+Exit criteria:
+
+- a checkpoint can express and verify several settlement or witness receipts
+  without requiring a blockchain.
+
+### v0.44.0 - Explain Crate Skeleton
+
+Goal: add `bcx-explain` for bounded WHY semantics after graph, validity, and
+receipt prerequisites exist.
+
+Deliverables:
+
+- crate scaffold,
+- query type,
+- query direction,
+- maximum depth,
+- maximum nodes,
+- maximum response bytes,
+- iterative traversal rule with explicit work queue,
+- visited or tri-color traversal state,
+- cancellation marker.
+
+Verification:
+
+- `cargo test -p bcx-explain`,
+- oversized query tests.
+
+Exit criteria:
+
+- no WHY query can request unbounded work.
+
+### v0.45.0 - Explanation Bundle
+
+Goal: return bounded proof bundles for local/offline verification.
+
+Deliverables:
+
+- explanation bundle type,
+- canonical manifest with bundle version, target claim, purpose, policy epoch,
+  trust roots, limits, and freshness,
+- deduplicated statement table addressed by commitment,
+- statement references,
+- attestation references,
+- binding references,
+- operational receipt references,
+- transparency receipt references,
+- missing, withheld, redacted, truncated, stale, and contradicted markers,
+- disclosure map binding fields to plaintext, ciphertext, commitments, or
+  predicate proofs,
+- final bundle commitment or signature.
+
+Verification:
+
+- bundle validation tests,
+- missing-parent fixture tests,
+- disclosure map fixtures.
+
+Exit criteria:
+
+- an offline verifier can see what is proven, missing, redacted, stale,
+  contradicted, withheld, truncated, or unknown.
+
+### v0.46.0 - Contradiction Handling
+
+Goal: preserve conflicting claims without overwriting historical evidence.
+
+Deliverables:
+
+- contradiction statement checks,
+- conflicting claim relation,
+- target-kind and authority checks,
+- checkpoint-relative conflict status,
+- non-invalidation rule for historical authentic evidence,
+- assurance summary,
+- explanation output for conflicts.
+
+Verification:
+
+- conflicting fixture tests,
+- no-overwrite tests,
+- authentic-but-unusable fixtures.
+
+Exit criteria:
+
+- BCX can represent `A says sent` and `B says not received` at the same time
+  without erasing either authentic claim.
+
+### v0.47.0 - Privacy And Disclosure Hardening
+
+Goal: shape wire-level privacy before offline, HTTP, blockchain, witness, and
+ZK profiles use WHY bundles.
 
 Deliverables:
 
@@ -2169,7 +1464,76 @@ Exit criteria:
 - privacy-sensitive deployments have protocol hooks for minimizing linkability
   and over-disclosure.
 
-### v0.87.0 - Profile Normative Specification Pack
+### v0.48.0 - Offline Profile
+
+Goal: add `bcx-offline` for air-gapped bundles after explanation and privacy
+rules exist.
+
+Deliverables:
+
+- offline bundle profile,
+- bundle manifest,
+- evidence file commitments,
+- detached private evidence references,
+- pinned trust and checkpoint roots,
+- explicit incompleteness behavior.
+
+Verification:
+
+- `cargo test -p bcx-offline`,
+- tampered bundle tests.
+
+Exit criteria:
+
+- BCX can work without HTTP, Fluxheim, or any blockchain.
+
+### v0.49.0 - CLI Skeleton
+
+Goal: add `bcx-cli` for inspection without making it a root dependency.
+
+Deliverables:
+
+- `bcx verify`,
+- `bcx why`,
+- `bcx inspect`,
+- fixture-driven command tests.
+
+Verification:
+
+- CLI smoke tests,
+- no root dependency regression.
+
+Exit criteria:
+
+- developers can inspect offline BCX objects locally.
+
+## Phase 6: Specifications, Wire Parser, Fuzzing, HTTP, And Fluxheim
+
+### v0.50.0 - Core And Codec Specification Draft
+
+Goal: start normative security specifications alongside implementation, not at
+the end.
+
+Deliverables:
+
+- `BCX-CORE/1` working draft,
+- `BCX-CODEC-CBOR/1` working draft,
+- commitment suite text,
+- statement preimage text,
+- graph admission text,
+- verification and validity text.
+
+Verification:
+
+- docs checks,
+- traceability review against implemented APIs.
+
+Exit criteria:
+
+- implementation behavior is traceable to written protocol requirements before
+  carrier profiles start.
+
+### v0.51.0 - Profile Normative Specification Pack
 
 Goal: require every profile to specify both protocol bytes and security
 semantics.
@@ -2195,7 +1559,7 @@ Exit criteria:
 - Rust traits are supported by normative profile specifications, not treated as
   the whole protocol.
 
-### v0.88.0 - Draft Wire Version And Registry Gate
+### v0.52.0 - Draft Wire Version And Registry Gate
 
 Goal: prevent experimental encodings from being presented as frozen `BCX/1`.
 
@@ -2218,7 +1582,33 @@ Exit criteria:
 - BCX uses draft/experimental wire labels until the normative BCX/1
   representation is frozen.
 
-### v0.89.0 - Parser Fuzzing Program
+### v0.53.0 - Wire Prefix Parser
+
+Goal: reject invalid wire data before allocation, hashing, key lookup, or
+cryptographic verification.
+
+Deliverables:
+
+- fixed wire prefix,
+- magic value,
+- wire object type,
+- draft/version fields,
+- flags and critical-flag behavior,
+- exact frame-length check,
+- trailing-byte rejection,
+- aggregate decode budget integration.
+
+Verification:
+
+- malformed prefix fixtures,
+- unsupported version, type, and critical-flag fixtures,
+- short, long, and trailing-byte fixtures.
+
+Exit criteria:
+
+- untrusted input has a fail-fast parser boundary before high-cost work.
+
+### v0.54.0 - Parser Fuzzing Program
 
 Goal: fuzz every untrusted parser before network endpoints are exposed.
 
@@ -2240,9 +1630,751 @@ Verification:
 Exit criteria:
 
 - every parser has a reproducible malformed-input corpus and a fuzz entry
-  point.
+  point before HTTP implementation starts.
 
-### v0.90.0 - Graph And State Modeling
+### v0.55.0 - HTTP Profile Security Contract
+
+Goal: define `BCX-HTTP/1` before implementation.
+
+Deliverables:
+
+- attached mode contract,
+- encapsulated mode contract,
+- committed HTTP components,
+- intermediary mutation rules,
+- replay rules,
+- limits,
+- no state-changing 0-RTT rule.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- implementation cannot start without a precise HTTP security contract.
+
+### v0.56.0 - HTTP Profile Crate
+
+Goal: add dependency-light `bcx-http`.
+
+Deliverables:
+
+- profile identifiers,
+- header names,
+- attached-mode commitment builder,
+- encapsulated-mode envelope model.
+
+Verification:
+
+- `cargo test -p bcx-http`,
+- mutation tests for committed components.
+
+Exit criteria:
+
+- HTTP commitments can be verified without Hyper or Axum dependencies.
+
+### v0.57.0 - HTTP Hyper Integration
+
+Goal: add `bcx-http-hyper` as the first concrete HTTP integration.
+
+Deliverables:
+
+- request extraction,
+- response receipt extraction,
+- header validation,
+- body digest integration.
+
+Verification:
+
+- integration tests,
+- malformed request tests.
+
+Exit criteria:
+
+- one real Rust HTTP stack can carry BCX objects.
+
+### v0.58.0 - Fluxheim Profile Contract
+
+Goal: document exactly what Fluxheim can observe and enforce.
+
+Deliverables:
+
+- Fluxheim ingress effect scope,
+- route decision scope,
+- upstream response scope,
+- cache decision scope,
+- non-claims about upstream database commits.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- Fluxheim integration cannot overclaim application effects.
+
+### v0.59.0 - Fluxheim Integration Skeleton
+
+Goal: add `bcx-fluxheim` as an optional integration crate.
+
+Deliverables:
+
+- policy adapter traits,
+- receipt builder,
+- route decision binding,
+- local WHY fixture.
+
+Verification:
+
+- integration fixture tests,
+- no root dependency regression.
+
+Exit criteria:
+
+- Fluxheim can emit local BCX causal receipts.
+
+### v0.60.0 - Two-Fluxheim Demonstration
+
+Goal: trace one signed operation across two Fluxheim nodes.
+
+Deliverables:
+
+- local smoke script,
+- signed intent,
+- admission,
+- effect,
+- explanation bundle.
+
+Verification:
+
+- smoke test,
+- tamper test.
+
+Exit criteria:
+
+- BCX proves useful over HTTP before any blockchain integration exists.
+
+## Phase 7: Settlement Profiles And Additional Bindings
+
+### v0.61.0 - Ethereum Profile Security Contract
+
+Goal: define what `BCX-ETHEREUM/1` commits and can prove.
+
+Deliverables:
+
+- chain ID commitment,
+- contract address commitment,
+- calldata digest commitment,
+- value commitment,
+- sender or authorization commitment,
+- transaction and log position,
+- block hash and reorg handling,
+- expiry and nullifier rules,
+- finality policy.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- Ethereum implementation cannot start without a precise security contract.
+
+### v0.62.0 - Ethereum Profile Crate
+
+Goal: add dependency-light `bcx-ethereum`.
+
+Deliverables:
+
+- Ethereum binding vocabulary,
+- checkpoint anchoring model,
+- finality status mapping,
+- mock receipt verification.
+
+Verification:
+
+- `cargo test -p bcx-ethereum`,
+- mutation tests.
+
+Exit criteria:
+
+- Ethereum can bind and settle checkpoints conceptually without Alloy yet.
+
+### v0.63.0 - Ethereum Alloy Integration
+
+Goal: add `bcx-ethereum-alloy` for concrete RPC and primitive integration.
+
+Deliverables:
+
+- RPC receipt adapter,
+- chain ID fetch adapter,
+- transaction evidence builder,
+- testnet-ready fixtures.
+
+Verification:
+
+- mocked RPC tests,
+- optional live smoke script.
+
+Exit criteria:
+
+- Ethereum integration is useful without entering rollup scope.
+
+### v0.64.0 - Cardano Profile Security Contract
+
+Goal: define `BCX-CARDANO/1` around EUTXO semantics.
+
+Deliverables:
+
+- state UTXO commitment,
+- consumed-output rule,
+- created-output rule,
+- validator version commitment,
+- finality policy.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- Cardano is modeled natively rather than imitating Ethereum.
+
+### v0.65.0 - Cardano Profile Crate
+
+Goal: add dependency-light `bcx-cardano`.
+
+Deliverables:
+
+- Cardano binding vocabulary,
+- checkpoint-in-UTXO model,
+- finality status mapping,
+- mock receipt verification.
+
+Verification:
+
+- `cargo test -p bcx-cardano`,
+- mutation tests.
+
+Exit criteria:
+
+- a BCX checkpoint can have both Ethereum and Cardano receipt models.
+
+### v0.66.0 - Cardano Pallas Integration
+
+Goal: add `bcx-cardano-pallas` for offchain Rust integration.
+
+Deliverables:
+
+- transaction evidence builder,
+- UTXO evidence parser,
+- mock indexer adapter,
+- fixture tests.
+
+Verification:
+
+- mocked indexer tests,
+- optional local smoke script.
+
+Exit criteria:
+
+- a second deep settlement family proves BCX is not Ethereum-specific.
+
+### v0.67.0 - SCITT Profile Contract
+
+Goal: define how BCX checkpoints can use a transparency service.
+
+Deliverables:
+
+- signed statement mapping,
+- transparency receipt model,
+- witness finality status,
+- privacy notes.
+
+Verification:
+
+- docs checks.
+
+Exit criteria:
+
+- BCX can use transparency infrastructure without becoming SCITT.
+
+### v0.68.0 - OpenTelemetry Profile Contract
+
+Goal: define observability correlation without turning telemetry into proof.
+
+Deliverables:
+
+- statement ID to trace/span mapping,
+- non-proof warning,
+- export boundary.
+
+Verification:
+
+- docs checks.
+
+Exit criteria:
+
+- telemetry remains operational context, not cryptographic evidence.
+
+### v0.69.0 - Bitcoin Anchoring Profile Contract
+
+Goal: define how Bitcoin fits as anchoring and payment evidence.
+
+Deliverables:
+
+- security contract,
+- finality model,
+- transaction commitment model,
+- output and script commitment rules,
+- privacy review,
+- dependency plan.
+
+Verification:
+
+- docs checks,
+- security review notes.
+
+Exit criteria:
+
+- Bitcoin has a concrete BCX profile contract before any Bitcoin crate is
+  implemented.
+
+### v0.70.0 - XRP Payment Evidence Profile Contract
+
+Goal: define how XRP Ledger fits as payment and settlement evidence.
+
+Deliverables:
+
+- security contract,
+- ledger finality model,
+- transaction evidence model,
+- destination tag and memo commitment rules,
+- account and memo privacy review,
+- dependency plan.
+
+Verification:
+
+- docs checks,
+- security review notes.
+
+Exit criteria:
+
+- XRP has a concrete BCX profile contract before any XRP crate is implemented.
+
+### v0.71.0 - Banking Domain Contract
+
+Goal: define banking semantics separate from transport and settlement.
+
+Deliverables:
+
+- mandate model,
+- approval model,
+- transfer intent vocabulary,
+- settlement effect vocabulary,
+- compliance evidence hooks.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- banking meaning is not hard-coded into core BCX.
+
+### v0.72.0 - AI Agent Domain Contract
+
+Goal: define delegated machine-action semantics.
+
+Deliverables:
+
+- agent identity vocabulary,
+- model/tool authority,
+- human approval markers,
+- tool-call effect markers,
+- revocation hooks.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- agent workflows can use BCX without weakening the core.
+
+## Phase 8: Tokenless Local Execution, Proofs, And Witnessing
+
+### v0.73.0 - Tokenless Operation Contract
+
+Goal: make the no-token, no-global-validator BCX operating model normative.
+
+Deliverables:
+
+- tokenless operation contract,
+- external security-budget model,
+- local admission and rate-limit assumptions,
+- public-chain anchoring boundary,
+- private witness boundary.
+
+Verification:
+
+- docs checks,
+- threat-model update,
+- security-controls update.
+
+Exit criteria:
+
+- BCX clearly states that it does not run validators, mint a token, or require
+  a blockchain for local proof-carrying operation.
+
+### v0.74.0 - Deterministic State Contract And Resource Model
+
+Goal: define `bcx-state` before implementation, including deterministic
+resource limits.
+
+Deliverables:
+
+- deterministic state transition contract,
+- state root vocabulary,
+- input commitment rules,
+- output commitment rules,
+- instruction and work metering,
+- memory, stack, state-read, and state-write limits,
+- transactional rollback on failure,
+- deterministic host-function ABI,
+- prohibition or strict definition of floats, clocks, randomness, concurrency,
+  and external I/O,
+- program upgrade and state migration rules,
+- cross-architecture execution vectors,
+- fail-closed non-determinism rules.
+
+Verification:
+
+- docs checks,
+- adversarial determinism review,
+- resource model review.
+
+Exit criteria:
+
+- local state execution has a written security and resource contract before any
+  state crate exists.
+
+### v0.75.0 - State Crate Skeleton
+
+Goal: add `bcx-state` as a dependency-light core crate.
+
+Deliverables:
+
+- crate scaffold,
+- state transition trait,
+- state root type,
+- transition input and output bounds,
+- deterministic test state.
+
+Verification:
+
+- `cargo test -p bcx-state`,
+- `cargo test --workspace --no-default-features`.
+
+Exit criteria:
+
+- BCX can model local state transitions without pulling in a runtime, database,
+  VM, or blockchain dependency.
+
+### v0.76.0 - Local State Transition Verification
+
+Goal: verify deterministic state transitions as BCX effects.
+
+Deliverables:
+
+- transition verifier,
+- pre-state and post-state commitment checks,
+- transition effect binding,
+- mutation tests.
+
+Verification:
+
+- valid transition fixture tests,
+- mutated input, output, and state-root tests.
+
+Exit criteria:
+
+- a local transition can produce a verifiable `Effect` without global
+  execution.
+
+### v0.77.0 - Program Identity And Admission
+
+Goal: bind local contract-like programs to explicit BCX admission.
+
+Deliverables:
+
+- program identifier type,
+- program version commitment,
+- admission policy link,
+- deterministic input schema commitment,
+- program downgrade rejection tests.
+
+Verification:
+
+- `cargo test -p bcx-state`,
+- downgrade and wrong-program fixtures.
+
+Exit criteria:
+
+- a state transition is admitted for one exact program identity and cannot be
+  silently reinterpreted as another program.
+
+### v0.78.0 - Effect Proof Inputs
+
+Goal: define common public inputs for local and ZK effect proofs.
+
+Deliverables:
+
+- effect proof input model,
+- statement ID input,
+- program ID input,
+- pre-state and post-state inputs,
+- admission ID input,
+- canonical input ordering.
+
+Verification:
+
+- proof input fixture tests,
+- ordering mutation tests.
+
+Exit criteria:
+
+- every proof provider can consume the same BCX effect-proof input shape.
+
+### v0.79.0 - Threshold Proof Crate
+
+Goal: add `bcx-proof-threshold` for private witness and institutional notary
+sets.
+
+Deliverables:
+
+- threshold policy vocabulary,
+- signer set commitment,
+- threshold count validation,
+- witness signature bundle model,
+- duplicate signer rejection.
+
+Verification:
+
+- `cargo test -p bcx-proof-threshold`,
+- threshold mutation tests.
+
+Exit criteria:
+
+- a checkpoint can be witnessed by a private or federated group without using a
+  public blockchain.
+
+### v0.80.0 - ZK Proof Provider Contract
+
+Goal: define ZK proof integration rules before provider crates exist.
+
+Deliverables:
+
+- ZK proof provider trait,
+- proof system identifier,
+- program verification key commitment,
+- public input binding,
+- privacy and side-channel notes.
+
+Verification:
+
+- docs checks,
+- provider-boundary tests with a deterministic fake provider.
+
+Exit criteria:
+
+- ZK providers can plug into BCX without changing statement, effect, or
+  checkpoint semantics.
+
+### v0.81.0 - SP1 Proof Provider Crate
+
+Goal: add `bcx-proof-sp1` as an optional SP1 integration crate.
+
+Deliverables:
+
+- SP1 proof-suite identifier,
+- verification key commitment,
+- proof byte bounds,
+- public input adapter,
+- mocked verifier tests.
+
+Verification:
+
+- `cargo test -p bcx-proof-sp1`,
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX can verify SP1-produced effect proofs through an optional provider
+  boundary.
+
+### v0.82.0 - RISC Zero Proof Provider Crate
+
+Goal: add `bcx-proof-risc0` as an optional RISC Zero integration crate.
+
+Deliverables:
+
+- RISC Zero proof-suite identifier,
+- image ID commitment,
+- receipt byte bounds,
+- public input adapter,
+- mocked verifier tests.
+
+Verification:
+
+- `cargo test -p bcx-proof-risc0`,
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX can verify RISC Zero-produced effect proofs through an optional provider
+  boundary.
+
+### v0.83.0 - Witness Service Contract
+
+Goal: define `bcx-witness` before implementation.
+
+Deliverables:
+
+- witness service security contract,
+- checkpoint admission rules,
+- timestamp and ordering policy,
+- duplicate statement policy,
+- privacy and retention policy.
+
+Verification:
+
+- docs checks,
+- threat-model update.
+
+Exit criteria:
+
+- non-chain ordering and double-spend prevention have a written BCX contract.
+
+### v0.84.0 - Witness Service Skeleton
+
+Goal: add `bcx-witness` as an optional service crate.
+
+Deliverables:
+
+- service crate scaffold,
+- in-memory witness store for tests,
+- checkpoint request model,
+- threshold proof output hook,
+- duplicate checkpoint rejection.
+
+Verification:
+
+- `cargo test -p bcx-witness`,
+- no root dependency regression.
+
+Exit criteria:
+
+- BCX has a local/federated witness path that does not depend on Ethereum,
+  Cardano, Bitcoin, or XRP.
+
+### v0.85.0 - Local Contract Workflow Fixture
+
+Goal: demonstrate smart-contract-like BCX operation without a blockchain.
+
+Deliverables:
+
+- local program fixture,
+- intent fixture,
+- admission fixture,
+- state transition effect fixture,
+- proof bundle fixture,
+- explanation output.
+
+Verification:
+
+- local workflow smoke test,
+- tamper tests for program ID, admission ID, state roots, and proof inputs.
+
+Exit criteria:
+
+- BCX can show `Intent -> Admission -> Effect` for deterministic local logic
+  with verifiable proof evidence and no global VM.
+
+### v0.86.0 - Tokenless Offline Institution Demo
+
+Goal: prove a complete tokenless BCX path between known parties.
+
+Deliverables:
+
+- offline bundle,
+- local deterministic effect,
+- COSE attestation,
+- threshold witness checkpoint,
+- WHY explanation bundle,
+- replay and duplicate rejection fixture.
+
+Verification:
+
+- end-to-end offline smoke script,
+- tamper and replay tests.
+
+Exit criteria:
+
+- BCX demonstrates a free, tokenless, blockchain-independent workflow before
+  relying on public-chain settlement profiles.
+
+## Phase 9: Conformance, Modeling, Platform Evidence, And Release Candidates
+
+### v0.87.0 - Conformance Crate
+
+Goal: add `bcx-conformance` for mandatory interoperability vectors.
+
+Deliverables:
+
+- canonical encoding vectors,
+- signature vectors,
+- replay cases,
+- unknown extension cases,
+- binding mutation cases,
+- checkpoint cases.
+
+Verification:
+
+- conformance test suite.
+
+Exit criteria:
+
+- independent implementations can validate compatibility.
+
+### v0.88.0 - Testkit Crate
+
+Goal: add `bcx-testkit` for deterministic builders and adversarial fixtures.
+
+Deliverables:
+
+- statement builders,
+- attestation builders,
+- binding builders,
+- tamper helpers,
+- deterministic keys for tests only.
+
+Verification:
+
+- `cargo test -p bcx-testkit`.
+
+Exit criteria:
+
+- future releases can add tests faster without weakening production crates.
+
+### v0.89.0 - Graph And State Modeling
 
 Goal: model graph and semantic-state invariants under reordering,
 duplication, missing parents, and concurrent insertion.
@@ -2267,31 +2399,7 @@ Exit criteria:
 - the roadmap has executable evidence for acyclicity and semantic-state
   invariants beyond example tests.
 
-### v0.91.0 - Cryptographic Conformance Program
-
-Goal: prove primitive and hybrid verification against external vectors and
-adversarial suite mutations.
-
-Deliverables:
-
-- RFC 8032 Ed25519 vectors,
-- NIST ACVP or KAT plan for ML-DSA and SLH-DSA,
-- RFC 9964 JOSE/COSE vector plan,
-- two-provider differential verification plan,
-- hybrid component swap and strip corpus,
-- downgrade and cross-suite reuse corpus.
-
-Verification:
-
-- conformance smoke tests,
-- hybrid negative corpus.
-
-Exit criteria:
-
-- cryptographic acceptance is measured against standards vectors and
-  adversarial suite mutations.
-
-### v0.92.0 - Cross-System Consistency Program
+### v0.90.0 - Cross-System Consistency Program
 
 Goal: prove statement identity is unchanged across carriers and settlement
 profiles.
@@ -2316,7 +2424,7 @@ Exit criteria:
 - carriers and settlement backends change evidence and assurance, not the
   underlying statement identity.
 
-### v0.93.0 - Platform Evidence Program
+### v0.91.0 - Platform Evidence Program
 
 Goal: add runtime and platform evidence beyond ordinary unit tests.
 
@@ -2339,7 +2447,7 @@ Exit criteria:
 - release evidence covers memory, stack, allocation, and mutation-resistance
   concerns where the Rust/toolchain support exists.
 
-### v0.94.0 - Mandatory Target Gate
+### v0.92.0 - Mandatory Target Gate
 
 Goal: make advertised platform support evidence-based.
 
@@ -2361,30 +2469,7 @@ Exit criteria:
 - a green release gate proves required advertised targets compile, instead of
   silently skipping them.
 
-## Phase 13: Hardening Toward 1.0
-
-### v0.95.0 - Fuzzing And Negative Corpus
-
-Goal: expand malformed input and mutation testing.
-
-Deliverables:
-
-- fuzz harness plan,
-- malformed corpus,
-- decode and verification negative corpus,
-- CI integration plan,
-- deterministic corpus regression tests.
-
-Verification:
-
-- local fuzz smoke,
-- corpus regression tests.
-
-Exit criteria:
-
-- known malformed cases fail closed.
-
-### v0.96.0 - MSRV Matrix Evidence
+### v0.93.0 - MSRV Matrix Evidence
 
 Goal: prove Rust `1.90.0` through `1.96.1` compatibility.
 
@@ -2402,7 +2487,7 @@ Exit criteria:
 
 - MSRV support is evidence-based, not aspirational.
 
-### v0.97.0 - no_std And Dependency Audit
+### v0.94.0 - no_std And Dependency Audit
 
 Goal: verify the core remains no-std and dependency-light.
 
@@ -2415,7 +2500,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test --workspace --no-default-features`
+- `cargo test --workspace --no-default-features`,
 - feature checks.
 
 Exit criteria:
@@ -2423,28 +2508,31 @@ Exit criteria:
 - root/core crates do not accidentally pull transport, runtime, database, VM,
   proof-provider, or blockchain dependencies.
 
-### v0.98.0 - Security Specification Draft
+### v0.95.0 - Security Specification Freeze
 
-Goal: turn implementation docs into normative specs.
+Goal: consolidate implementation-aligned drafts into specs that can be frozen
+for release candidates.
 
 Deliverables:
 
-- `BCX-CORE/1` draft,
-- `BCX-CODEC-CBOR/1` draft,
-- `BCX-PROOF-COSE/1` draft,
-- `BCX-STATE/1` draft,
-- profile spec template.
+- `BCX-CORE/1` freeze candidate,
+- `BCX-CODEC-CBOR/1` freeze candidate,
+- `BCX-PROOF-COSE/1` freeze candidate,
+- `BCX-STATE/1` freeze candidate,
+- profile spec template freeze candidate.
 
 Verification:
 
 - docs checks,
-- security review.
+- security review,
+- traceability review.
 
 Exit criteria:
 
-- crate behavior is traceable to written protocol requirements.
+- crate behavior is traceable to written protocol requirements and no major
+  unstated protocol rule remains.
 
-### v0.99.0 - Interop Demonstration
+### v0.96.0 - Interop Demonstration
 
 Goal: show one logical causal graph across multiple profiles.
 
@@ -2467,7 +2555,7 @@ Exit criteria:
 - BCX is visibly one causal protocol with local, witness, carrier, and
   settlement bindings.
 
-### v0.100.0 - API Freeze Candidate
+### v0.97.0 - API Freeze Candidate
 
 Goal: identify APIs intended to survive into `1.0.0`.
 
@@ -2487,7 +2575,30 @@ Exit criteria:
 
 - no unstable experimental API is accidentally presented as stable.
 
-### v0.101.0 - Release Candidate 1
+### v0.98.0 - Release Evidence Freeze
+
+Goal: freeze the release evidence package before release candidates.
+
+Deliverables:
+
+- conformance evidence summary,
+- fuzzing evidence summary,
+- platform evidence summary,
+- crypto conformance evidence summary,
+- residual risk register,
+- pentest scope draft.
+
+Verification:
+
+- docs checks,
+- release evidence review.
+
+Exit criteria:
+
+- release candidates start from a complete evidence package instead of
+  discovering missing evidence during tagging.
+
+### v0.99.0 - Release Candidate 1
 
 Goal: cut the first `1.0.0` candidate.
 
@@ -2507,7 +2618,7 @@ Exit criteria:
 
 - only release-candidate fixes remain before `1.0.0`.
 
-### v0.102.0 - Release Candidate 2
+### v0.100.0 - Release Candidate 2
 
 Goal: resolve RC1 findings and repeat the release audit.
 
@@ -2536,20 +2647,23 @@ Required scope:
 - stable root `bcx` facade,
 - stable core statement, attestation, binding, checkpoint, and explanation
   vocabulary,
+- domain-separated commitment suite and registry,
 - canonical encoding and conformance vectors,
 - sealed statement commitments and derived statement IDs,
 - early wire parser and aggregate decode budgets,
 - graph-store insertion that preserves acyclicity under late parents and
   duplicate delivery,
-- standard COSE proof-suite boundary,
+- capability verification, trusted time, and atomic replay checks,
+- key resolution, signing provider, verifier provider, and exact suite policy,
+- standard COSE proof-envelope boundary,
 - hybrid signature constants, coordinator, composite key records, and framed
   signed message representative,
 - provider scratch and side-effect contract,
 - checkpoint-relative semantic validity engine,
-- revocation and conflict roots with authenticated non-inclusion behavior,
+- revocation, conflict, checkpoint, and anti-equivocation roots,
 - operational and transparency receipt models,
 - privacy and selective disclosure hardening,
-- deterministic local state transition verification,
+- deterministic local state transition verification with resource limits,
 - local contract workflow fixtures,
 - ZK proof provider boundaries for SP1 and RISC Zero,
 - replay, delegation, disclosure, and settlement policy checks,

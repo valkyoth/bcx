@@ -55,6 +55,26 @@ Integrations make those bindings usable in real stacks.
 - Security and testability are part of every release.
 - Unsafe Rust is forbidden until a documented boundary crate is approved.
 
+## Non-Negotiable Protocol Invariants
+
+- Statement identity is sealed and derived from canonical typed statement
+  bytes.
+- Commitments are domain-separated by object class, version, codec, and suite.
+- Carriers never rewrite statements; they bind native evidence to unchanged
+  statement identities.
+- Local availability, missing-parent state, transport metadata, attestations,
+  and native bindings are not part of canonical statement identity.
+- Graph admission is atomic: cycle checks and insertion happen as one operation.
+- Wire parsing is bounded and rejects invalid input before allocation, hashing,
+  key lookup, or cryptographic verification.
+- Semantic validity is derived from policy, revocation, conflict, checkpoint,
+  and evidence roots; immutable historical statements are not mutated into
+  invalid history.
+- Key resolution, signing, verification, replay, capability checks, and
+  settlement finality use explicit policy and trust snapshots.
+- WHY bundles disclose what is proven, missing, redacted, withheld, stale,
+  contradicted, or truncated.
+
 ## Published Foundation Crates
 
 The crates already published for `0.1.0` still fit the new model and should be
