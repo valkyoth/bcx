@@ -254,6 +254,7 @@ continues past the relevant dependency point.
 | Operation and effect-attempt state needed separate state machines, and portable transition histories needed omission resistance. | Expanded `v0.23.1 - Operation Execution Lifecycle` with operation-derived status over all attempts, attempt-number and `EffectAttemptId` allocation rules, distinct retry versus reconciliation semantics, indeterminate phase reasons, transition-chain commitments, journal-head evidence, stale/incomplete markers, and truncation/reorder/fork/substitution fixtures. |
 | Operation-level transitions had dead ends and completion needed profile-bound meaning. | Expanded `v0.23.1 - Operation Execution Lifecycle` with `Active` resolution transitions, phase-specific indeterminate resolution, admission-gated `start_attempt`, policy/root rechecks before retry, profile-bound `CompletionRule`, and completion/reorg/revocation fixtures; attached profile completion-rule requirements to `v0.51.0 - Profile Normative Specification Pack`. |
 | Completion rules needed canonical identity, and retries needed complete time-varying authority re-evaluation. | Expanded `v0.23.1 - Operation Execution Lifecycle` with canonical `CompletionRuleRecord`, domain-separated `CompletionRuleId`, policy epoch binding, rule substitution/downgrade handling, retry-time evaluation of validity windows, keys, capabilities, delegations, policy/trust/revocation/conflict roots, scope, budgets, recovery rules, and completion-rule epochs; attached completion-rule identity requirements to `v0.51.0 - Profile Normative Specification Pack`. |
+| Completion-rule committed fields and vector coverage needed final consistency tightening. | Expanded `v0.23.1 - Operation Execution Lifecycle` so `CompletionRuleRecord` commits receipt-invalidation behavior, adds canonical completion-rule vectors for mutation/default/critical-field/receipt-invalidation/re-encoding behavior, and proves completion-relevant receipt binding is determined by canonical rule/profile semantics. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -1292,8 +1293,8 @@ Deliverables:
 - canonical `CompletionRuleRecord` and domain-separated `CompletionRuleId`,
 - `CompletionRuleRecord` includes rule version, profile identifier,
   profile/policy epoch, required effect classes, threshold, finality policy,
-  pending-attempt behavior, reorg behavior, and compensation behavior in the
-  committed preimage,
+  pending-attempt behavior, reorg behavior, compensation behavior, and
+  receipt-invalidation behavior in the committed preimage,
 - `CompletionRuleId` is bound into admission evidence, completion transition
   events, effect receipts when completion-relevant, journal-head evidence, and
   verification cache keys,
@@ -1370,6 +1371,14 @@ Verification:
 - weaker-rule downgrade fixtures,
 - wrong-policy-epoch fixtures,
 - historical-completion-rule fixtures,
+- canonical `CompletionRuleRecord` field-mutation vectors,
+- omitted-field and default-field `CompletionRuleRecord` vectors,
+- unknown-critical-rule-field vectors,
+- receipt-invalidation-policy vectors,
+- byte-identical completion-rule re-encoding vectors,
+- completion-relevant receipt binding fixtures proving relevance is determined
+  by canonical rule/profile semantics and cannot be selected by a completion
+  transition to avoid `CompletionRuleId` binding,
 - attempt-start-after-revocation fixtures,
 - one-successful-and-one-pending-or-failed-attempt fixtures,
 - completion-followed-by-reorg-or-receipt-invalidation fixtures,
