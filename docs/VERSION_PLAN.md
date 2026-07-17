@@ -236,6 +236,12 @@ continues past the relevant dependency point.
 | Production signing providers needed side-channel and entropy admission rules. | Expanded `v0.29.0`, `v0.36.1`, and `v0.36.2` with provider side-channel declarations, zeroization, entropy health, hedged-signing fallback policy, fault-injection behavior, platform capability declarations, and external-provider guarantee boundaries. |
 | Graph semantics needed an early executable reference model before profile and persistent adapter work. | Added `v0.20.1 - Minimal Graph Reference Model` for atomic insertion, competing inserts, missing-parent promotion, pruning/finalization boundaries, duplicate delivery, and cycles through pruned ancestors. |
 | Security controls needed to mirror the new outcome, budget, commitment, hybrid, and quorum rules. | Updated `docs/security-controls.md` and attached ongoing security-control traceability to `v0.17.1`, `v0.31.0`, `v0.47.0`, and `v0.79.0`. |
+| Unsupported-suite outcomes could become a downgrade escape hatch. | Tightened `v0.17.1` to distinguish unknown critical suites, policy-forbidden suites, locally unsupported recognized suites, and temporarily unavailable providers. |
+| Verification receipts needed trust semantics. | Added receipt trust rules to `v0.17.1` and tied receipt classification into `v0.41.0`. Sender-provided receipts cannot suppress required local verification unless policy admits the receipt signer role. |
+| Historical key validity cannot be selected by an unsigned claimed timestamp. | Expanded `v0.27.0` and `v0.31.0` with authenticated evaluation points such as admission receipts, checkpoint sequence/time, transparency inclusion, or profile trusted-clock evidence. |
+| Threshold quorum safety needed exact mathematics. | Expanded `v0.79.0` with supported fault model, exact quorum formula, weighted-quorum policy, overflow-safe arithmetic, and policy-time rejection of impossible configurations. |
+| Provider side-channel wording could admit variable-time signing into high-assurance profiles. | Added provider assurance classes in `v0.28.1` and required high-assurance profiles to admit only constant-time software or appropriately isolated hardware signing providers. |
+| Invalid-result caching needed a complete semantic cache key. | Added cache-key requirements to `v0.17.1` covering statement, policy, trust, revocation, conflict, checkpoint, suite, and profile roots. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
@@ -829,12 +835,32 @@ Deliverables:
   states,
 - `Indeterminate(ResourceExhausted)` outcome,
 - `Indeterminate(MissingEvidence)` outcome,
-- `Indeterminate(UnsupportedSuite)` outcome,
+- unknown critical suite or algorithm is structurally invalid,
+- suite forbidden by exact policy is invalid for admission,
+- protocol-recognized and policy-allowed suite missing in the local
+  implementation is `Indeterminate(UnsupportedLocally)`,
+- temporarily unavailable external provider is
+  `Indeterminate(ProviderUnavailable)`,
+- missing required authorization evidence remains indeterminate as a truth
+  claim but causes fail-closed denial for consequential admission,
+- separate result dimensions for verification truth, evidence completeness,
+  and authorization usability,
 - rule that budget exhaustion cannot be cached as an invalid result,
+- rule that invalid outcomes may be cached only when the cache key includes
+  every relevant statement, policy, trust, revocation, conflict, checkpoint,
+  suite, and profile root,
 - rule that retrying with a larger locally permitted budget may complete
   verification without changing the underlying statement validity,
-- verification receipt recording `CostScheduleId`, consumed units, and
-  completion state,
+- unsigned local verification receipts are diagnostics only,
+- attestable verification receipt binding statement ID, verification context,
+  roots, policy epoch, `CostScheduleId`, outcome, and completion state,
+- explicit trusted role requirement for receipt signers,
+- consumer rule to either re-execute verification or accept an attestable
+  receipt under policy,
+- rule that sender-provided receipts cannot suppress required local
+  verification,
+- rejection of receipt replay across different roots, policies, or
+  checkpoints,
 - offline-bundle field identifying the cost schedule used when claiming
   completed verification,
 - documentation that local resource policies affect completion, not the
@@ -845,16 +871,22 @@ Verification:
 
 - outcome classification tests,
 - cache-behavior tests proving resource exhaustion is not stored as invalid,
+- complete invalid-result cache-key tests,
 - retry-with-larger-budget tests,
 - verification receipt fixtures,
+- unsigned receipt diagnostic-only fixtures,
+- attestable receipt signer-role fixtures,
+- receipt replay rejection fixtures,
 - offline-bundle cost-schedule fixtures,
 - conformance vectors for valid, invalid, resource-exhausted,
-  missing-evidence, and unsupported-suite outcomes.
+  missing-evidence, unsupported-locally, provider-unavailable, and
+  policy-forbidden-suite outcomes.
 
 Exit criteria:
 
 - two implementations with different local budgets can disagree about
-  completion without disagreeing about semantic validity.
+  completion without disagreeing about semantic validity,
+- verification receipts are trusted only through local policy or re-execution.
 
 ### v0.18.0 - Public Identifier Storage Policy
 
@@ -975,12 +1007,16 @@ Deliverables:
 - pruning and finalization boundary model,
 - duplicate-delivery model,
 - cycle-through-pruned-ancestor model,
+- operation-history generator,
+- state-machine differential test harness comparing the reference model and
+  bounded graph implementation after every operation,
 - trace fixtures shared with `bcx-testkit`.
 
 Verification:
 
 - reference-model property test run,
 - model-to-implementation fixture replay,
+- generated operation-history differential tests,
 - competing insert and missing-parent promotion tests,
 - pruning/finalization cycle tests.
 
@@ -1209,7 +1245,7 @@ Verification:
 
 - policy commitment fixtures,
 - wrong evaluator, version, input, and resolver fixtures,
-- admission evidence mutation tests.
+- admission evidence mutation tests,
 - fixtures for attested, reproducible, and proven decision modes.
 
 Exit criteria:
@@ -1231,6 +1267,12 @@ Deliverables:
 - issuer, realm, audience, algorithm, and key-usage binding,
 - validity intervals,
 - rotation, compromise, and revocation evidence,
+- authenticated evaluation point for historical key and revocation selection,
+- admitted evaluation points: trusted admission receipt time, checkpoint
+  sequence and authenticated checkpoint time, transparency inclusion point, or
+  profile-defined trusted clock evidence,
+- explicit rejection of unsigned self-declared timestamps for selecting a
+  historical key, validity interval, or revocation state,
 - trust-anchor selection,
 - deterministic failure for ambiguous `kid` matches,
 - no network I/O during primitive verification,
@@ -1240,6 +1282,8 @@ Verification:
 
 - ambiguous key fixtures,
 - wrong realm, audience, usage, and interval fixtures,
+- unsigned self-declared timestamp rejection fixtures,
+- checkpoint-relative historical key fixtures,
 - revocation and rotation fixtures.
 
 Exit criteria:
@@ -1270,6 +1314,37 @@ Exit criteria:
 - primitive verification providers cannot resolve keys, perform network I/O, or
   choose policy inside the core verification operation.
 
+### v0.28.1 - Provider Assurance Classes
+
+Goal: classify provider side-channel assurance before production provider
+crates are admitted.
+
+Deliverables:
+
+- `ConstantTimeSoftware` provider assurance class,
+- `HardwareIsolated` provider assurance class,
+- `SideChannelUnassessed` provider assurance class,
+- `TestOnly` provider assurance class,
+- high-assurance policy rule requiring admitted constant-time software or
+  appropriately isolated hardware providers for consequential signing,
+- rule that documented variable-time behavior does not qualify for
+  high-assurance consequential signing,
+- verifier-provider adversary model for malicious or compromised providers,
+- resource-amplification input handling requirements for provider dispatch.
+
+Verification:
+
+- assurance-class policy tests,
+- high-assurance rejection tests for side-channel-unassessed providers,
+- test-only provider feature-guard tests,
+- malicious verifier provider fixtures,
+- resource-amplification fixtures.
+
+Exit criteria:
+
+- provider admission distinguishes documentation from assurance, and
+  high-assurance profiles cannot accidentally admit variable-time signing.
+
 ### v0.29.0 - Signing Provider Boundary
 
 Goal: define how BCX creates attestations without exposing private key material
@@ -1279,6 +1354,7 @@ Deliverables:
 
 - opaque private-key handles,
 - signer capability metadata,
+- provider assurance class from `v0.28.1`,
 - injected RNG or entropy interface for no-std,
 - ML-DSA and SLH-DSA deterministic versus hedged mode policy,
 - rule that providers cannot fall back from hedged to deterministic signing
@@ -1299,6 +1375,7 @@ Deliverables:
 Verification:
 
 - fake signer tests,
+- provider assurance-class tests,
 - entropy failure tests,
 - hedged-signing fallback rejection tests,
 - malformed internal-state rejection tests,
@@ -1358,8 +1435,11 @@ Deliverables:
   composite key for new acceptance,
 - rule that components from different key epochs cannot be mixed,
 - partial component rotation creates a new composite commitment,
-- historical verification uses the checkpoint-relative composite record valid
-  at signing time,
+- historical verification uses the composite record valid at an authenticated
+  evaluation point, not at an unsigned claimed signing timestamp,
+- admitted composite-key evaluation points: trusted admission receipt time,
+  checkpoint sequence and authenticated checkpoint time, transparency inclusion
+  point, or profile-defined trusted clock evidence,
 - rule that one component cannot be silently reused in incompatible composite
   suites,
 - compromise recovery and emergency downgrade behavior is policy-bound and
@@ -1371,6 +1451,8 @@ Verification:
 - component substitution tests,
 - old-Ed25519/new-ML-DSA component mixing tests,
 - expired-component and revoked-component tests,
+- unsigned claimed signing timestamp rejection tests,
+- authenticated evaluation point fixtures,
 - component order mutation tests,
 - cross-suite key reuse rejection tests.
 
@@ -1534,8 +1616,11 @@ Deliverables:
 
 - optional Ed25519 provider crate or integration,
 - feature-gated provider selection,
-- constant-time or documented side-channel properties for signing and key
-  operations,
+- provider assurance class from `v0.28.1`,
+- constant-time software or hardware-isolated admission requirement for
+  high-assurance consequential signing,
+- side-channel-unassessed provider admission limited to non-high-assurance or
+  test-only policy where explicitly allowed,
 - secret-key and seed zeroization guarantees,
 - entropy-source health and failure propagation,
 - hedged-signing fallback policy where the provider supports hedged signing,
@@ -1553,7 +1638,8 @@ Verification:
 
 - `cargo test -p <ed25519-provider-crate>`,
 - RFC 8032 vector smoke tests,
-- side-channel declaration review,
+- provider assurance-class review,
+- high-assurance provider admission tests,
 - entropy failure tests,
 - malformed internal-state tests,
 - no root dependency regression.
@@ -1572,8 +1658,11 @@ Deliverables:
 
 - optional ML-DSA-65 provider crate or integration,
 - feature-gated provider selection,
-- constant-time or documented side-channel properties for signing and key
-  operations,
+- provider assurance class from `v0.28.1`,
+- constant-time software or hardware-isolated admission requirement for
+  high-assurance consequential signing,
+- side-channel-unassessed provider admission limited to non-high-assurance or
+  test-only policy where explicitly allowed,
 - secret-key and seed zeroization guarantees,
 - entropy-source health and failure propagation,
 - hedged-versus-deterministic signing mode declaration,
@@ -1593,7 +1682,8 @@ Verification:
 
 - `cargo test -p <ml-dsa-provider-crate>`,
 - NIST KAT or ACVP-vector smoke tests where available,
-- side-channel declaration review,
+- provider assurance-class review,
+- high-assurance provider admission tests,
 - entropy failure tests,
 - malformed internal-state tests,
 - hedged fallback policy tests,
@@ -1768,14 +1858,25 @@ Deliverables:
 
 - operational receipt vocabulary for admission, execution, observation,
   witness, settlement, and synchronization,
+- verification receipt vocabulary from `v0.17.1`,
+- distinction between unsigned local diagnostic receipts and attestable
+  verification receipts,
+- trusted verifier role requirements for receipt acceptance,
+- policy rule that consumers re-execute verification unless they accept a
+  receipt under an explicit trusted verifier role,
 - transparency receipt vocabulary for inclusion, consistency, disclosure, and
   non-inclusion,
 - receipt-to-statement commitment rules,
+- receipt binding to statement ID, verification context, roots, policy epoch,
+  `CostScheduleId`, outcome, and completion state where applicable,
 - receipt assurance classification.
 
 Verification:
 
 - receipt validation fixtures,
+- forged verification receipt fixtures,
+- sender-provided receipt cannot suppress local verification fixtures,
+- cross-root, cross-policy, and cross-checkpoint receipt replay fixtures,
 - wrong receipt class fixtures,
 - explanation bundle receipt tests.
 
@@ -2814,6 +2915,14 @@ sets.
 Deliverables:
 
 - threshold policy vocabulary,
+- supported fault model declaration,
+- exact quorum formula; for the unweighted Byzantine model, quorum size `q`
+  from `n` members must satisfy `2q > n + f` to intersect in more than `f`
+  members,
+- weighted quorum forbidden through `v1.0.0`,
+- overflow-safe arithmetic for threshold and quorum calculations,
+- rejection of impossible threshold, quorum, and fault configurations at
+  policy construction time,
 - signer-set epoch binding,
 - signer membership commitment,
 - fault assumption and maximum tolerated faulty witnesses,
@@ -2824,6 +2933,7 @@ Deliverables:
 - threshold change binding,
 - behavior when the threshold or signer set changes,
 - joint-consensus or overlapping-epoch transition rules,
+- old-and-new quorum requirements during joint transitions,
 - proof-of-possession for witness keys where required by the admitted suite,
 - signer set commitment,
 - threshold count validation,
@@ -2834,11 +2944,15 @@ Verification:
 
 - `cargo test -p bcx-proof-threshold`,
 - signer-set epoch and rotation fixtures,
+- exact quorum-formula fixtures,
+- overflow-safe arithmetic fixtures,
+- impossible-configuration rejection tests,
 - quorum-intersection fixtures,
 - insufficient-intersection conflicting checkpoint tests,
 - sufficient-intersection conflict rejection tests,
 - equivocation evidence fixtures,
 - joint-consensus transition tests,
+- old-and-new quorum transition tests,
 - proof-of-possession fixtures,
 - threshold mutation tests.
 
@@ -3038,19 +3152,18 @@ release-candidate fixture set.
 
 Deliverables:
 
-- statement builders,
-- attestation builders,
-- binding builders,
-- tamper helpers,
-- deterministic keys for tests only,
-- compile-time guards blocking deterministic keys from production facade
-  features,
-- conspicuous test-only key and signer type names.
+- expanded statement, attestation, and binding scenario catalog,
+- advanced tamper helper catalog,
+- additional deterministic test-only key sets behind the `v0.16.2`
+  production-facade guards,
+- adversarial receipt, graph, provider, and profile fixture packs,
+- fixture coverage report.
 
 Verification:
 
 - `cargo test -p bcx-testkit`,
-- production facade feature-guard check.
+- production facade feature-guard check,
+- fixture coverage report check.
 
 Exit criteria:
 

@@ -14,7 +14,7 @@ Required controls from the first production profile:
 - immutable trust snapshots for key, policy, and revocation resolution,
 - no silent downgrade,
 - signer entropy policy and opaque private-key handles,
-- production provider admission for side-channel declarations, secret
+- production provider admission with provider assurance classes, secret
   zeroization, entropy-source health, fault-injection behavior, and external
   guarantee boundaries,
 - hybrid all-component acceptance with composite key lifecycle, epoch,
@@ -26,8 +26,12 @@ Required controls from the first production profile:
   cryptographic verification,
 - checked `VerificationBudget` and versioned `VerificationCostSchedule`,
 - indeterminate resource-exhaustion outcomes that are not cached as invalid,
-- verification receipts recording cost schedule, consumed units, and completion
-  state,
+- locally unsupported recognized suites and temporarily unavailable providers
+  separated from structurally invalid or policy-forbidden suites,
+- verification receipts recording cost schedule, consumed units, completion
+  state, signer role, roots, and policy epoch,
+- sender-provided verification receipts accepted only through explicit local
+  policy or re-execution,
 - bounded WHY depth and node count,
 - bounded unresolved-parent staging, orphan retention, fetch attempts, and
   referenced bytes,
@@ -38,7 +42,8 @@ Required controls from the first production profile:
 - fail-closed unknown algorithm policy,
 - checkpoint issuer, monotonic sequence, fork/equivocation, rollback, and
   consistency proof handling,
-- witness quorum-intersection and equivocation rules for threshold finality,
+- exact witness quorum formula, overflow-safe arithmetic,
+  quorum-intersection, and equivocation rules for threshold finality,
 - provider admission for crypto, carrier, settlement, proof, and storage
   backends.
 
@@ -49,4 +54,5 @@ High-assurance deployments should additionally require:
 - append-only receipt storage,
 - key rotation and revocation evidence,
 - remote attestation where admitted,
+- constant-time software or appropriately isolated hardware signing providers,
 - independent witness commitments for critical events.

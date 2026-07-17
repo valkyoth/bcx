@@ -24,6 +24,10 @@ internal motive.
   evidence.
 - Settlement finality overclaims.
 - Cross-profile downgrade or replay.
+- Malicious or compromised verifier providers.
+- Resource-amplification inputs that force expensive verification paths.
+- Threshold witness equivocation or disjoint-quorum finality claims.
+- Forged or replayed verification receipts.
 
 ## Out Of Scope
 
@@ -61,6 +65,8 @@ BCX must not claim:
 - a missing parent does not exist,
 - a redacted explanation is complete,
 - an HTTP wrapper or blockchain transaction is proof by itself.
+- a sender-provided verification receipt suppresses required local verification
+  unless local policy explicitly trusts that verifier role.
 
 ## Privacy Risks
 
@@ -86,4 +92,8 @@ Every WHY query must be authenticated and bounded by:
 - maximum nodes,
 - maximum response bytes,
 - disclosure policy,
-- trust-domain rules.
+- trust-domain rules,
+- verification budget and cost-schedule rules,
+- provider assurance policy,
+- receipt replay boundaries,
+- threshold quorum-intersection policy.
