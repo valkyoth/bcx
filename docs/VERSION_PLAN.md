@@ -247,6 +247,7 @@ continues past the relevant dependency point.
 | Verification cacheability needed per-outcome rules. | Expanded `v0.17.1 - Verification Outcome And Receipt Model` with a cacheability matrix for decoding, crypto, policy, revocation, validity time, replay, missing evidence, provider availability, resource exhaustion, capability, delegation, and authority outcomes. |
 | Verification receipts needed a nonrecursive signature domain. | Expanded `v0.41.0 - Receipt Model Split` with a distinct receipt-signature domain and direct receipt verification path that does not recursively require another verification receipt. |
 | Missing-parent quotas could be bypassed with unauthenticated issuer claims. | Expanded `v0.21.0 - Missing Parent Reconciliation` with unauthenticated global/source quotas and authenticated per-issuer quotas only after issuer authentication. |
+| Repeated replay/provider/cache/receipt/orphan/quorum gap review needed one traceable closure line. | Confirmed the closure remains versioned in `v0.17.1`, `v0.21.0`, `v0.23.0`, `v0.28.1`, `v0.41.0`, and `v0.79.0`; no extra milestone is introduced for the duplicate review. |
 
 ## Phase 0: Published Foundation And Direction Pivot
 
